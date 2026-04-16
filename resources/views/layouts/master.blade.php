@@ -17,8 +17,13 @@
 
 @include('partials.top_menu')
 <div class="page-content">
-    @include('partials.menu')
-    <div class="content-wrapper">
+  @php($roleMenu = Auth::check() ? 'partials.menus.'.Auth::user()->user_type : null)
+    @if($roleMenu && view()->exists($roleMenu))
+        @include($roleMenu)
+    @else
+        @include('partials.menu')
+    @endif
+        <div class="content-wrapper">
         @include('partials.header')
 
         <div class="content">

@@ -31,6 +31,20 @@ class StudentRecordController extends Controller
         $this->student = $student;
    }
 
+   public function index()
+    {
+        if (Qs::userIsTeamSA()) {
+            return redirect()->route('students.create');
+        }
+
+        $firstClass = $this->my_class->all()->first();
+        if ($firstClass) {
+            return redirect()->route('students.list', $firstClass->id);
+        }
+
+        return redirect()->route('dashboard');
+    }
+
     public function reset_pass($st_id)
     {
         $st_id = Qs::decodeHash($st_id);

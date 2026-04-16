@@ -1,8 +1,7 @@
 <script>
 
     function getLGA(state_id){
-        var url = '{{ route('get_lga', [':id']) }}';
-        url = url.replace(':id', state_id);
+               var url = "{{ url('ajax/get_lga') }}/" + encodeURIComponent(state_id);
         var lga = $('#lga_id');
 
         $.ajax({

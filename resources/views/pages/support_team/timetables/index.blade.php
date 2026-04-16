@@ -25,7 +25,7 @@
             </li>
             @endif
             <li class="nav-item dropdown ms-auto">
-                <a href="#" class="nav-link dropdown-toggle px-3 px-sm-4" data-toggle="dropdown">
+                <a href="#" class="nav-link dropdown-toggle px-3 px-sm-4" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="icon-calendar2 me-1"></i>
                     <span class="d-none d-sm-inline">Show Timetables</span>
                     <span class="d-sm-none">Timetables</span>
@@ -35,6 +35,9 @@
                         <a href="#ttr{{ $mc->id }}" class="dropdown-item py-2 px-4" data-toggle="tab" role="tab">
                             <i class="icon-users me-2"></i>
                             {{ $mc->name }}
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary ms-2">
+                                {{ $tt_records->where('my_class_id', $mc->id)->count() }}
+                            </span>
                         </a>
                     @endforeach
                 </div>
@@ -56,7 +59,7 @@
                                 </h6>
                             </div>
                             <div class="card-body p-4">
-                                <form class="ajax-store" method="post" action="{{ route('ttr.store') }}">
+                                <form class="ajax-store" method="post" action="{{ route('ttr.store') }}" id="createTimetableForm">
                                     @csrf
                                     
                                     <div class="form-group mb-4">
@@ -78,7 +81,7 @@
                                             Select Class <span class="text-danger">*</span>
                                         </label>
                                         <select required data-placeholder="Select Class" 
-                                                class="form-control select" name="my_class_id" id="my_class_id">
+                                                class="form-control select-search" name="my_class_id" id="my_class_id">
                                             <option value=""></option>
                                             @foreach($my_classes as $mc)
                                                 <option {{ old('my_class_id') == $mc->id ? 'selected' : '' }} 
@@ -93,7 +96,7 @@
                                         <label class="form-label fw-semibold mb-2">
                                             Timetable Type
                                         </label>
-                                        <select class="select form-control" name="exam_id" id="exam_id">
+                                        <select class="form-control select-search" name="exam_id" id="exam_id">
                                             <option value="">Class Timetable (Regular)</option>
                                             @foreach($exams as $ex)
                                                 <option {{ old('exam_id') == $ex->id ? 'selected' : '' }} 
@@ -109,7 +112,7 @@
                                     </div>
 
                                     <div class="d-flex justify-content-end mt-4">
-                                        <button type="reset" class="btn btn-light me-2">
+                                        <button type="reset" class="btn btn-light me-2" id="resetFormBtn">
                                             <i class="icon-reset me-1"></i>
                                             Reset
                                         </button>
@@ -136,21 +139,23 @@
                                 {{ $mc->name }} - Timetables
                             </h6>
                             <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                <i class="icon-calendar me-1"></i>
                                 Total: {{ $tt_records->where('my_class_id', $mc->id)->count() }} Timetables
                             </span>
                         </div>
                         
                         <div class="card-body p-0 p-md-3">
+                            @if($tt_records->where('my_class_id', $mc->id)->count() > 0)
                             <div class="table-responsive">
                                 <table class="table table-hover datatable-button-html5-columns mb-0">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th class="px-3 px-md-4">#</th>
+                                            <th class="px-3 px-md-4" width="50">#</th>
                                             <th class="px-3 px-md-4">Timetable Name</th>
                                             <th class="px-3 px-md-4">Class</th>
                                             <th class="px-3 px-md-4">Type</th>
                                             <th class="px-3 px-md-4">Year</th>
-                                            <th class="px-3 px-md-4 text-center">Actions</th>
+                                            <th class="px-3 px-md-4 text-center" width="120">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -159,9 +164,13 @@
                                                 <td class="px-3 px-md-4 fw-semibold">{{ $loop->iteration }}</td>
                                                 <td class="px-3 px-md-4">
                                                     <span class="fw-semibold">{{ $ttr->name }}</span>
+                                                    @if($ttr->description)
+                                                    <small class="text-muted d-block">{{ \Illuminate\Support\Str::limit($ttr->description, 50) }}</small>
+                                                    @endif
                                                 </td>
                                                 <td class="px-3 px-md-4">
                                                     <span class="badge bg-info bg-opacity-10 text-info">
+                                                        <i class="icon-users me-1"></i>
                                                         {{ $ttr->my_class->name }}
                                                     </span>
                                                 </td>
@@ -180,13 +189,15 @@
                                                 </td>
                                                 <td class="px-3 px-md-4">
                                                     <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                                        <i class="icon-calendar me-1"></i>
                                                         {{ $ttr->year }}
                                                     </span>
                                                 </td>
                                                 <td class="px-3 px-md-4 text-center">
                                                     <div class="dropdown">
                                                         <button class="btn btn-light btn-sm dropdown-toggle" 
-                                                                type="button" data-toggle="dropdown">
+                                                                type="button" data-toggle="dropdown" 
+                                                                aria-haspopup="true" aria-expanded="false">
                                                             <i class="icon-menu9"></i>
                                                         </button>
                                                         <div class="dropdown-menu dropdown-menu-right shadow-sm border-0 py-2">
@@ -226,6 +237,13 @@
                                     </tbody>
                                 </table>
                             </div>
+                            @else
+                            <div class="text-center py-5">
+                                <i class="icon-calendar icon-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">No timetables found for {{ $mc->name }}</h6>
+                                <p class="small text-muted">Click "Create Timetable" to add one.</p>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -234,210 +252,87 @@
     </div>
 </div>
 
+<!-- Success/Error Toast Notification Area -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+    <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="icon-checkmark-circle me-2"></i>
+                <span id="toastMessage">Timetable created successfully!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 <style>
-/* Navigation Tabs Styling */
-.nav-tabs {
-    border-bottom: 2px solid rgba(0,0,0,0.05);
-    gap: 0.25rem;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+/* Existing styles remain the same, adding a few more */
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1050;
 }
 
-.nav-tabs::-webkit-scrollbar {
-    height: 3px;
-}
-
-.nav-tabs::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.2);
-    border-radius: 10px;
-}
-
-.nav-tabs .nav-link {
-    border: none;
-    color: #6c757d;
-    font-weight: 500;
-    padding: 0.75rem 1.25rem;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    border-radius: 0.5rem 0.5rem 0 0;
-}
-
-.nav-tabs .nav-link:hover {
-    color: #007bff;
-    background: rgba(0,123,255,0.05);
-}
-
-.nav-tabs .nav-link.active {
-    color: #007bff;
-    background: transparent;
-    border-bottom: 3px solid #007bff;
-}
-
-/* Dropdown Styling */
-.dropdown-menu {
-    border-radius: 0.75rem;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.dropdown-item {
-    transition: all 0.2s ease;
-    font-size: 0.875rem;
-}
-
-.dropdown-item:hover {
-    background: #f8f9fa;
-    transform: translateX(5px);
-}
-
-/* Form Styling */
-.form-control, .input-group-text {
+.toast {
+    min-width: 250px;
     border-radius: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.input-group-text {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+.toast.show {
+    opacity: 1;
 }
 
-.form-control:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.1);
-}
-
-select.form-control {
-    cursor: pointer;
-}
-
-/* Table Styling */
-.table {
-    margin-bottom: 0;
-}
-
-.table thead th {
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-    border-top: none;
-    white-space: nowrap;
-}
-
+/* Loading Animation for Table */
 .table tbody tr {
     transition: all 0.2s ease;
 }
 
-.table tbody tr:hover {
-    background: rgba(0,123,255,0.02);
+/* Hover effect for action buttons */
+.dropdown-item i {
+    transition: transform 0.2s ease;
 }
 
-/* Badge Styling */
-.badge {
-    font-weight: 500;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
+.dropdown-item:hover i {
+    transform: scale(1.1);
 }
 
-.bg-opacity-10 {
-    --bs-bg-opacity: 0.1;
-}
-
-/* Action Button */
-.dropdown-toggle.btn-light {
-    border: 1px solid #dee2e6;
-    background: white;
-    padding: 0.375rem 0.75rem;
-    border-radius: 0.5rem;
-}
-
-.dropdown-toggle.btn-light:hover {
-    background: #f8f9fa;
-    border-color: #c1c9d0;
-}
-
-.dropdown-toggle::after {
-    display: none;
-}
-
-/* Responsive Adjustments */
+/* Responsive improvements */
 @media (max-width: 767.98px) {
-    .card-body {
-        padding: 1rem !important;
+    .toast-container {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
     }
     
-    .table td, .table th {
-        padding: 0.75rem !important;
-        font-size: 0.875rem;
+    .toast {
+        width: calc(100% - 20px);
+        min-width: auto;
+    }
+}
+
+/* Print styles */
+@media print {
+    .card-header .d-flex,
+    .dropdown,
+    .btn,
+    .nav-tabs,
+    .toast-container {
+        display: none !important;
     }
     
-    .badge {
-        padding: 0.35rem 0.5rem;
-        font-size: 0.75rem;
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
     }
     
-    .nav-tabs .nav-link {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
+    .table {
+        width: 100% !important;
     }
-    
-    .btn-group-sm > .btn, .btn-sm {
-        padding: 0.25rem 0.5rem;
-    }
-}
-
-@media (max-width: 575.98px) {
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start !important;
-    }
-    
-    .table-responsive {
-        border-radius: 0.5rem;
-        margin: 0 -1rem;
-        width: calc(100% + 2rem);
-    }
-    
-    .table td, .table th {
-        white-space: nowrap;
-    }
-    
-    .dropdown-menu {
-        min-width: 200px;
-    }
-}
-
-/* Animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.tab-pane.active {
-    animation: fadeIn 0.5s ease;
-}
-
-/* Form Select Styling */
-.select2-container--default .select2-selection--single {
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    height: 42px;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: 40px;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 40px;
-}
-
-/* Card Hover Effect */
-.card.shadow-sm {
-    transition: all 0.3s ease;
-}
-
-.card.shadow-sm:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
 }
 </style>
 
@@ -445,12 +340,46 @@ select.form-control {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Select2 for better dropdown experience
     if (typeof $.fn.select2 !== 'undefined') {
-        $('.select').select2({
+        $('.select-search').select2({
             width: '100%',
             allowClear: true,
             placeholder: function() {
                 return $(this).data('placeholder') || 'Select an option';
+            },
+            dropdownParent: $('#add-tt')
+        });
+    }
+    
+    // Handle form submission loading state
+    const createForm = document.getElementById('createTimetableForm');
+    if (createForm) {
+        createForm.addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('ajax-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
             }
+        });
+    }
+    
+    // Handle reset button
+    const resetBtn = document.getElementById('resetFormBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Reset form fields
+            document.getElementById('createTimetableForm').reset();
+            // Reset Select2 fields
+            setTimeout(() => {
+                $('.select-search').val('').trigger('change');
+                const submitBtn = document.getElementById('ajax-btn');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="icon-paperplane me-2"></i>Create Timetable';
+                }
+                // Show reset confirmation
+                showToast('Form has been reset', 'info');
+            }, 100);
         });
     }
     
@@ -472,24 +401,93 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(adjustTableResponsive, 250);
     });
+    
+    // Smooth scroll to active tab on page load
+    const activeTab = document.querySelector('.nav-link.active[data-toggle="tab"]');
+    if (activeTab && window.innerWidth < 768) {
+        setTimeout(() => {
+            activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }, 100);
+    }
+    
+    // Initialize Bootstrap toasts
+    if (typeof bootstrap !== 'undefined') {
+        const toastEl = document.getElementById('successToast');
+        if (toastEl) {
+            window.toast = new bootstrap.Toast(toastEl);
+        }
+    }
+    
+    // Check for session success message
+    @if(session('success'))
+        showToast('{{ session('success') }}', 'success');
+    @endif
+    
+    @if(session('error'))
+        showToast('{{ session('error') }}', 'danger');
+    @endif
 });
+
+// Show toast notification
+function showToast(message, type = 'success') {
+    const toastEl = document.getElementById('successToast');
+    if (toastEl) {
+        const toastBody = toastEl.querySelector('.toast-body span');
+        if (toastBody) {
+            toastBody.textContent = message;
+        }
+        
+        // Change toast color based on type
+        toastEl.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning');
+        if (type === 'success') toastEl.classList.add('bg-success');
+        else if (type === 'error') toastEl.classList.add('bg-danger');
+        else if (type === 'info') toastEl.classList.add('bg-info');
+        else if (type === 'warning') toastEl.classList.add('bg-warning');
+        
+        // Show toast
+        if (typeof bootstrap !== 'undefined' && window.toast) {
+            window.toast.show();
+        } else {
+            toastEl.classList.add('show');
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3000);
+        }
+    }
+}
 
 // Enhanced delete confirmation
 function confirmDelete(id) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this! All timetable data will be permanently deleted.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this! All timetable data including all slots will be permanently deleted.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({
+                    title: 'Deleting...',
+                    text: 'Please wait while we delete the timetable.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                document.getElementById('item-delete-' + id).submit();
+            }
+        });
+    } else {
+        if (confirm('Are you sure? You won\'t be able to revert this!')) {
             document.getElementById('item-delete-' + id).submit();
         }
-    });
+    }
 }
 </script>
 
