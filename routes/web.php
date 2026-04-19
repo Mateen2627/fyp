@@ -20,6 +20,17 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('/change_password', 'MyAccountController@change_pass')->name('my_account.change_pass');
     });
 
+
+    /*************** Admin Module *****************/
+    Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => 'teamSA'], function () {
+        Route::get('/dashboard', 'DashboardController@index')->name('admin.dashboard');
+        Route::resource('users', 'ManageUserController', ['as' => 'admin'])->except(['show']);
+        Route::resource('courses', 'ManageCourseController', ['as' => 'admin'])->except(['show']);
+        Route::resource('assign-teachers', 'AssignTeacherController', ['as' => 'admin', 'parameters' => ['assign-teachers' => 'assign_teacher']])->except(['show']);
+        Route::resource('reports', 'ReportController', ['as' => 'admin'])->except(['show']);
+        Route::resource('system-settings', 'SystemSettingController', ['as' => 'admin', 'parameters' => ['system-settings' => 'system_setting']])->except(['show']);
+    });
+
     /*************** Support Team *****************/
     Route::group(['namespace' => 'SupportTeam',], function(){
 

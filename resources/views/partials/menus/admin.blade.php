@@ -20,16 +20,12 @@
 
         <div class="card card-sidebar-mobile">
             <ul class="nav nav-sidebar" data-nav-type="accordion">
-                <li class="nav-item"><a href="{{ route('dashboard') }}" class="nav-link {{ Route::is('dashboard') ? 'active' : '' }}"><i class="icon-home4"></i><span>Dashboard</span></a></li>
-
-                <li class="nav-item"><a href="{{ route('users.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['users.index','users.create','users.edit','users.show']) ? 'active' : '' }}"><i class="icon-users4"></i><span>Users</span></a></li>
-                <li class="nav-item"><a href="{{ route('students.promotion') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['students.promotion','students.promotion_manage']) ? 'active' : '' }}"><i class="icon-sort"></i><span>Student Promotion</span></a></li>
-                <li class="nav-item"><a href="{{ route('classes.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['classes.index','classes.edit']) ? 'active' : '' }}"><i class="icon-windows2"></i><span>Classes</span></a></li>
-                <li class="nav-item"><a href="{{ route('sections.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['sections.index','sections.edit']) ? 'active' : '' }}"><i class="icon-fence"></i><span>Sections</span></a></li>
-                <li class="nav-item"><a href="{{ route('subjects.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['subjects.index','subjects.edit']) ? 'active' : '' }}"><i class="icon-pin"></i><span>Subjects</span></a></li>
-                <li class="nav-item"><a href="{{ route('exams.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['exams.index','exams.edit']) ? 'active' : '' }}"><i class="icon-books"></i><span>Exams</span></a></li>
-                <li class="nav-item"><a href="{{ route('payments.manage') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['payments.manage','payments.invoice','payments.receipts']) ? 'active' : '' }}"><i class="icon-cash3"></i><span>Payments</span></a></li>
-                <li class="nav-item"><a href="{{ route('my_account') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['my_account']) ? 'active' : '' }}"><i class="icon-user"></i><span>My Account</span></a></li>
+                <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link {{ Route::is('admin.dashboard') ? 'active' : '' }}"><i class="icon-home4"></i><span>Dashboard</span></a></li>
+                <li class="nav-item"><a href="{{ route('admin.users.index') }}" class="nav-link {{ Route::is('admin.users.*') ? 'active' : '' }}"><i class="icon-users4"></i><span>Manage Users</span></a></li>
+                <li class="nav-item"><a href="{{ route('admin.courses.index') }}" class="nav-link {{ Route::is('admin.courses.*') ? 'active' : '' }}"><i class="icon-book"></i><span>Manage Courses</span></a></li>
+                <li class="nav-item"><a href="{{ route('admin.assign-teachers.index') }}" class="nav-link {{ Route::is('admin.assign-teachers.*') ? 'active' : '' }}"><i class="icon-user-check"></i><span>Assign Teachers</span></a></li>
+                <li class="nav-item"><a href="{{ route('admin.reports.index') }}" class="nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}"><i class="icon-file-text2"></i><span>Reports</span></a></li>
+                <li class="nav-item"><a href="{{ route('admin.system-settings.index') }}" class="nav-link {{ Route::is('admin.system-settings.*') ? 'active' : '' }}"><i class="icon-cog3"></i><span>System Settings</span></a></li>
             </ul>
         </div>
     </div>
