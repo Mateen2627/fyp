@@ -13,6 +13,11 @@ class Course extends Eloquent
         return $this->hasMany(TeacherAssignment::class, 'course_id');
     }
 
+    public function teacherAssignments()
+    {
+        return $this->hasMany(TeacherAssignment::class, 'course_id');
+    }
+
     public function my_class()
     {
         return $this->belongsTo(MyClass::class, 'my_class_id');
