@@ -199,10 +199,12 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/classes', 'ClassController@index')->name('teacher.classes.index');
 
         Route::post('/assignments/{assignment}/submissions/{submission}/mark', 'AssignmentController@mark')->name('teacher.assignments.mark');
-        Route::resource('/assignments', 'AssignmentController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show']);
+        Route::get('/assignments/{assignment}/submissions/{submission}/download', 'AssignmentController@downloadSubmission')->name('teacher.assignments.submissions.download');
+        Route::resource('/assignments', 'AssignmentController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
         Route::post('/quizzes/{quiz}/attempts/{attempt}/mark', 'QuizController@mark')->name('teacher.quizzes.mark');
-        Route::resource('/quizzes', 'QuizController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show']);
+        Route::get('/quizzes/{quiz}/attempts/{attempt}/download', 'QuizController@downloadAttempt')->name('teacher.quizzes.attempts.download');
+        Route::resource('/quizzes', 'QuizController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
         Route::get('/attendance', 'AttendanceController@index')->name('teacher.attendance.index');
     });

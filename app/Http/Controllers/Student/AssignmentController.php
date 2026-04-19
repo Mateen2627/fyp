@@ -50,28 +50,23 @@ class AssignmentController extends Controller
     {
         $this->assertBelongsToStudentClass($assignment);
 
-        $data = $request->validate([
-            'submission_text' => 'nullable|string',
-            'attachment' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:5120',
-        ]);
-
-        $payload = [
-            'submission_text' => $data['submission_text'] ?? null,
-            'submitted_at' => now(),
-        ];
-
         $existing = StudentAssignmentSubmission::where('assignment_id', $assignment->id)->where('student_id', Auth::id())->first();
-
-        if ($request->hasFile('attachment')) {
-            $payload['attachment_path'] = $request->file('attachment')->store('student_submissions', 'public');
-        } elseif ($existing && $existing->attachment_path) {
-            $payload['attachment_path'] = $existing->attachment_path;
+        if ($existing) {
+            return redirect()->route('student.assignments.show', $assignment->id)->with('flash_danger', 'You have already submitted this assignment. Resubmission is not allowed.');
         }
 
-        StudentAssignmentSubmission::updateOrCreate(
-            ['assignment_id' => $assignment->id, 'student_id' => Auth::id()],
-            $payload
-        );
+        $data = $request->validate([
+            'submission_text' => 'nullable|string',
+            'attachment' => 'required|file|mimes:pdf|max:5120',
+        ]);
+
+        StudentAssignmentSubmission::create([
+            'assignment_id' => $assignment->id,
+            'student_id' => Auth::id(),
+            'submission_text' => $data['submission_text'] ?? null,
+            'attachment_path' => $request->file('attachment')->store('student_submissions', 'public'),
+            'submitted_at' => now(),
+        ]);
 
         return redirect()->route('student.assignments.show', $assignment->id)->with('flash_success', 'Assignment submitted successfully.');
     }

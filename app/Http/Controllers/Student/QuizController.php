@@ -50,28 +50,23 @@ class QuizController extends Controller
     {
         $this->assertBelongsToStudentClass($quiz);
 
-        $data = $request->validate([
-            'answers' => 'nullable|string',
-            'attachment' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:5120',
-        ]);
-
         $existing = StudentQuizAttempt::where('quiz_id', $quiz->id)->where('student_id', Auth::id())->first();
-
-        $payload = [
-            'answers' => $data['answers'] ?? null,
-            'submitted_at' => now(),
-        ];
-
-        if ($request->hasFile('attachment')) {
-            $payload['attachment_path'] = $request->file('attachment')->store('quiz_attempts', 'public');
-        } elseif ($existing && $existing->attachment_path) {
-            $payload['attachment_path'] = $existing->attachment_path;
+        if ($existing) {
+            return redirect()->route('student.quizzes.show', $quiz->id)->with('flash_danger', 'You have already submitted this quiz. Resubmission is not allowed.');
         }
 
-        StudentQuizAttempt::updateOrCreate(
-            ['quiz_id' => $quiz->id, 'student_id' => Auth::id()],
-            $payload
-        );
+        $data = $request->validate([
+            'answers' => 'nullable|string',
+            'attachment' => 'required|file|mimes:pdf|max:5120',
+        ]);
+
+        StudentQuizAttempt::create([
+            'quiz_id' => $quiz->id,
+            'student_id' => Auth::id(),
+            'answers' => $data['answers'] ?? null,
+            'attachment_path' => $request->file('attachment')->store('quiz_attempts', 'public'),
+            'submitted_at' => now(),
+        ]);
 
         return redirect()->route('student.quizzes.show', $quiz->id)->with('flash_success', 'Quiz submitted successfully.');
     }

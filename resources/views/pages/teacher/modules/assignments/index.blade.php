@@ -13,7 +13,7 @@
                     <td>{{ optional($assignment->my_class)->name ?: '-' }}</td>
                     <td>{{ optional($assignment->course)->title ?: '-' }}</td>
                     <td>{{ optional($assignment->due_date)->format('Y-m-d') ?: '-' }}</td>
-                    <td><a href="{{ route('teacher.assignments.show', $assignment->id) }}" class="btn btn-sm btn-info">Review Submissions</a></td>
+                    <td><a href="{{ route('teacher.assignments.show', $assignment->id) }}" class="btn btn-sm btn-info">Review Submissions</a> <a href="{{ route('teacher.assignments.edit', $assignment->id) }}" class="btn btn-sm btn-secondary">Edit</a></td>
                 </tr>
             @empty
                 <tr><td colspan="5" class="text-center">No assignments created yet.</td></tr>

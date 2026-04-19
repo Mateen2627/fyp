@@ -8,6 +8,7 @@ use App\Models\StudentQuizAttempt;
 use App\Models\TeacherAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class QuizController extends Controller
 {
@@ -32,8 +33,6 @@ class QuizController extends Controller
 
     public function store(Request $request)
     {
-        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
-
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'course_id' => 'required|integer',
@@ -42,7 +41,7 @@ class QuizController extends Controller
             'total_marks' => 'nullable|integer|min:0',
             'scheduled_at' => 'nullable|date',
         ]);
-        abort_unless(in_array((int) $data['course_id'], array_map('intval', $allowedCourseIds), true), 403);
+
         $isAllowedPair = TeacherAssignment::where('teacher_id', Auth::id())
             ->where('course_id', $data['course_id'])
             ->where('my_class_id', $data['my_class_id'])
@@ -56,6 +55,29 @@ class QuizController extends Controller
         return redirect()->route('teacher.quizzes.index')->with('flash_success', 'Quiz created.');
     }
 
+    public function edit(Quiz $quiz)
+    {
+        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+
+        return view('pages.teacher.modules.quizzes.edit', compact('quiz'));
+    }
+
+    public function update(Request $request, Quiz $quiz)
+    {
+        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+
+        $data = $request->validate([
+            'title' => 'required|string|max:200',
+            'description' => 'nullable|string',
+            'total_marks' => 'nullable|integer|min:0',
+            'scheduled_at' => 'nullable|date',
+        ]);
+
+        $quiz->update($data);
+
+        return redirect()->route('teacher.quizzes.index')->with('flash_success', 'Quiz updated.');
+    }
+
     public function show(Quiz $quiz)
     {
         abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
@@ -64,15 +86,26 @@ class QuizController extends Controller
         return view('pages.teacher.modules.quizzes.show', compact('quiz', 'attempts'));
     }
 
+    public function downloadAttempt(Quiz $quiz, StudentQuizAttempt $attempt)
+    {
+        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        abort_unless((int) $attempt->quiz_id === (int) $quiz->id, 404);
+        abort_unless($attempt->attachment_path && Storage::disk('public')->exists($attempt->attachment_path), 404);
+
+        return Storage::disk('public')->download($attempt->attachment_path);
+    }
+
     public function mark(Request $request, Quiz $quiz, StudentQuizAttempt $attempt)
     {
         abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
         abort_unless((int) $attempt->quiz_id === (int) $quiz->id, 404);
 
-        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
+        if (!is_null($attempt->marks)) {
+            return back()->with('flash_danger', 'Marks already assigned and cannot be overridden.');
+        }
 
         $data = $request->validate([
-            'marks' => 'nullable|numeric|min:0|max:100',
+            'marks' => 'required|numeric|min:0|max:100',
             'teacher_feedback' => 'nullable|string',
         ]);
         $attempt->update($data);

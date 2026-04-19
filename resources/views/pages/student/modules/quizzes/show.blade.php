@@ -15,6 +15,7 @@
 <div class="card">
     <div class="card-header"><h6 class="mb-0">Your Attempt</h6></div>
     <div class="card-body">
+        @if(!$attempt)
         <form action="{{ route('student.quizzes.submit', $quiz->id) }}" method="post" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
@@ -31,6 +32,9 @@
             <button class="btn btn-primary">Submit Quiz</button>
             <a href="{{ route('student.quizzes.index') }}" class="btn btn-light">Back</a>
         </form>
+        @else
+            <div class="alert alert-info">You already submitted this quiz. Resubmission is disabled.</div>
+        @endif
 
         @if($attempt)
             <hr>

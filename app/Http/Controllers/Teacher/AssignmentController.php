@@ -8,6 +8,7 @@ use App\Models\StudentAssignmentSubmission;
 use App\Models\TeacherAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AssignmentController extends Controller
 {
@@ -18,10 +19,7 @@ class AssignmentController extends Controller
 
     public function index()
     {
-        $assignments = Assignment::with(['course', 'my_class'])
-            ->where('teacher_id', Auth::id())
-            ->latest()
-            ->paginate(20);
+        $assignments = Assignment::with(['course', 'my_class'])->where('teacher_id', Auth::id())->latest()->paginate(20);
 
         return view('pages.teacher.modules.assignments.index', compact('assignments'));
     }
@@ -34,8 +32,6 @@ class AssignmentController extends Controller
 
     public function store(Request $request)
     {
-        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
-
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'course_id' => 'required|integer',
@@ -43,7 +39,7 @@ class AssignmentController extends Controller
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
         ]);
-        abort_unless(in_array((int) $data['course_id'], array_map('intval', $allowedCourseIds), true), 403);
+
         $isAllowedPair = TeacherAssignment::where('teacher_id', Auth::id())
             ->where('course_id', $data['course_id'])
             ->where('my_class_id', $data['my_class_id'])
@@ -57,6 +53,28 @@ class AssignmentController extends Controller
         return redirect()->route('teacher.assignments.index')->with('flash_success', 'Assignment created.');
     }
 
+    public function edit(Assignment $assignment)
+    {
+        abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
+
+        return view('pages.teacher.modules.assignments.edit', compact('assignment'));
+    }
+
+    public function update(Request $request, Assignment $assignment)
+    {
+        abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
+
+        $data = $request->validate([
+            'title' => 'required|string|max:200',
+            'description' => 'nullable|string',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $assignment->update($data);
+
+        return redirect()->route('teacher.assignments.index')->with('flash_success', 'Assignment updated.');
+    }
+
     public function show(Assignment $assignment)
     {
         abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
@@ -65,15 +83,26 @@ class AssignmentController extends Controller
         return view('pages.teacher.modules.assignments.show', compact('assignment', 'submissions'));
     }
 
+    public function downloadSubmission(Assignment $assignment, StudentAssignmentSubmission $submission)
+    {
+        abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
+        abort_unless((int) $submission->assignment_id === (int) $assignment->id, 404);
+        abort_unless($submission->attachment_path && Storage::disk('public')->exists($submission->attachment_path), 404);
+
+        return Storage::disk('public')->download($submission->attachment_path);
+    }
+
     public function mark(Request $request, Assignment $assignment, StudentAssignmentSubmission $submission)
     {
         abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
         abort_unless((int) $submission->assignment_id === (int) $assignment->id, 404);
 
-        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
+        if (!is_null($submission->marks)) {
+            return back()->with('flash_danger', 'Marks already assigned and cannot be overridden.');
+        }
 
         $data = $request->validate([
-            'marks' => 'nullable|numeric|min:0|max:100',
+            'marks' => 'required|numeric|min:0|max:100',
             'teacher_feedback' => 'nullable|string',
         ]);
         $submission->update($data);

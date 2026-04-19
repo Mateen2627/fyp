@@ -8,13 +8,17 @@
 <td>{{ $submission->student_id }}</td>
 <td>{{ optional($submission->submitted_at)->format('Y-m-d H:i') ?: '-' }}</td>
 <td>{{ $submission->submission_text ?: '-' }}</td>
-<td>{{ $submission->attachment_path ?: '-' }}</td>
+<td>
+    @if($submission->attachment_path)
+        <a href="{{ route('teacher.assignments.submissions.download', [$assignment->id, $submission->id]) }}" class="btn btn-sm btn-outline-primary">Download PDF</a>
+    @else - @endif
+</td>
 <td>
 <form action="{{ route('teacher.assignments.mark', [$assignment->id, $submission->id]) }}" method="post">
 @csrf
-<input type="number" step="0.01" min="0" max="100" name="marks" value="{{ $submission->marks }}" class="form-control mb-1" placeholder="Marks">
-<textarea name="teacher_feedback" class="form-control mb-1" placeholder="Feedback">{{ $submission->teacher_feedback }}</textarea>
-<button class="btn btn-sm btn-primary">Save</button>
+<input type="number" step="0.01" min="0" max="100" name="marks" value="{{ $submission->marks }}" class="form-control mb-1" placeholder="Marks" {{ !is_null($submission->marks) ? 'disabled' : '' }}>
+<textarea name="teacher_feedback" class="form-control mb-1" placeholder="Feedback" {{ !is_null($submission->marks) ? 'disabled' : '' }}>{{ $submission->teacher_feedback }}</textarea>
+@if(is_null($submission->marks))<button class="btn btn-sm btn-primary">Save</button>@else <span class="badge badge-success">Locked</span>@endif
 </form>
 </td>
 </tr>
