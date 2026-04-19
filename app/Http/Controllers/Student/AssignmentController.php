@@ -23,9 +23,7 @@ class AssignmentController extends Controller
 
         $assignments = Assignment::with(['course', 'teacher'])
             ->whereNotNull('teacher_id')
-            ->whereHas('course', function ($q) use ($record) {
-                $q->where('my_class_id', $record->my_class_id);
-            })
+            ->where('my_class_id', $record->my_class_id)
             ->latest()
             ->paginate(20);
 
@@ -81,6 +79,6 @@ class AssignmentController extends Controller
     private function assertBelongsToStudentClass(Assignment $assignment): void
     {
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
-        abort_unless(optional($assignment->course)->my_class_id == $record->my_class_id, 403);
+        abort_unless((int) $assignment->my_class_id === (int) $record->my_class_id, 403);
     }
 }

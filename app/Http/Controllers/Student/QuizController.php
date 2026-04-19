@@ -23,9 +23,7 @@ class QuizController extends Controller
 
         $quizzes = Quiz::with(['course', 'teacher'])
             ->whereNotNull('teacher_id')
-            ->whereHas('course', function ($q) use ($record) {
-                $q->where('my_class_id', $record->my_class_id);
-            })
+            ->where('my_class_id', $record->my_class_id)
             ->latest()
             ->paginate(20);
 
@@ -81,6 +79,6 @@ class QuizController extends Controller
     private function assertBelongsToStudentClass(Quiz $quiz): void
     {
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
-        abort_unless(optional($quiz->course)->my_class_id == $record->my_class_id, 403);
+        abort_unless((int) $quiz->my_class_id === (int) $record->my_class_id, 403);
     }
 }

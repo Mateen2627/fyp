@@ -18,7 +18,7 @@ class AssignmentController extends Controller
 
     public function index()
     {
-        $assignments = Assignment::with('course')
+        $assignments = Assignment::with(['course', 'my_class'])
             ->where('teacher_id', Auth::id())
             ->latest()
             ->paginate(20);
@@ -28,8 +28,8 @@ class AssignmentController extends Controller
 
     public function create()
     {
-        $courses = TeacherAssignment::with('course')->where('teacher_id', Auth::id())->get()->pluck('course')->filter()->unique('id');
-        return view('pages.teacher.modules.assignments.create', compact('courses'));
+        $pairs = TeacherAssignment::with(['course', 'my_class'])->where('teacher_id', Auth::id())->get();
+        return view('pages.teacher.modules.assignments.create', compact('pairs'));
     }
 
     public function store(Request $request)
@@ -39,10 +39,16 @@ class AssignmentController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'course_id' => 'required|integer',
+            'my_class_id' => 'required|integer',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
         ]);
         abort_unless(in_array((int) $data['course_id'], array_map('intval', $allowedCourseIds), true), 403);
+        $isAllowedPair = TeacherAssignment::where('teacher_id', Auth::id())
+            ->where('course_id', $data['course_id'])
+            ->where('my_class_id', $data['my_class_id'])
+            ->exists();
+        abort_unless($isAllowedPair, 403);
 
         $data['teacher_id'] = Auth::id();
 

@@ -18,16 +18,16 @@ class QuizController extends Controller
 
     public function index()
     {
-        $quizzes = Quiz::with('course')->where('teacher_id', Auth::id())->latest()->paginate(20);
+        $quizzes = Quiz::with(['course', 'my_class'])->where('teacher_id', Auth::id())->latest()->paginate(20);
 
         return view('pages.teacher.modules.quizzes.index', compact('quizzes'));
     }
 
     public function create()
     {
-        $courses = TeacherAssignment::with('course')->where('teacher_id', Auth::id())->get()->pluck('course')->filter()->unique('id');
+        $pairs = TeacherAssignment::with(['course', 'my_class'])->where('teacher_id', Auth::id())->get();
 
-        return view('pages.teacher.modules.quizzes.create', compact('courses'));
+        return view('pages.teacher.modules.quizzes.create', compact('pairs'));
     }
 
     public function store(Request $request)
@@ -37,11 +37,17 @@ class QuizController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'course_id' => 'required|integer',
+            'my_class_id' => 'required|integer',
             'description' => 'nullable|string',
             'total_marks' => 'nullable|integer|min:0',
             'scheduled_at' => 'nullable|date',
         ]);
         abort_unless(in_array((int) $data['course_id'], array_map('intval', $allowedCourseIds), true), 403);
+        $isAllowedPair = TeacherAssignment::where('teacher_id', Auth::id())
+            ->where('course_id', $data['course_id'])
+            ->where('my_class_id', $data['my_class_id'])
+            ->exists();
+        abort_unless($isAllowedPair, 403);
 
         $data['teacher_id'] = Auth::id();
 
