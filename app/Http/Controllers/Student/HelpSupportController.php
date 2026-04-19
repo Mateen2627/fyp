@@ -8,7 +8,7 @@ class HelpSupportController extends BaseStudentCrudController
 {
     protected $modelClass = StudentHelpSupport::class;
     protected $viewTitle = 'Help & Support';
-    protected $routeBase = 'student.help_support';
+    protected $routeBase = 'student.help-support';
     protected $formFields = ['subject', 'message', 'priority', 'status'];
 
     protected function rules(): array

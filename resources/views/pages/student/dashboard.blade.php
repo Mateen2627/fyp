@@ -13,7 +13,7 @@
     <div class="col-md-4 mb-3"><a class="card card-body text-dark" href="{{ route('student.quizzes.index') }}">Quizzes</a></div>
     <div class="col-md-4 mb-3"><a class="card card-body text-dark" href="{{ route('student.attendance.index') }}">Attendance</a></div>
     <div class="col-md-4 mb-3"><a class="card card-body text-dark" href="{{ route('student.reports.index') }}">Reports</a></div>
-    <div class="col-md-4 mb-3"><a class="card card-body text-dark" href="{{ route('student.extra_details.index') }}">Extra Details</a></div>
-    <div class="col-md-4 mb-3"><a class="card card-body text-dark" href="{{ route('student.help_support.index') }}">Help & Support</a></div>
+    <div class="col-md-4 mb-3"><a class="card card-body text-dark" href="{{ route('student.extra-details.index') }}">Extra Details</a></div>
+    <div class="col-md-4 mb-3"><a class="card card-body text-dark" href="{{ route('student.help-support.index') }}">Help & Support</a></div>
 </div>
 @endsection

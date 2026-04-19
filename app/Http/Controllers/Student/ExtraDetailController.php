@@ -8,7 +8,7 @@ class ExtraDetailController extends BaseStudentCrudController
 {
     protected $modelClass = StudentExtraDetail::class;
     protected $viewTitle = 'Extra Details';
-    protected $routeBase = 'student.extra_details';
+    protected $routeBase = 'student.extra-details';
     protected $formFields = ['label', 'detail_value', 'notes'];
 
     protected function rules(): array
