@@ -169,6 +169,20 @@ Route::group(['middleware' => 'auth'], function () {
 
     });
 
+
+
+    /*************** Student Modules *****************/
+    Route::group(['namespace' => 'Student', 'prefix' => 'student', 'middleware' => 'student'], function () {
+        Route::get('/dashboard', 'DashboardController@index')->name('student.dashboard');
+        Route::resource('courses', 'CourseController', ['as' => 'student']);
+        Route::resource('assignments', 'AssignmentController', ['as' => 'student']);
+        Route::resource('quizzes', 'QuizController', ['as' => 'student']);
+        Route::resource('attendance', 'AttendanceController', ['as' => 'student']);
+        Route::resource('reports', 'ReportController', ['as' => 'student']);
+        Route::resource('extra-details', 'ExtraDetailController', ['as' => 'student', 'parameters' => ['extra-details' => 'extra_detail']]);
+        Route::resource('help-support', 'HelpSupportController', ['as' => 'student', 'parameters' => ['help-support' => 'help_support']]);
+    });
+
     /************************ AJAX ****************************/
     Route::group(['prefix' => 'ajax'], function() {
         Route::get('get_lga/{state_id}', 'AjaxController@get_lga')->name('get_lga');
