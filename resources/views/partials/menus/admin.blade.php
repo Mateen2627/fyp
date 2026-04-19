@@ -23,6 +23,7 @@
                 <li class="nav-item"><a href="{{ route('admin.dashboard') }}" class="nav-link {{ Route::is('admin.dashboard') ? 'active' : '' }}"><i class="icon-home4"></i><span>Dashboard</span></a></li>
                 <li class="nav-item"><a href="{{ route('admin.users.index') }}" class="nav-link {{ Route::is('admin.users.*') ? 'active' : '' }}"><i class="icon-users4"></i><span>Manage Users</span></a></li>
                 <li class="nav-item"><a href="{{ route('admin.courses.index') }}" class="nav-link {{ Route::is('admin.courses.*') ? 'active' : '' }}"><i class="icon-book"></i><span>Manage Courses</span></a></li>
+                <li class="nav-item"><a href="{{ route('admin.classes.index') }}" class="nav-link {{ Route::is('admin.classes.*') ? 'active' : '' }}"><i class="icon-windows2"></i><span>Manage Classes</span></a></li>
                 <li class="nav-item"><a href="{{ route('admin.assign-teachers.index') }}" class="nav-link {{ Route::is('admin.assign-teachers.*') ? 'active' : '' }}"><i class="icon-user-check"></i><span>Assign Teachers</span></a></li>
                 <li class="nav-item"><a href="{{ route('admin.reports.index') }}" class="nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}"><i class="icon-file-text2"></i><span>Reports</span></a></li>
                 <li class="nav-item"><a href="{{ route('admin.system-settings.index') }}" class="nav-link {{ Route::is('admin.system-settings.*') ? 'active' : '' }}"><i class="icon-cog3"></i><span>System Settings</span></a></li>
