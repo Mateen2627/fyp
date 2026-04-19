@@ -146,6 +146,16 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('dorms', 'DormController');
         Route::resource('payments', 'PaymentController');
 
+
+        Route::group(['middleware' => 'teacher'], function() {
+            Route::resource('courses', 'CourseController');
+            Route::resource('assignments', 'AssignmentController');
+            Route::resource('quizzes', 'QuizController');
+            Route::resource('attendance', 'AttendanceController');
+            Route::resource('student_reports', 'StudentReportController');
+            Route::resource('announcements', 'AnnouncementController');
+        });
+
     });
 
     /************************ AJAX ****************************/
