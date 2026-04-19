@@ -47,28 +47,22 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        $d = [
-            'user_type' => Qs::getUserType(),
-        ];
-
-        if (Qs::userIsTeamSA()) {
-            $d['users'] = $this->user->getAll();
-        }
-
-        if (Qs::userIsSuperAdmin()) {
-            return view('pages.support_team.dashboard', $d);
-        }
-
-        if (Qs::userIsAdmin()) {
-            return view('pages.admin.dashboard', $d);
-        }
-
         if (Qs::userIsTeacher()) {
-            return view('pages.teacher.dashboard', $d);
+            return redirect()->route('teacher.dashboard');
         }
 
         if (Qs::userIsStudent()) {
-            return view('pages.student.dashboard', $d);
+            return redirect()->route('student.dashboard');
+        }
+
+        if (Qs::userIsAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $d = ['user_type' => Qs::getUserType()];
+
+        if (Qs::userIsTeamSA()) {
+            $d['users'] = $this->user->getAll();
         }
 
         if (Qs::userIsParent()) {
