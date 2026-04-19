@@ -174,10 +174,16 @@ Route::group(['middleware' => 'auth'], function () {
     /*************** Student Modules *****************/
     Route::group(['namespace' => 'Student', 'prefix' => 'student', 'middleware' => 'student'], function () {
         Route::get('/dashboard', 'DashboardController@index')->name('student.dashboard');
-        Route::resource('courses', 'CourseController', ['as' => 'student']);
-        Route::resource('assignments', 'AssignmentController', ['as' => 'student']);
-        Route::resource('quizzes', 'QuizController', ['as' => 'student']);
-        Route::resource('attendance', 'AttendanceController', ['as' => 'student']);
+
+        Route::resource('courses', 'CourseController', ['as' => 'student'])->only(['index']);
+
+        Route::post('assignments/{assignment}/submit', 'AssignmentController@submit')->name('student.assignments.submit');
+        Route::resource('assignments', 'AssignmentController', ['as' => 'student'])->only(['index', 'show']);
+
+        Route::post('quizzes/{quiz}/submit', 'QuizController@submit')->name('student.quizzes.submit');
+        Route::resource('quizzes', 'QuizController', ['as' => 'student'])->only(['index', 'show']);
+
+        Route::resource('attendance', 'AttendanceController', ['as' => 'student'])->only(['index', 'store']);
         Route::resource('reports', 'ReportController', ['as' => 'student']);
         Route::resource('extra-details', 'ExtraDetailController', ['as' => 'student', 'parameters' => ['extra-details' => 'extra_detail']]);
         Route::resource('help-support', 'HelpSupportController', ['as' => 'student', 'parameters' => ['help-support' => 'help_support']]);

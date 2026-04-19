@@ -2,23 +2,80 @@
 
 namespace App\Http\Controllers\Student;
 
-use App\Models\StudentAssignment;
+use App\Http\Controllers\Controller;
+use App\Models\Assignment;
+use App\Models\StudentAssignmentSubmission;
+use App\Models\StudentRecord;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class AssignmentController extends BaseStudentCrudController
+class AssignmentController extends Controller
 {
-    protected $modelClass = StudentAssignment::class;
-    protected $viewTitle = 'Assignments';
-    protected $routeBase = 'student.assignments';
-    protected $formFields = ['title', 'course_name', 'description', 'due_date', 'status'];
-
-    protected function rules(): array
+    public function __construct()
     {
-        return [
-            'title' => 'required|string|max:200',
-            'course_name' => 'nullable|string|max:200',
-            'description' => 'nullable|string',
-            'due_date' => 'nullable|date',
-            'status' => 'required|in:pending,in_progress,submitted,graded',
+        $this->middleware('student');
+    }
+
+    public function index()
+    {
+        $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
+        $studentId = Auth::id();
+
+        $assignments = Assignment::with('course')
+            ->whereHas('course', function ($q) use ($record) {
+                $q->where('my_class_id', $record->my_class_id);
+            })
+            ->latest()
+            ->paginate(20);
+
+        $submissionMap = StudentAssignmentSubmission::where('student_id', $studentId)
+            ->whereIn('assignment_id', $assignments->pluck('id'))
+            ->get()
+            ->keyBy('assignment_id');
+
+        return view('pages.student.modules.assignments.index', compact('assignments', 'submissionMap'));
+    }
+
+    public function show(Assignment $assignment)
+    {
+        $this->assertBelongsToStudentClass($assignment);
+
+        $submission = StudentAssignmentSubmission::where('assignment_id', $assignment->id)
+            ->where('student_id', Auth::id())
+            ->first();
+
+        return view('pages.student.modules.assignments.show', compact('assignment', 'submission'));
+    }
+
+    public function submit(Request $request, Assignment $assignment)
+    {
+        $this->assertBelongsToStudentClass($assignment);
+
+        $data = $request->validate([
+            'submission_text' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:5120',
+        ]);
+
+        $payload = [
+            'submission_text' => $data['submission_text'] ?? null,
+            'submitted_at' => now(),
         ];
+
+        if ($request->hasFile('attachment')) {
+            $payload['attachment_path'] = $request->file('attachment')->store('student_submissions', 'public');
+        }
+
+        StudentAssignmentSubmission::updateOrCreate(
+            ['assignment_id' => $assignment->id, 'student_id' => Auth::id()],
+            $payload
+        );
+
+        return redirect()->route('student.assignments.show', $assignment->id)->with('flash_success', 'Assignment submitted successfully.');
+    }
+
+    private function assertBelongsToStudentClass(Assignment $assignment): void
+    {
+        $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
+        abort_unless(optional($assignment->course)->my_class_id == $record->my_class_id, 403);
     }
 }
