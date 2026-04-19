@@ -8,7 +8,7 @@ class StudentAttendance extends Eloquent
 {
     protected $table = 'student_attendance_records';
 
-    protected $fillable = ['user_id', 'attendance_date', 'status', 'remarks'];
+    protected $fillable = ['user_id', 'attendance_date', 'status', 'mode', 'facial_verified', 'remarks'];
 
     protected $dates = ['attendance_date'];
 }

@@ -6,7 +6,7 @@ use Eloquent;
 
 class Assignment extends Eloquent
 {
-    protected $fillable = ['title', 'course_id', 'teacher_id', 'my_class_id', 'description', 'due_date'];
+    protected $fillable = ['title', 'course_id', 'teacher_id', 'my_class_id', 'description', 'attachment_path', 'due_date'];
 
     protected $dates = ['due_date'];
 

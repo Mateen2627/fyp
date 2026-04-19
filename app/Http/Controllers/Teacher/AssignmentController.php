@@ -37,6 +37,7 @@ class AssignmentController extends Controller
             'course_id' => 'required|integer',
             'my_class_id' => 'required|integer',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf|max:5120',
             'due_date' => 'nullable|date',
         ]);
 
@@ -47,6 +48,7 @@ class AssignmentController extends Controller
         abort_unless($isAllowedPair, 403);
 
         $data['teacher_id'] = Auth::id();
+        $data['attachment_path'] = $request->hasFile('attachment') ? $request->file('attachment')->store('assignment_materials', 'public') : null;
 
         Assignment::create($data);
 
@@ -67,12 +69,25 @@ class AssignmentController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf|max:5120',
             'due_date' => 'nullable|date',
         ]);
+
+        if ($request->hasFile('attachment')) {
+            $data['attachment_path'] = $request->file('attachment')->store('assignment_materials', 'public');
+        }
 
         $assignment->update($data);
 
         return redirect()->route('teacher.assignments.index')->with('flash_success', 'Assignment updated.');
+    }
+
+    public function downloadMaterial(Assignment $assignment)
+    {
+        abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
+        abort_unless($assignment->attachment_path && Storage::disk('public')->exists($assignment->attachment_path), 404);
+
+        return Storage::disk('public')->download($assignment->attachment_path);
     }
 
     public function show(Assignment $assignment)

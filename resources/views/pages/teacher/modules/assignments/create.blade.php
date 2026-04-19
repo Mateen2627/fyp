@@ -2,7 +2,7 @@
 @section('page_title', 'Add Assignment')
 @section('content')
 <div class="card"><div class="card-body">
-<form action="{{ route('teacher.assignments.store') }}" method="post">
+<form enctype="multipart/form-data" action="{{ route('teacher.assignments.store') }}" method="post">
     @csrf
     <div class="form-group"><label>Title</label><input type="text" name="title" class="form-control" required></div>
     <div class="form-group"><label>Assign to Class + Course</label>
@@ -16,6 +16,7 @@
         <input type="hidden" name="my_class_id" id="my_class_id">
     </div>
     <div class="form-group"><label>Description</label><textarea name="description" class="form-control"></textarea></div>
+    <div class="form-group"><label>Assignment PDF</label><input type="file" name="attachment" class="form-control" accept="application/pdf"></div>
     <div class="form-group"><label>Due Date</label><input type="date" name="due_date" class="form-control"></div>
     <button class="btn btn-primary">Create</button>
 </form>

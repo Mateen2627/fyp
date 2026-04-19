@@ -1,7 +1,7 @@
 @extends('layouts.master')
 @section('page_title', 'Review Quiz Attempts')
 @section('content')
-<div class="card mb-3"><div class="card-body"><h6>{{ $quiz->title }}</h6></div></div>
+<div class="card mb-3"><div class="card-body"><h6>{{ $quiz->title }}</h6><p class="mb-2">{{ $quiz->description ?: "-" }}</p>@if($quiz->attachment_path)<a href="{{ route('teacher.quizzes.download', $quiz->id) }}" class="btn btn-sm btn-outline-primary">Download Quiz File</a>@endif</div></div>
 <div class="card"><div class="table-responsive"><table class="table table-striped mb-0"><thead><tr><th>Student ID</th><th>Submitted</th><th>Answers</th><th>Attachment</th><th>Marks/Feedback</th></tr></thead><tbody>
 @forelse($attempts as $attempt)
 <tr>

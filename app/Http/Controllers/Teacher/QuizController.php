@@ -38,6 +38,7 @@ class QuizController extends Controller
             'course_id' => 'required|integer',
             'my_class_id' => 'required|integer',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf|max:5120',
             'total_marks' => 'nullable|integer|min:0',
             'scheduled_at' => 'nullable|date',
         ]);
@@ -49,6 +50,7 @@ class QuizController extends Controller
         abort_unless($isAllowedPair, 403);
 
         $data['teacher_id'] = Auth::id();
+        $data['attachment_path'] = $request->hasFile('attachment') ? $request->file('attachment')->store('quiz_materials', 'public') : null;
 
         Quiz::create($data);
 
@@ -69,13 +71,26 @@ class QuizController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf|max:5120',
             'total_marks' => 'nullable|integer|min:0',
             'scheduled_at' => 'nullable|date',
         ]);
 
+        if ($request->hasFile('attachment')) {
+            $data['attachment_path'] = $request->file('attachment')->store('quiz_materials', 'public');
+        }
+
         $quiz->update($data);
 
         return redirect()->route('teacher.quizzes.index')->with('flash_success', 'Quiz updated.');
+    }
+
+    public function downloadMaterial(Quiz $quiz)
+    {
+        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        abort_unless($quiz->attachment_path && Storage::disk('public')->exists($quiz->attachment_path), 404);
+
+        return Storage::disk('public')->download($quiz->attachment_path);
     }
 
     public function show(Quiz $quiz)

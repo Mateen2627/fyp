@@ -1,7 +1,7 @@
 @extends('layouts.master')
 @section('page_title', 'Review Assignment Submissions')
 @section('content')
-<div class="card mb-3"><div class="card-body"><h6>{{ $assignment->title }}</h6></div></div>
+<div class="card mb-3"><div class="card-body"><h6>{{ $assignment->title }}</h6><p class="mb-2">{{ $assignment->description ?: "-" }}</p>@if($assignment->attachment_path)<a href="{{ route('teacher.assignments.download', $assignment->id) }}" class="btn btn-sm btn-outline-primary">Download Assignment File</a>@endif</div></div>
 <div class="card"><div class="table-responsive"><table class="table table-striped mb-0"><thead><tr><th>Student ID</th><th>Submitted</th><th>Text</th><th>Attachment</th><th>Marks/Feedback</th></tr></thead><tbody>
 @forelse($submissions as $submission)
 <tr>

@@ -184,6 +184,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('quizzes/{quiz}/submit', 'QuizController@submit')->name('student.quizzes.submit');
         Route::resource('quizzes', 'QuizController', ['as' => 'student'])->only(['index', 'show']);
 
+        Route::post('attendance/register-face', 'AttendanceController@registerFace')->name('student.attendance.register_face');
         Route::resource('attendance', 'AttendanceController', ['as' => 'student'])->only(['index', 'store']);
         Route::resource('reports', 'ReportController', ['as' => 'student']);
         Route::resource('extra-details', 'ExtraDetailController', ['as' => 'student', 'parameters' => ['extra-details' => 'extra_detail']]);
@@ -198,10 +199,12 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/courses', 'CourseController@index')->name('teacher.courses.index');
         Route::get('/classes', 'ClassController@index')->name('teacher.classes.index');
 
+        Route::get('/assignments/{assignment}/download', 'AssignmentController@downloadMaterial')->name('teacher.assignments.download');
         Route::post('/assignments/{assignment}/submissions/{submission}/mark', 'AssignmentController@mark')->name('teacher.assignments.mark');
         Route::get('/assignments/{assignment}/submissions/{submission}/download', 'AssignmentController@downloadSubmission')->name('teacher.assignments.submissions.download');
         Route::resource('/assignments', 'AssignmentController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
+        Route::get('/quizzes/{quiz}/download', 'QuizController@downloadMaterial')->name('teacher.quizzes.download');
         Route::post('/quizzes/{quiz}/attempts/{attempt}/mark', 'QuizController@mark')->name('teacher.quizzes.mark');
         Route::get('/quizzes/{quiz}/attempts/{attempt}/download', 'QuizController@downloadAttempt')->name('teacher.quizzes.attempts.download');
         Route::resource('/quizzes', 'QuizController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show', 'edit', 'update']);
