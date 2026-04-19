@@ -51,15 +51,6 @@
                     </a>
                 </li>
 
-                @if(Qs::userIsTeamSAT())
-                    <li class="nav-item"><a href="{{ route('courses.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['courses.index','courses.create','courses.edit','courses.show']) ? 'active' : '' }}"><i class="icon-book"></i> <span>Courses</span></a></li>
-                    <li class="nav-item"><a href="{{ route('assignments.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['assignments.index','assignments.create','assignments.edit','assignments.show']) ? 'active' : '' }}"><i class="icon-clipboard3"></i> <span>Assignments</span></a></li>
-                    <li class="nav-item"><a href="{{ route('quizzes.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['quizzes.index','quizzes.create','quizzes.edit','quizzes.show']) ? 'active' : '' }}"><i class="icon-question4"></i> <span>Quizzes</span></a></li>
-                    <li class="nav-item"><a href="{{ route('attendance.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['attendance.index','attendance.create','attendance.edit','attendance.show']) ? 'active' : '' }}"><i class="icon-calendar5"></i> <span>Attendance</span></a></li>
-                    <li class="nav-item"><a href="{{ route('student_reports.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['student_reports.index','student_reports.create','student_reports.edit','student_reports.show']) ? 'active' : '' }}"><i class="icon-file-text2"></i> <span>Student Reports</span></a></li>
-                    <li class="nav-item"><a href="{{ route('announcements.index') }}" class="nav-link {{ in_array(Route::currentRouteName(), ['announcements.index','announcements.create','announcements.edit','announcements.show']) ? 'active' : '' }}"><i class="icon-megaphone"></i> <span>Announcements</span></a></li>
-                @endif
-
                 {{--Academics--}}
                 @if(Qs::userIsAcademic())
                     <li class="nav-item nav-item-submenu {{ in_array(Route::currentRouteName(), ['tt.index', 'ttr.edit', 'ttr.show', 'ttr.manage']) ? 'nav-item-expanded nav-item-open' : '' }} ">
