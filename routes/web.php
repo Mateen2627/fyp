@@ -189,6 +189,23 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('help-support', 'HelpSupportController', ['as' => 'student', 'parameters' => ['help-support' => 'help_support']]);
     });
 
+
+
+    /*************** Teacher Modules *****************/
+    Route::group(['namespace' => 'Teacher', 'prefix' => 'teacher', 'middleware' => 'teacher'], function () {
+        Route::get('/dashboard', 'DashboardController@index')->name('teacher.dashboard');
+        Route::get('/courses', 'CourseController@index')->name('teacher.courses.index');
+        Route::get('/classes', 'ClassController@index')->name('teacher.classes.index');
+
+        Route::post('/assignments/{assignment}/submissions/{submission}/mark', 'AssignmentController@mark')->name('teacher.assignments.mark');
+        Route::resource('/assignments', 'AssignmentController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show']);
+
+        Route::post('/quizzes/{quiz}/attempts/{attempt}/mark', 'QuizController@mark')->name('teacher.quizzes.mark');
+        Route::resource('/quizzes', 'QuizController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show']);
+
+        Route::get('/attendance', 'AttendanceController@index')->name('teacher.attendance.index');
+    });
+
     /************************ AJAX ****************************/
     Route::group(['prefix' => 'ajax'], function() {
         Route::get('get_lga/{state_id}', 'AjaxController@get_lga')->name('get_lga');
