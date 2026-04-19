@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\MyClass;
 use Illuminate\Http\Request;
 
 class ManageCourseController extends Controller
@@ -15,12 +16,15 @@ class ManageCourseController extends Controller
 
     public function index()
     {
-        return view('pages.admin.modules.courses.index', ['records' => Course::latest()->paginate(20)]);
+        return view('pages.admin.modules.courses.index', [
+            'records' => Course::latest()->paginate(20),
+            'classes' => MyClass::pluck('name', 'id'),
+        ]);
     }
 
     public function create()
     {
-        return view('pages.admin.modules.courses.create');
+        return view('pages.admin.modules.courses.create', ['classes' => MyClass::orderBy('name')->get()]);
     }
 
     public function store(Request $request)
@@ -29,7 +33,7 @@ class ManageCourseController extends Controller
             'title' => 'required|string|max:200',
             'code' => 'nullable|string|max:50',
             'description' => 'nullable|string',
-            'my_class_id' => 'nullable|integer',
+            'my_class_id' => 'nullable|exists:my_classes,id',
         ]);
 
         Course::create($data);
@@ -38,7 +42,10 @@ class ManageCourseController extends Controller
 
     public function edit(Course $course)
     {
-        return view('pages.admin.modules.courses.edit', ['record' => $course]);
+        return view('pages.admin.modules.courses.edit', [
+            'record' => $course,
+            'classes' => MyClass::orderBy('name')->get(),
+        ]);
     }
 
     public function update(Request $request, Course $course)
@@ -47,7 +54,7 @@ class ManageCourseController extends Controller
             'title' => 'required|string|max:200',
             'code' => 'nullable|string|max:50',
             'description' => 'nullable|string',
-            'my_class_id' => 'nullable|integer',
+            'my_class_id' => 'nullable|exists:my_classes,id',
         ]);
 
         $course->update($data);

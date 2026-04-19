@@ -27,7 +27,7 @@ class AssignTeacherController extends Controller
     {
         return view('pages.admin.modules.assignments.create', [
             'courses' => Course::orderBy('title')->get(),
-            'teachers' => User::where('user_type', 'teacher')->orderBy('name')->get(),
+            'teachers' => $this->teachers(),
         ]);
     }
 
@@ -38,6 +38,11 @@ class AssignTeacherController extends Controller
             'teacher_id' => 'required|exists:users,id',
             'notes' => 'nullable|string',
         ]);
+
+        $teacher = User::findOrFail($data['teacher_id']);
+        if (strtolower((string) $teacher->user_type) !== 'teacher') {
+            return back()->withInput()->with('flash_danger', 'Selected user is not a teacher.');
+        }
 
         $data['assigned_by'] = Auth::id();
 
@@ -54,7 +59,7 @@ class AssignTeacherController extends Controller
         return view('pages.admin.modules.assignments.edit', [
             'record' => $assign_teacher,
             'courses' => Course::orderBy('title')->get(),
-            'teachers' => User::where('user_type', 'teacher')->orderBy('name')->get(),
+            'teachers' => $this->teachers(),
         ]);
     }
 
@@ -65,6 +70,11 @@ class AssignTeacherController extends Controller
             'teacher_id' => 'required|exists:users,id',
             'notes' => 'nullable|string',
         ]);
+
+        $teacher = User::findOrFail($data['teacher_id']);
+        if (strtolower((string) $teacher->user_type) !== 'teacher') {
+            return back()->withInput()->with('flash_danger', 'Selected user is not a teacher.');
+        }
 
         $data['assigned_by'] = Auth::id();
         $assign_teacher->update($data);
@@ -77,5 +87,13 @@ class AssignTeacherController extends Controller
         $assign_teacher->delete();
 
         return redirect()->route('admin.assign-teachers.index')->with('flash_success', 'Teacher assignment deleted successfully.');
+    }
+
+    protected function teachers()
+    {
+        return User::query()
+            ->whereRaw('LOWER(user_type) = ?', ['teacher'])
+            ->orderBy('name')
+            ->get();
     }
 }

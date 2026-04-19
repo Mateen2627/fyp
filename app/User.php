@@ -8,6 +8,7 @@ use App\Models\Nationality;
 use App\Models\StaffRecord;
 use App\Models\State;
 use App\Models\StudentRecord;
+use App\Models\TeacherAssignment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -64,4 +65,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(StaffRecord::class);
     }
+
+    public function teacher_assignments()
+    {
+        return $this->hasMany(TeacherAssignment::class, 'teacher_id');
+    }
 }
+
