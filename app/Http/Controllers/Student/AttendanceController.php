@@ -27,17 +27,14 @@ class AttendanceController extends Controller
     {
         $data = $request->validate([
             'face_token' => 'required|string|min:4|max:255',
-            'face_image' => 'nullable|image|max:5120',
+            'face_template' => 'required|string|min:20',
         ]);
 
         $payload = [
             'face_token' => $data['face_token'],
+            'face_template' => $data['face_template'],
             'is_active' => 1,
         ];
-
-        if ($request->hasFile('face_image')) {
-            $payload['face_image_path'] = $request->file('face_image')->store('face_profiles', 'public');
-        }
 
         StudentFaceProfile::updateOrCreate(['user_id' => Auth::id()], $payload);
 
@@ -52,6 +49,7 @@ class AttendanceController extends Controller
             'mode' => 'required|in:manual,facial',
             'remarks' => 'nullable|string',
             'face_token' => 'nullable|string',
+            'attendance_template' => 'nullable|string',
         ]);
 
         $facialVerified = false;

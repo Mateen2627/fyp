@@ -6,5 +6,5 @@ use Eloquent;
 
 class StudentFaceProfile extends Eloquent
 {
-    protected $fillable = ['user_id', 'face_token', 'face_image_path', 'is_active'];
+    protected $fillable = ['user_id', 'face_token', 'face_template', 'face_image_path', 'is_active'];
 }
