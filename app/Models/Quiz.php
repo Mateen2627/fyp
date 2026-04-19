@@ -19,4 +19,9 @@ class Quiz extends Eloquent
     {
         return $this->hasMany(StudentQuizAttempt::class);
     }
+
+    public function teacher()
+    {
+        return $this->belongsTo(\App\User::class, 'teacher_id');
+    }
 }

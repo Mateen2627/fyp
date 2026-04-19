@@ -6,7 +6,7 @@ use Eloquent;
 
 class StudentQuizAttempt extends Eloquent
 {
-    protected $fillable = ['quiz_id', 'student_id', 'answers', 'marks', 'teacher_feedback', 'submitted_at'];
+    protected $fillable = ['quiz_id', 'student_id', 'answers', 'attachment_path', 'marks', 'teacher_feedback', 'submitted_at'];
 
     protected $dates = ['submitted_at'];
 

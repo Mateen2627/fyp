@@ -21,7 +21,8 @@ class AssignmentController extends Controller
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
         $studentId = Auth::id();
 
-        $assignments = Assignment::with('course')
+        $assignments = Assignment::with(['course', 'teacher'])
+            ->whereNotNull('teacher_id')
             ->whereHas('course', function ($q) use ($record) {
                 $q->where('my_class_id', $record->my_class_id);
             })
@@ -61,8 +62,12 @@ class AssignmentController extends Controller
             'submitted_at' => now(),
         ];
 
+        $existing = StudentAssignmentSubmission::where('assignment_id', $assignment->id)->where('student_id', Auth::id())->first();
+
         if ($request->hasFile('attachment')) {
             $payload['attachment_path'] = $request->file('attachment')->store('student_submissions', 'public');
+        } elseif ($existing && $existing->attachment_path) {
+            $payload['attachment_path'] = $existing->attachment_path;
         }
 
         StudentAssignmentSubmission::updateOrCreate(

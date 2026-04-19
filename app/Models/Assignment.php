@@ -19,4 +19,9 @@ class Assignment extends Eloquent
     {
         return $this->hasMany(StudentAssignmentSubmission::class);
     }
+
+    public function teacher()
+    {
+        return $this->belongsTo(\App\User::class, 'teacher_id');
+    }
 }

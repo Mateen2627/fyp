@@ -5,6 +5,7 @@
     <div class="card-header"><h6 class="mb-0">{{ $assignment->title }}</h6></div>
     <div class="card-body">
         <p><strong>Course:</strong> {{ optional($assignment->course)->title ?: '-' }}</p>
+        <p><strong>Teacher:</strong> {{ optional($assignment->teacher)->name ?: '-' }}</p>
         <p><strong>Due Date:</strong> {{ optional($assignment->due_date)->format('Y-m-d') ?: '-' }}</p>
         <p><strong>Description:</strong><br>{{ $assignment->description ?: '-' }}</p>
     </div>

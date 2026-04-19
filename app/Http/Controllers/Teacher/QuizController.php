@@ -32,6 +32,8 @@ class QuizController extends Controller
 
     public function store(Request $request)
     {
+        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
+
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'course_id' => 'required|integer',
@@ -39,6 +41,8 @@ class QuizController extends Controller
             'total_marks' => 'nullable|integer|min:0',
             'scheduled_at' => 'nullable|date',
         ]);
+        abort_unless(in_array((int) $data['course_id'], array_map('intval', $allowedCourseIds), true), 403);
+
         $data['teacher_id'] = Auth::id();
 
         Quiz::create($data);
@@ -58,6 +62,8 @@ class QuizController extends Controller
     {
         abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
         abort_unless((int) $attempt->quiz_id === (int) $quiz->id, 404);
+
+        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
 
         $data = $request->validate([
             'marks' => 'nullable|numeric|min:0|max:100',

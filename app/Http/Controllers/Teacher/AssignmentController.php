@@ -34,12 +34,16 @@ class AssignmentController extends Controller
 
     public function store(Request $request)
     {
+        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
+
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'course_id' => 'required|integer',
             'description' => 'nullable|string',
             'due_date' => 'nullable|date',
         ]);
+        abort_unless(in_array((int) $data['course_id'], array_map('intval', $allowedCourseIds), true), 403);
+
         $data['teacher_id'] = Auth::id();
 
         Assignment::create($data);
@@ -59,6 +63,8 @@ class AssignmentController extends Controller
     {
         abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
         abort_unless((int) $submission->assignment_id === (int) $assignment->id, 404);
+
+        $allowedCourseIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('course_id')->filter()->unique()->all();
 
         $data = $request->validate([
             'marks' => 'nullable|numeric|min:0|max:100',

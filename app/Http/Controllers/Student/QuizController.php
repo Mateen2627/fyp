@@ -21,7 +21,8 @@ class QuizController extends Controller
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
         $studentId = Auth::id();
 
-        $quizzes = Quiz::with('course')
+        $quizzes = Quiz::with(['course', 'teacher'])
+            ->whereNotNull('teacher_id')
             ->whereHas('course', function ($q) use ($record) {
                 $q->where('my_class_id', $record->my_class_id);
             })
@@ -52,12 +53,26 @@ class QuizController extends Controller
         $this->assertBelongsToStudentClass($quiz);
 
         $data = $request->validate([
-            'answers' => 'required|string',
+            'answers' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,txt,jpg,jpeg,png|max:5120',
         ]);
+
+        $existing = StudentQuizAttempt::where('quiz_id', $quiz->id)->where('student_id', Auth::id())->first();
+
+        $payload = [
+            'answers' => $data['answers'] ?? null,
+            'submitted_at' => now(),
+        ];
+
+        if ($request->hasFile('attachment')) {
+            $payload['attachment_path'] = $request->file('attachment')->store('quiz_attempts', 'public');
+        } elseif ($existing && $existing->attachment_path) {
+            $payload['attachment_path'] = $existing->attachment_path;
+        }
 
         StudentQuizAttempt::updateOrCreate(
             ['quiz_id' => $quiz->id, 'student_id' => Auth::id()],
-            ['answers' => $data['answers'], 'submitted_at' => now()]
+            $payload
         );
 
         return redirect()->route('student.quizzes.show', $quiz->id)->with('flash_success', 'Quiz submitted successfully.');
