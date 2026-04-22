@@ -7,17 +7,19 @@
             <!-- Content area -->
             <div class="content d-flex justify-content-center align-items-center p-3 p-md-4">
                 <!-- Login card -->
-                <form class="login-form w-100" method="post" action="{{ route('login') }}" style="max-width: 420px;">
+                <form class="login-form w-100" method="post" action="{{ route('login') }}" style="max-width: 440px;">
                     @csrf
-                    <div class="card mb-0 shadow-lg border-0 rounded-3 overflow-hidden">
+                    <div class="card mb-0 shadow-xl border-0 rounded-4 overflow-hidden">
                         <div class="card-body p-4 p-md-5">
-                            <!-- Header Icon -->
+                            
+                            <!-- Logo / Brand Header - Clean & Professional -->
                             <div class="text-center mb-4">
-                                <div class="d-inline-flex align-items-center justify-content-center bg-warning-100 rounded-circle p-3 mb-3">
-                                    <i class="icon-people icon-2x text-warning" style="font-size: 2.5rem;"></i>
+                                <!-- Removed the cluttered text, just clean brand -->
+                                <div class="mb-3">
+                                    <span class="brand-logo" style="font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); -webkit-background-clip: text; background-clip: text; color: transparent;">SPAMS</span>
                                 </div>
-                                <h4 class="mb-1 fw-bold">Welcome Back!</h4>
-                                <p class="text-muted mb-0">Sign in to continue to {{ Qs::getSystemName() }}</p>
+                                <h4 class="mb-1 fw-semibold" style="color: #1e293b;">Welcome back</h4>
+                                <p class="text-muted small mb-0">Sign in to your account</p>
                             </div>
 
                             <!-- Error Messages -->
@@ -26,7 +28,7 @@
                                     <div class="d-flex align-items-center">
                                         <i class="icon-warning2 me-2"></i>
                                         <div>
-                                            <strong class="d-block">Oops! Something went wrong:</strong>
+                                            <strong class="d-block">Access Error:</strong>
                                             @foreach ($errors->all() as $error)
                                                 <span class="d-block small">{{ $error }}</span>
                                             @endforeach
@@ -38,37 +40,37 @@
 
                             <!-- Login Form -->
                             <div class="form-group mb-3">
-                                <label class="form-label text-muted small fw-semibold mb-2">Login ID or Email</label>
+                                <label class="form-label text-dark small fw-semibold mb-2">Email or Username</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="icon-user text-muted"></i>
+                                    <span class="input-group-text bg-transparent border-end-0 ps-3">
+                                        <i class="icon-envelope5 text-muted"></i>
                                     </span>
-                                    <input type="text" class="form-control border-start-0 ps-0" 
+                                    <input type="text" class="form-control border-start-0 ps-1 bg-transparent" 
                                            name="identity" value="{{ old('identity') }}" 
-                                           placeholder="Enter your username or email"
+                                           placeholder="Enter your email or username"
                                            required autofocus>
                                 </div>
                             </div>
 
-                            <div class="form-group mb-3">
+                            <div class="form-group mb-4">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label text-muted small fw-semibold">Password</label>
-                                    <a href="{{ route('password.request') }}" class="small text-primary text-decoration-none">
-                                        Forgot?
+                                    <label class="form-label text-dark small fw-semibold mb-0">Password</label>
+                                    <a href="{{ route('password.request') }}" class="small text-decoration-none" style="color: #6366f1;">
+                                        Forgot password?
                                     </a>
                                 </div>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="icon-lock text-muted"></i>
+                                    <span class="input-group-text bg-transparent border-end-0 ps-3">
+                                        <i class="icon-lock2 text-muted"></i>
                                     </span>
                                     <input required name="password" type="password" 
-                                           class="form-control border-start-0 ps-0" 
+                                           class="form-control border-start-0 ps-1 bg-transparent" 
                                            placeholder="Enter your password"
                                            id="password">
-                                    <button class="btn btn-light border" type="button" 
+                                    <button class="btn btn-link text-muted border-0" type="button" 
                                             onclick="togglePassword()" 
-                                            style="cursor: pointer;">
-                                        <i class="icon-eye" id="togglePasswordIcon"></i>
+                                            style="cursor: pointer; text-decoration: none;">
+                                        <i class="icon-eye" id="togglePasswordIcon" style="font-size: 1rem;"></i>
                                     </button>
                                 </div>
                             </div>
@@ -76,26 +78,27 @@
                             <div class="form-group d-flex align-items-center justify-content-between mb-4">
                                 <div class="form-check">
                                     <input type="checkbox" name="remember" class="form-check-input" 
-                                           id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                           id="remember" {{ old('remember') ? 'checked' : '' }}
+                                           style="border-color: #cbd5e1;">
                                     <label class="form-check-label text-muted small" for="remember">
-                                        Remember me
+                                        Keep me signed in
                                     </label>
                                 </div>
                             </div>
 
                             <div class="form-group mb-3">
-                                <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-semibold d-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); border: none; border-radius: 12px;">
                                     <span>Sign In</span>
-                                    <i class="icon-circle-right2"></i>
+                                    <i class="icon-arrow-right8"></i>
                                 </button>
                             </div>
 
-                            <!-- Demo Credentials (Optional - you can remove this) -->
-                            <div class="text-center mt-4 pt-3 border-top">
-                                <p class="small text-muted mb-2">Demo Credentials:</p>
+                            <!-- Demo Credentials - Clean & Minimal -->
+                            <div class="text-center mt-4 pt-3">
+                                <p class="small text-muted mb-2">Demo Access</p>
                                 <div class="d-flex flex-wrap justify-content-center gap-2">
-                                    <span class="badge bg-light text-dark p-2">Admin: admin@demo.com</span>
-                                    <span class="badge bg-light text-dark p-2">Password: secret</span>
+                                    <span class="px-2 py-1" style="background: #f8fafc; border-radius: 8px; font-size: 0.7rem; color: #475569;">admin@demo.com</span>
+                                    <span class="px-2 py-1" style="background: #f8fafc; border-radius: 8px; font-size: 0.7rem; color: #475569;">secret</span>
                                 </div>
                             </div>
                         </div>
@@ -106,14 +109,14 @@
     </div>
 
     <style>
-        /* Page Background */
+        /* Professional Gradient Background */
         .page-content.login-cover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(145deg, #0f172a 0%, #1e1b4b 50%, #2e1065 100%);
             position: relative;
             min-height: 100vh;
         }
         
-        /* Optional overlay pattern */
+        /* Animated gradient overlay */
         .page-content.login-cover::before {
             content: '';
             position: absolute;
@@ -121,90 +124,143 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path d="M10 10 L90 10 L90 90 L10 90 Z" fill="none" stroke="white" stroke-width="0.5"/></svg>');
-            background-size: 30px 30px;
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
             pointer-events: none;
         }
+        
+        /* Optional floating particles effect */
+        .page-content.login-cover::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="30" cy="30" r="2" fill="white" opacity="0.1"/><circle cx="170" cy="80" r="3" fill="white" opacity="0.08"/><circle cx="100" cy="150" r="2" fill="white" opacity="0.12"/><circle cx="50" cy="180" r="1.5" fill="white" opacity="0.1"/><circle cx="150" cy="20" r="2.5" fill="white" opacity="0.07"/></svg>');
+            background-repeat: repeat;
+            background-size: 40px 40px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
 
-        /* Card Styling */
+        /* Card Styling - Clean Glassmorphism */
         .login-form .card {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.98);
-            transition: transform 0.3s ease;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(0px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         .login-form .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Input Group Styling */
+        /* Input Group Styling - Modern Minimal */
         .input-group-text {
-            background: #f8f9fa;
+            background: transparent;
+            border: 1px solid #e2e8f0;
             border-right: none;
+            color: #94a3b8;
         }
 
         .input-group .form-control {
+            border: 1px solid #e2e8f0;
             border-left: none;
-            background: #f8f9fa;
+            background: transparent;
+            font-size: 0.9rem;
+            padding: 0.75rem 0.75rem 0.75rem 0.25rem;
         }
 
         .input-group .form-control:focus {
-            background: #fff;
-            border-color: #ced4da;
+            background: transparent;
+            border-color: #cbd5e1;
             box-shadow: none;
+            outline: none;
         }
 
         .input-group .form-control:focus + .input-group-text {
-            border-color: #ced4da;
+            border-color: #cbd5e1;
         }
 
-        /* Password Toggle Button */
-        .btn-light.border {
-            background: #f8f9fa;
-            border-color: #ced4da;
-            border-left: none;
+        .input-group .form-control::placeholder {
+            color: #cbd5e1;
+            font-size: 0.85rem;
         }
 
-        .btn-light.border:hover {
-            background: #e9ecef;
+        /* Form Label */
+        .form-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
         /* Button Styling */
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
             transition: all 0.3s ease;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, #4f46e5 0%, #db2777 100%) !important;
+        }
+
+        /* Checkbox Styling */
+        .form-check-input {
+            cursor: pointer;
+            width: 1rem;
+            height: 1rem;
+            margin-top: 0.15rem;
+        }
+
+        .form-check-input:checked {
+            background-color: #6366f1;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Alert Styling */
+        .alert-danger {
+            background: #fef2f2;
+            border: none;
+            border-left: 3px solid #ef4444;
+            color: #b91c1c;
+            border-radius: 12px;
+            font-size: 0.85rem;
         }
 
         /* Responsive Adjustments */
         @media (max-width: 576px) {
             .login-form {
                 max-width: 100% !important;
+                margin: 0 16px;
             }
             
             .card-body {
-                padding: 2rem !important;
+                padding: 2rem 1.5rem !important;
             }
             
             .btn-primary {
                 padding: 0.75rem !important;
             }
             
-            .icon-2x {
-                font-size: 2rem !important;
+            .brand-logo {
+                font-size: 2.2rem !important;
             }
         }
 
-        /* Animation */
+        /* Smooth Animation */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -213,25 +269,25 @@
         }
 
         .login-form {
-            animation: fadeInUp 0.6s ease;
+            animation: fadeInUp 0.5s ease-out;
         }
 
-        /* Checkbox Styling */
-        .form-check-input {
-            cursor: pointer;
+        /* Link Styling */
+        a {
+            transition: color 0.2s ease;
         }
-
-        .form-check-input:checked {
-            background-color: #667eea;
-            border-color: #667eea;
+        
+        a:hover {
+            color: #4f46e5 !important;
         }
-
-        /* Alert Styling */
-        .alert-danger {
-            background: #fff2f0;
-            border: none;
-            border-left: 4px solid #dc3545;
-            color: #dc3545;
+        
+        /* Icon inside password toggle */
+        .btn-link:hover {
+            background: transparent !important;
+        }
+        
+        .btn-link:focus {
+            box-shadow: none !important;
         }
     </style>
 
@@ -256,11 +312,11 @@
             if (alert) {
                 setTimeout(function() {
                     if (alert) {
-                        alert.style.transition = 'opacity 0.5s ease';
+                        alert.style.transition = 'opacity 0.4s ease';
                         alert.style.opacity = '0';
                         setTimeout(function() {
-                            alert.remove();
-                        }, 500);
+                            if (alert && alert.remove) alert.remove();
+                        }, 400);
                     }
                 }, 5000);
             }

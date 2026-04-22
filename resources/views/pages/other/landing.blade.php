@@ -26,6 +26,11 @@
             --white: #ffffff;
             --gradient: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
             --gradient-hover: linear-gradient(135deg, #4f46e5 0%, #db2777 100%);
+            --gradient-bg: linear-gradient(125deg, #f0f4ff 0%, #f9f0ff 100%);
+            --glass-bg: rgba(255,255,255,0.75);
+            --shadow-sm: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --shadow-md: 0 20px 25px -12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 25px 40px -12px rgba(0,0,0,0.15);
         }
 
         * {
@@ -37,7 +42,7 @@
         body {
             font-family: 'Inter', sans-serif;
             color: var(--dark);
-            background: var(--white);
+            background: var(--gradient-bg);
             line-height: 1.6;
             overflow-x: hidden;
         }
@@ -46,16 +51,13 @@
         ::-webkit-scrollbar {
             width: 8px;
         }
-
         ::-webkit-scrollbar-track {
             background: var(--light-gray);
         }
-
         ::-webkit-scrollbar-thumb {
             background: var(--primary);
             border-radius: 10px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
@@ -67,23 +69,21 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15);
             transition: all 0.3s ease;
         }
-
         .top-nav.scrolled {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--shadow-sm);
+            border-bottom-color: transparent;
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 0 24px;
         }
-
         .inner {
             display: flex;
             align-items: center;
@@ -91,103 +91,106 @@
             padding: 16px 0;
             gap: 20px;
         }
-
         .brand {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 800;
             background: var(--gradient);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             text-decoration: none;
-            transition: transform 0.3s ease;
+            letter-spacing: -0.3px;
+            transition: all 0.2s;
         }
-
         .brand:hover {
-            transform: scale(1.05);
+            opacity: 0.9;
+            transform: scale(1.02);
         }
-
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 32px;
         }
-
         .nav-links a {
             text-decoration: none;
-            color: var(--gray);
+            color: var(--dark);
             font-weight: 500;
             font-size: 0.95rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
             position: relative;
         }
-
-        .nav-links a::after {
+        .nav-links a:not(.btn-primary)::after {
             content: '';
             position: absolute;
-            bottom: -5px;
+            bottom: -6px;
             left: 0;
             width: 0;
             height: 2px;
             background: var(--gradient);
-            transition: width 0.3s ease;
+            border-radius: 2px;
+            transition: width 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         }
-
-        .nav-links a:hover::after {
+        .nav-links a:not(.btn-primary):hover::after {
             width: 100%;
         }
-
-        .nav-links a:hover {
+        .nav-links a:not(.btn-primary):hover {
             color: var(--primary);
         }
-
         .menu-btn {
             display: none;
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--primary);
+            background: rgba(99,102,241,0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .menu-btn:hover {
+            background: rgba(99,102,241,0.2);
         }
 
-        /* Button Styles */
+        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             padding: 12px 28px;
-            border-radius: 12px;
+            border-radius: 40px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             text-decoration: none;
             transition: all 0.3s ease;
             cursor: pointer;
             border: none;
+            letter-spacing: -0.2px;
         }
-
         .btn-primary {
             background: var(--gradient);
             color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 6px 14px rgba(99, 102, 241, 0.3);
         }
-
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
             background: var(--gradient-hover);
         }
-
         .btn-outline {
             background: transparent;
-            border: 2px solid var(--primary);
+            border: 1.5px solid var(--primary);
             color: var(--primary);
+            backdrop-filter: blur(4px);
         }
-
         .btn-outline:hover {
             background: var(--primary);
             color: white;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(99,102,241,0.2);
         }
-
         .btn-large {
             padding: 14px 36px;
             font-size: 1rem;
@@ -195,35 +198,31 @@
 
         /* Hero Section */
         .hero {
-            padding: 140px 0 80px;
-            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            padding: 150px 0 100px;
+            background: radial-gradient(circle at 10% 30%, rgba(99,102,241,0.08) 0%, rgba(236,72,153,0.05) 100%);
             position: relative;
             overflow: hidden;
         }
-
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path fill="%236366f1" fill-opacity="0.05" d="M100 0L200 200H0L100 0z"/></svg>') repeat;
-            opacity: 0.1;
+            top: -20%;
+            right: -10%;
+            width: 70%;
+            height: 130%;
+            background: radial-gradient(ellipse, rgba(99,102,241,0.1) 0%, rgba(236,72,153,0) 70%);
             pointer-events: none;
         }
-
         .hero-wrap {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 60px;
             align-items: center;
             position: relative;
-            z-index: 1;
+            z-index: 2;
         }
-
         .hero h1 {
-            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
             font-weight: 800;
             line-height: 1.2;
             margin: 0 0 20px;
@@ -232,150 +231,183 @@
             background-clip: text;
             color: transparent;
         }
-
         .hero p {
             font-size: 1.1rem;
             color: var(--gray);
             margin: 0 0 32px;
         }
-
         .hero-actions {
             display: flex;
-            gap: 16px;
+            gap: 20px;
             flex-wrap: wrap;
         }
-
         .hero-stats {
             display: flex;
-            gap: 32px;
-            margin-top: 48px;
-            padding-top: 32px;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            gap: 42px;
+            margin-top: 50px;
+            padding-top: 20px;
         }
-
         .stat-item {
             text-align: center;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(8px);
+            padding: 10px 20px;
+            border-radius: 40px;
+            min-width: 110px;
         }
-
         .stat-number {
             font-size: 2rem;
             font-weight: 800;
-            color: var(--primary);
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             display: block;
         }
-
         .stat-label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 500;
             color: var(--gray);
         }
-
         .hero-card {
-            background: white;
-            border-radius: 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
             padding: 32px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: all 0.3s;
         }
-
+        .hero-card:hover {
+            transform: translateY(-6px);
+        }
         .hero-card h3 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             margin: 0 0 16px;
-            color: var(--dark);
+            font-weight: 700;
         }
-
         .hero-card ul {
             list-style: none;
-            padding: 0;
         }
-
         .hero-card li {
-            padding: 10px 0;
+            padding: 12px 0;
             display: flex;
             align-items: center;
             gap: 12px;
-            color: var(--gray);
+            font-weight: 500;
         }
-
         .hero-card li i {
-            color: var(--primary);
-            font-size: 1.1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 1.2rem;
         }
 
-        /* Section Styles */
+        /* Section */
         section {
-            padding: 80px 0;
+            padding: 90px 0;
         }
-
         .section-alt {
-            background: var(--light-gray);
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(2px);
         }
-
         .section-title {
-            font-size: clamp(1.8rem, 3vw, 2.5rem);
-            font-weight: 700;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 800;
             text-align: center;
             margin: 0 0 16px;
+            letter-spacing: -0.02em;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
-
         .section-subtitle {
             text-align: center;
             color: var(--gray);
-            max-width: 600px;
-            margin: 0 auto 48px;
+            max-width: 640px;
+            margin: 0 auto 56px;
             font-size: 1.1rem;
         }
 
-        /* Features Grid */
+        /* Features Grid - redesigned accordion style cards but keeping grid for clarity, but enhanced */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 32px;
         }
-
         .feature-card {
-            background: white;
-            padding: 32px;
-            border-radius: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(8px);
+            padding: 32px 28px;
+            border-radius: 32px;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: var(--shadow-sm);
         }
-
         .feature-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(99,102,241,0.3);
+            background: white;
         }
-
         .feature-icon {
-            width: 70px;
-            height: 70px;
+            width: 64px;
+            height: 64px;
             background: var(--gradient);
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            transition: transform 0.3s ease;
+            margin-bottom: 24px;
+            transition: all 0.3s;
         }
-
         .feature-card:hover .feature-icon {
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 10px 20px -5px rgba(99,102,241,0.4);
         }
-
         .feature-icon i {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: white;
         }
-
         .feature-card h4 {
-            font-size: 1.25rem;
-            margin: 0 0 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .feature-card p, .feature-card ul {
+            color: var(--gray);
+            line-height: 1.5;
+        }
+        .feature-card ul {
+            list-style: none;
+            margin-top: 12px;
+            padding-left: 0;
+        }
+        .feature-card li {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        .feature-card li i {
+            color: var(--primary);
+            font-size: 0.8rem;
         }
 
-        .feature-card p {
-            color: var(--gray);
-            line-height: 1.6;
-            margin: 0;
+        /* AI Special badge */
+        .ai-badge {
+            background: linear-gradient(120deg, #f0f4ff, #ffe6f0);
+            border-radius: 50px;
+            padding: 6px 14px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 12px;
+            color: var(--primary-dark);
+            border: 1px solid rgba(99,102,241,0.3);
         }
 
         /* About Section */
@@ -384,13 +416,12 @@
             margin: 0 auto;
             text-align: center;
         }
-
         .about-content p {
             font-size: 1.1rem;
-            color: var(--gray);
+            color: var(--dark);
             margin-bottom: 24px;
+            font-weight: 500;
         }
-
         .tech-stack {
             display: flex;
             justify-content: center;
@@ -398,21 +429,21 @@
             flex-wrap: wrap;
             margin-top: 40px;
         }
-
         .tech-badge {
             background: white;
             padding: 10px 24px;
-            border-radius: 50px;
-            font-weight: 500;
+            border-radius: 60px;
+            font-weight: 600;
+            background: linear-gradient(135deg, white, #f8fafc);
             color: var(--primary);
-            border: 1px solid var(--primary);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(99,102,241,0.2);
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
         }
-
         .tech-badge:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            color: var(--primary-dark);
         }
 
         /* CTA Section */
@@ -420,30 +451,24 @@
             background: var(--gradient);
             text-align: center;
             position: relative;
-            overflow: hidden;
+            border-radius: 48px 48px 0 0;
+            margin-top: 20px;
         }
-
         .cta::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="white" fill-opacity="0.05"/></svg>') repeat;
+            inset: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 70%);
             pointer-events: none;
         }
-
-        .cta .section-title,
-        .cta .section-subtitle {
+        .cta .section-title, .cta .section-subtitle {
             color: white;
         }
-
         .cta .btn-outline {
             border-color: white;
             color: white;
+            background: rgba(255,255,255,0.1);
         }
-
         .cta .btn-outline:hover {
             background: white;
             color: var(--primary);
@@ -451,161 +476,129 @@
 
         /* Footer */
         footer {
-            background: var(--dark);
-            color: var(--gray);
-            padding: 48px 0 24px;
+            background: #0a0f1e;
+            color: #a0aec0;
+            padding: 56px 0 24px;
+            border-top: 1px solid rgba(99,102,241,0.2);
         }
-
         .footer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 40px;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
         }
-
         .footer-col h4 {
             color: white;
             margin-bottom: 20px;
-            font-size: 1.1rem;
+            font-weight: 700;
         }
-
-        .footer-col p {
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-
-        .footer-col a {
-            color: var(--gray);
+        .footer-col p, .footer-col a {
+            color: #94a3b8;
             text-decoration: none;
             display: block;
             margin-bottom: 12px;
-            transition: color 0.3s ease;
+            transition: 0.2s;
         }
-
         .footer-col a:hover {
-            color: var(--primary);
+            color: var(--primary-light);
+            transform: translateX(4px);
         }
-
         .social-links {
             display: flex;
             gap: 16px;
             margin-top: 20px;
         }
-
         .social-links a {
             width: 40px;
             height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            border-radius: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: 0.2s;
         }
-
         .social-links a:hover {
             background: var(--primary);
             transform: translateY(-3px);
         }
-
         .footer-bottom {
             text-align: center;
-            padding-top: 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 28px;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
             .menu-btn {
-                display: block;
+                display: flex;
             }
-
             .nav-links {
                 position: fixed;
                 top: 70px;
                 left: -100%;
-                width: 100%;
+                width: 80%;
                 height: calc(100vh - 70px);
-                background: white;
+                background: rgba(255,255,255,0.98);
+                backdrop-filter: blur(20px);
                 flex-direction: column;
-                padding: 40px 20px;
+                padding: 40px 24px;
                 transition: left 0.3s ease;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                box-shadow: var(--shadow-lg);
+                border-radius: 0 24px 24px 0;
+                gap: 28px;
+                align-items: flex-start;
             }
-
             .nav-links.active {
                 left: 0;
             }
-
             .hero-wrap {
                 grid-template-columns: 1fr;
-                gap: 40px;
+                gap: 48px;
             }
-
             .hero {
                 padding: 120px 0 60px;
             }
-
             .hero-stats {
+                flex-wrap: wrap;
                 justify-content: center;
+                gap: 16px;
             }
-
-            section {
-                padding: 60px 0;
-            }
-
             .features-grid {
                 grid-template-columns: 1fr;
             }
-
             .footer-grid {
                 grid-template-columns: 1fr;
                 text-align: center;
             }
-
             .social-links {
                 justify-content: center;
             }
         }
-
         @media (max-width: 480px) {
             .hero-actions {
                 flex-direction: column;
             }
-
             .hero-actions .btn {
                 width: 100%;
             }
-
             .hero-stats {
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .container {
-                padding: 0 16px;
+                flex-direction: row;
+                flex-wrap: wrap;
             }
         }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* animations */
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
         }
-
         .animate-float {
-            animation: float 3s ease-in-out infinite;
+            animation: float 4s ease-in-out infinite;
+        }
+        .feature-card {
+            transition: all 0.3s;
         }
     </style>
 </head>
@@ -613,11 +606,11 @@
 
     <header class="top-nav" id="navbar">
         <div class="container">
-            <div class="inner">
-                <a class="brand" href="{{ route('landing') }}">{{ $app_name }}</a>
-                <div class="menu-btn" onclick="toggleMenu()">
-                    <i class="fas fa-bars"></i>
-                </div>
+    <div class="inner">
+        <a class="brand" href="{{ route('landing') }}">SPEMS</a>
+        <div class="menu-btn" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
                 <nav class="nav-links" id="navLinks">
                     <a href="#features">Features</a>
                     <a href="#about">About</a>
@@ -664,12 +657,12 @@
                     </div>
                     <div data-aos="fade-up" data-aos-delay="200" data-aos-duration="800">
                         <div class="hero-card animate-float">
-                            <h3><i class="fas fa-star" style="color: #f59e0b;"></i> What Visitors Can Do</h3>
+                            <h3><i class="fas fa-magic" style="background: var(--gradient); -webkit-background-clip:text; background-clip:text; color:transparent;"></i> Next-Gen AI Integration</h3>
                             <ul>
-                                <li><i class="fas fa-check-circle"></i> Explore project features and modules</li>
-                                <li><i class="fas fa-check-circle"></i> Understand the system architecture</li>
-                                <li><i class="fas fa-check-circle"></i> Access the secure dashboard via login</li>
-                                <li><i class="fas fa-check-circle"></i> Contact support for inquiries</li>
+                                <li><i class="fas fa-brain"></i> AI-powered facial recognition attendance</li>
+                                <li><i class="fas fa-chart-simple"></i> Real-time performance analytics</li>
+                                <li><i class="fas fa-robot"></i> Smart reporting & predictions</li>
+                                <li><i class="fas fa-shield-alt"></i> Role-based secure dashboards</li>
                             </ul>
                         </div>
                     </div>
@@ -677,61 +670,83 @@
             </div>
         </section>
 
-        <!-- Features Section -->
+        <!-- Features Section: Updated according to requirements -->
         <section id="features">
             <div class="container">
                 <h2 class="section-title" data-aos="fade-up">Powerful Features</h2>
-                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
-                    Everything you need to manage your educational institution efficiently
-                </p>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">AI-driven ecosystem for modern education</p>
                 <div class="features-grid">
+                    <!-- Admin Panel Card -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-                        <div class="feature-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h4>User Management</h4>
-                        <p>Manage students, teachers, parents, and administrators with role-based access control.</p>
+                        <div class="feature-icon"><i class="fas fa-user-shield"></i></div>
+                        <h4>Admin Panel</h4>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Manage users & subjects data</li>
+                            <li><i class="fas fa-microchip"></i> AI training for face recognition</li>
+                            <li><i class="fas fa-database"></i> System configuration & reporting</li>
+                        </ul>
+                        <div class="ai-badge"><i class="fas fa-brain"></i> AI Admin Core</div>
                     </div>
+                    <!-- Student Panel Card -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h4>Academic Tracking</h4>
-                        <p>Track student performance, manage marks, and generate comprehensive reports.</p>
+                        <div class="feature-icon"><i class="fas fa-user-graduate"></i></div>
+                        <h4>Student Panel</h4>
+                        <ul>
+                            <li><i class="fas fa-calendar-check"></i> View attendance records</li>
+                            <li><i class="fas fa-tasks"></i> View & submit tasks</li>
+                            <li><i class="fas fa-chart-line"></i> Check grades & performance reports</li>
+                        </ul>
+                        <div class="ai-badge"><i class="fas fa-chart-pie"></i> Real-time Insights</div>
                     </div>
+                    <!-- Teacher Panel Card -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
-                        <div class="feature-icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <h4>Timetable Management</h4>
-                        <p>Create and manage class schedules and exam timetables effortlessly.</p>
+                        <div class="feature-icon"><i class="fas fa-chalkboard-user"></i></div>
+                        <h4>Teacher Panel</h4>
+                        <ul>
+                            <li><i class="fas fa-camera"></i> Mark attendance (AI facial recognition)</li>
+                            <li><i class="fas fa-cloud-upload-alt"></i> Upload tasks & assignments</li>
+                            <li><i class="fas fa-star"></i> Assign grades & generate performance reports</li>
+                        </ul>
+                        <div class="ai-badge"><i class="fas fa-face-smile"></i> Smart Grading</div>
                     </div>
+                    <!-- Parent Panel Card -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
-                        <div class="feature-icon">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                        <h4>Fee Management</h4>
-                        <p>Handle fee collection, generate invoices, and track payment history.</p>
+                        <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                        <h4>Parent Panel</h4>
+                        <ul>
+                            <li><i class="fas fa-chart-simple"></i> Monitor real-time performance</li>
+                            <li><i class="fas fa-bell"></i> Attendance & grade alerts</li>
+                            <li><i class="fas fa-file-signature"></i> Track child’s academic journey</li>
+                        </ul>
+                        <div class="ai-badge"><i class="fas fa-eye"></i> Live Tracking</div>
                     </div>
+                    <!-- AI Attendance Special Card (extra highlight) -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
-                        <div class="feature-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <h4>Exam Management</h4>
-                        <p>Create exams, manage marksheets, and generate student report cards.</p>
+                        <div class="feature-icon"><i class="fas fa-fingerprint"></i></div>
+                        <h4>AI Attendance <span style="font-size:0.8rem;">⚡</span></h4>
+                        <ul>
+                            <li><i class="fas fa-video"></i> Automatic facial recognition marking</li>
+                            <li><i class="fas fa-clock"></i> Real-time presence tracking</li>
+                            <li><i class="fas fa-chart-line"></i> Attendance analytics dashboard</li>
+                        </ul>
+                        <div class="ai-badge"><i class="fas fa-microchip"></i> Powered by TensorFlow</div>
                     </div>
+                    <!-- Additional Analytics Module -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="700">
-                        <div class="feature-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <h4>Notifications</h4>
-                        <p>Send alerts and announcements to students and parents instantly.</p>
+                        <div class="feature-icon"><i class="fas fa-chart-column"></i></div>
+                        <h4>Performance Analytics</h4>
+                        <ul>
+                            <li><i class="fas fa-chart-gantt"></i> Student progress prediction</li>
+                            <li><i class="fas fa-file-alt"></i> Automated report generation</li>
+                            <li><i class="fas fa-envelope-open-text"></i> Smart notifications & insights</li>
+                        </ul>
+                        <div class="ai-badge"><i class="fas fa-chart-line"></i> AI Predictive Models</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- About Section -->
+        <!-- About Section (unchanged concepts) -->
         <section id="about" class="section-alt">
             <div class="container">
                 <h2 class="section-title" data-aos="fade-up">About This Project</h2>
@@ -750,6 +765,7 @@
                         <span class="tech-badge">Bootstrap</span>
                         <span class="tech-badge">jQuery</span>
                         <span class="tech-badge">REST API</span>
+                        <span class="tech-badge">Face Recognition AI</span>
                     </div>
                 </div>
             </div>
@@ -812,93 +828,43 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Scripts (Same logic, untouched) -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100
-        });
-
-        // Mobile Menu Toggle
-        function toggleMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
-        }
-
-        // Navbar Scroll Effect
+        AOS.init({ duration: 800, once: true, offset: 100 });
+        function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
         window.addEventListener('scroll', () => {
             const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
         });
-
-        // Counter Animation
         const counters = document.querySelectorAll('.counter');
         const speed = 200;
-
         const animateCounters = () => {
             counters.forEach(counter => {
                 const target = +counter.getAttribute('data-target');
                 const count = +counter.innerText;
                 const increment = target / speed;
-                
-                if (count < target) {
-                    counter.innerText = Math.ceil(count + increment);
-                    setTimeout(animateCounters, 1);
-                } else {
-                    counter.innerText = target;
-                }
+                if (count < target) { counter.innerText = Math.ceil(count + increment); setTimeout(animateCounters, 1); } 
+                else { counter.innerText = target; }
             });
         };
-
-        // Intersection Observer for counters
-        const observerOptions = {
-            threshold: 0.5
-        };
-
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounters();
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
+            entries.forEach(entry => { if(entry.isIntersecting) { animateCounters(); observer.unobserve(entry.target); } });
+        }, { threshold: 0.5 });
         const statsSection = document.querySelector('.hero-stats');
-        if (statsSection) {
-            observer.observe(statsSection);
-        }
-
-        // Smooth Scroll
+        if(statsSection) observer.observe(statsSection);
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    if (window.innerWidth <= 768) {
-                        document.getElementById('navLinks').classList.remove('active');
-                    }
-                }
+                if(target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); if(window.innerWidth <= 768) document.getElementById('navLinks').classList.remove('active'); }
             });
         });
-
-        // Close mobile menu when clicking outside
         document.addEventListener('click', function(e) {
             const navLinks = document.getElementById('navLinks');
             const menuBtn = document.querySelector('.menu-btn');
-            if (window.innerWidth <= 768 && navLinks.classList.contains('active')) {
-                if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) {
-                    navLinks.classList.remove('active');
-                }
-            }
+            if(window.innerWidth <= 768 && navLinks.classList.contains('active') && !navLinks.contains(e.target) && !menuBtn.contains(e.target)) navLinks.classList.remove('active');
         });
     </script>
 </body>
