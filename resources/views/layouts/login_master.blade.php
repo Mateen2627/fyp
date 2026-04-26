@@ -6,848 +6,406 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Student Management and Evaluation System - Comprehensive educational management platform">
+    <meta name="description" content="NeoEdu - Student Management and Evaluation System">
     <meta name="author" content="Your Institution Name">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    
-    <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    
-    <!-- Theme Color for Mobile Browsers -->
-    <meta name="theme-color" content="#4e73df">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>{{ config('app.name', 'NeoEdu') }} | Secure Portal</title>
 
-    <title>{{ config('app.name', 'Student Management and Evaluation System') }}</title>
-
-    @include('partials.login.inc_top')
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* ========================================
-           CSS RESET & VARIABLES
-        ======================================== */
-        :root {
-            --primary: #4e73df;
-            --primary-dark: #224abe;
-            --primary-light: #6b8eff;
-            --secondary: #1cc88a;
-            --secondary-dark: #17a673;
-            --danger: #e74a3b;
-            --warning: #f6c23e;
-            --info: #36b9cc;
-            --dark: #1a1c23;
-            --gray: #858796;
-            --light: #f8f9fc;
-            --gradient-primary: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-            --gradient-secondary: linear-gradient(135deg, #1cc88a 0%, #13855e 100%);
-            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            
-            /* Mobile breakpoints */
-            --mobile: 576px;
-            --tablet: 768px;
-            --desktop: 992px;
-            --large: 1200px;
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
-
-        body {
-            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            color: #2c3e50;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf5 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-            width: 100%;
-            position: relative;
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            overflow: hidden;
+            height: 100vh;
         }
-
-        /* ========================================
-           RESPONSIVE TYPOGRAPHY
-        ======================================== */
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        
+        .brand-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
         }
-
-        @media (max-width: 768px) {
-            html {
-                font-size: 14px;
+        
+        .accent-border {
+            border-left: 4px solid #ffffff;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #f472b6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+        
+        /* Floating animation for illustrations */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
             }
         }
-
-        @media (max-width: 576px) {
-            html {
-                font-size: 13px;
-            }
+        
+        .float-animation {
+            animation: float 4s ease-in-out infinite;
         }
-
-        /* ========================================
-           CUSTOM SCROLLBAR
-        ======================================== */
+        
+        .float-animation-delayed {
+            animation: float 5s ease-in-out infinite 1s;
+        }
+        
+        .float-animation-slow {
+            animation: float 6s ease-in-out infinite 0.5s;
+        }
+        
+        /* Custom focus ring */
+        .focus-ring-custom:focus {
+            ring: 2px solid #6366f1;
+            ring-offset: 2px;
+            outline: none;
+        }
+        
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         
-        @media (min-width: 768px) {
-            ::-webkit-scrollbar {
-                width: 10px;
-                height: 10px;
-            }
-        }
-        
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
-            border-radius: 10px;
         }
         
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #4e73df, #224abe);
+            background: #6366f1;
             border-radius: 10px;
-            transition: all 0.3s ease;
         }
         
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #224abe, #4e73df);
-        }
-
-        /* ========================================
-           SELECTION STYLING
-        ======================================== */
-        ::selection {
-            background: rgba(78, 115, 223, 0.2);
-            color: #2c3e50;
-        }
-
-        /* ========================================
-           FOCUS STATES FOR ACCESSIBILITY
-        ======================================== */
-        :focus-visible {
-            outline: 2px solid rgba(78, 115, 223, 0.5);
-            outline-offset: 2px;
-            border-radius: 4px;
-        }
-
-        /* ========================================
-           PAGE TRANSITION LOADER
-        ======================================== */
-        .page-transition {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, #4e73df, #1cc88a, #36b9cc, #4e73df);
-            background-size: 300% 100%;
-            animation: gradientShift 2s ease infinite;
-            z-index: 10000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
+            background: #8b5cf6;
         }
         
-        .page-transition.loading {
-            opacity: 1;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* ========================================
-           TOAST NOTIFICATIONS - MOBILE FRIENDLY
-        ======================================== */
-        .toast-container {
-            position: fixed;
-            top: 70px;
-            right: 16px;
-            left: 16px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 400px;
-            margin: 0 auto;
-            pointer-events: none;
-        }
-        
-        @media (min-width: 768px) {
-            .toast-container {
-                left: auto;
-                right: 20px;
-                max-width: 380px;
-            }
-        }
-        
-        .toast {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-            border-left: 4px solid;
-            animation: slideInRight 0.3s ease;
-            pointer-events: auto;
-            overflow: hidden;
-        }
-        
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .toast.fade-out {
-            animation: fadeOut 0.3s ease forwards;
-        }
-        
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-        }
-        
-        .toast.bg-success { border-left-color: #1cc88a; }
-        .toast.bg-error { border-left-color: #e74a3b; }
-        .toast.bg-warning { border-left-color: #f6c23e; }
-        .toast.bg-info { border-left-color: #36b9cc; }
-
-        /* ========================================
-           BACK TO TOP BUTTON - MOBILE OPTIMIZED
-        ======================================== */
-        .back-to-top {
-            position: fixed;
-            bottom: 16px;
-            right: 16px;
-            width: 44px;
-            height: 44px;
-            background: var(--gradient-primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
-            z-index: 99;
-            border: none;
-            font-size: 18px;
-            touch-action: manipulation;
-        }
-        
-        @media (min-width: 768px) {
-            .back-to-top {
-                bottom: 30px;
-                right: 30px;
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-        }
-        
-        .back-to-top.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .back-to-top:active {
-            transform: scale(0.95);
-        }
-        
-        @media (hover: hover) {
-            .back-to-top:hover {
-                transform: translateY(-5px) scale(1.05);
-                box-shadow: 0 8px 25px rgba(78, 115, 223, 0.5);
-            }
-        }
-
-        /* ========================================
-           MAINTENANCE BANNER
-        ======================================== */
-        .maintenance-banner {
-            background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%);
-            color: #2c3e50;
-            text-align: center;
-            padding: 12px 16px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            position: relative;
-            z-index: 1000;
-            animation: slideDown 0.5s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                transform: translateY(-100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .maintenance-banner i {
-            margin-right: 8px;
-        }
-
-        /* ========================================
-           LOADING SPINNER
-        ======================================== */
+        /* Loading spinner */
         .loading-spinner {
             display: inline-block;
             width: 18px;
             height: 18px;
-            border: 2px solid rgba(78, 115, 223, 0.2);
+            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border-top-color: #4e73df;
+            border-top-color: white;
             animation: spin 0.8s linear infinite;
         }
         
         @keyframes spin {
-            from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-
-        /* ========================================
-           MAIN CONTENT AREA - RESPONSIVE
-        ======================================== */
-        main {
-            flex: 1;
-            padding: 16px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
+        
+        /* Illustration container */
+        .illustration-container {
             position: relative;
-            z-index: 1;
-            animation: fadeInUp 0.5s ease-out;
+            min-height: 160px;
+            margin: 30px 0;
         }
         
-        @media (min-width: 768px) {
-            main {
-                padding: 20px;
-            }
-        }
-        
-        @media (min-width: 1200px) {
-            main {
-                padding: 30px;
-            }
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ========================================
-           CARD STYLES - RESPONSIVE
-        ======================================== */
-        .card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-        
-        @media (min-width: 768px) {
-            .card {
-                margin-bottom: 20px;
-            }
-        }
-        
-        @media (hover: hover) {
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 1rem 2.5rem 0 rgba(58, 59, 69, 0.2);
-            }
-        }
-        
-        /* Touch feedback for cards on mobile */
-        .card:active {
-            transform: scale(0.98);
-            transition: transform 0.1s ease;
-        }
-
-        /* ========================================
-           BUTTON STYLES - TOUCH FRIENDLY
-        ======================================== */
-        .btn {
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            padding: 10px 20px;
-            font-size: 0.875rem;
-            border-radius: 8px;
-            touch-action: manipulation;
-        }
-        
-        @media (min-width: 768px) {
-            .btn {
-                padding: 12px 24px;
-                font-size: 0.95rem;
-            }
-        }
-        
-        .btn:active {
-            transform: scale(0.97);
-        }
-        
-        /* Ripple effect */
-        .btn::before {
-            content: '';
+        .floating-shape {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+            background: rgba(255, 255, 255, 0.1);
+            filter: blur(20px);
         }
         
-        .btn:active::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        /* ========================================
-           NAVBAR - FULLY RESPONSIVE
-        ======================================== */
-        .navbar {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.98) !important;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-            padding: 12px 16px;
+        /* Feature cards */
+        .feature-card {
+            transition: all 0.3s ease;
         }
         
-        @media (min-width: 768px) {
-            .navbar {
-                padding: 16px 24px;
-            }
+        .feature-card:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.15);
         }
         
-        .navbar-brand {
-            font-weight: 800;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-size: 1.25rem;
-            white-space: normal;
-            word-break: break-word;
+        /* Left side content - no scroll */
+        .left-side-content {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
         }
         
-        @media (min-width: 768px) {
-            .navbar-brand {
-                font-size: 1.5rem;
-            }
-        }
-        
-        /* Mobile menu improvements */
-        .navbar-toggler {
-            padding: 8px 12px;
-            border: none;
-            background: transparent;
-            touch-action: manipulation;
-        }
-        
-        .navbar-collapse {
-            max-height: 80vh;
+        /* Scrollable right side */
+        .right-side-scroll {
             overflow-y: auto;
+            height: 100vh;
         }
         
-        @media (max-width: 767.98px) {
-            .navbar-nav {
-                padding: 16px 0;
-            }
-            
-            .nav-item {
-                margin: 4px 0;
-            }
-            
-            .nav-link {
-                padding: 12px 16px !important;
-                border-radius: 8px;
-            }
+        /* Hide scrollbar for cleaner look on left side */
+        .left-side-content::-webkit-scrollbar {
+            display: none;
         }
-
-        /* ========================================
-           FOOTER - RESPONSIVE
-        ======================================== */
-        footer {
-            background: linear-gradient(135deg, #1a1c23 0%, #2d3748 100%);
-            color: #cbd5e0;
-            padding: 32px 16px 20px;
-            margin-top: auto;
+        
+        /* Static logo - no animation */
+        .logo-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .logo-icon:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Custom brand text styling */
+        .brand-text {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
         
         @media (min-width: 768px) {
-            footer {
-                padding: 40px 24px 24px;
-            }
-        }
-        
-        footer a {
-            color: #cbd5e0;
-            transition: color 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            padding: 4px 0;
-        }
-        
-        footer a:active {
-            color: #4e73df;
-        }
-        
-        @media (hover: hover) {
-            footer a:hover {
-                color: #4e73df;
-            }
-        }
-        
-        /* Footer grid for responsive layout */
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        @media (min-width: 768px) {
-            .footer-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 32px;
-            }
-        }
-        
-        @media (min-width: 992px) {
-            .footer-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        /* ========================================
-           ANIMATIONS
-        ======================================== */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease forwards;
-        }
-        
-        .slide-up {
-            animation: slideUp 0.5s ease forwards;
-        }
-
-        /* ========================================
-           UTILITY CLASSES
-        ======================================== */
-        .text-gradient {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .d-none {
-            display: none !important;
-        }
-        
-        /* Responsive spacing utilities */
-        .mt-1 { margin-top: 0.25rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        .mt-3 { margin-top: 1rem; }
-        .mt-4 { margin-top: 1.5rem; }
-        
-        @media (min-width: 768px) {
-            .mt-md-0 { margin-top: 0; }
-            .mt-md-2 { margin-top: 0.5rem; }
-            .mt-md-3 { margin-top: 1rem; }
-            .mt-md-4 { margin-top: 1.5rem; }
-        }
-
-        /* ========================================
-           PRINT STYLES
-        ======================================== */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            
-            body {
-                background: white;
-                padding: 20px;
-            }
-            
-            .card {
-                box-shadow: none !important;
-                border: 1px solid #ddd !important;
-                break-inside: avoid;
-            }
-            
-            a {
-                text-decoration: none !important;
-                color: black !important;
-            }
-        }
-
-        /* ========================================
-           SAFE AREA INSETS FOR NOTCH DEVICES
-        ======================================== */
-        @supports (padding: max(0px)) {
-            .toast-container {
-                top: max(70px, env(safe-area-inset-top));
-                right: max(16px, env(safe-area-inset-right));
-                left: max(16px, env(safe-area-inset-left));
-            }
-            
-            .back-to-top {
-                bottom: max(16px, env(safe-area-inset-bottom));
-                right: max(16px, env(safe-area-inset-right));
+            .brand-text {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 
-<body class="d-flex flex-column min-vh-100">
-    <!-- Page Transition Indicator -->
-    <div class="page-transition" id="pageTransition"></div>
-    
-    <!-- Toast Notifications Container -->
-    <div class="toast-container" id="toastContainer"></div>
-    
-    <!-- Maintenance Mode Banner (if enabled) -->
-    @if(config('app.maintenance_mode', false))
-    <div class="maintenance-banner no-print">
-        <i class="fas fa-tools"></i>
-        System is under maintenance. Some features may be unavailable.
+<body class="bg-slate-50 text-slate-900 font-['Plus_Jakarta_Sans'] overflow-hidden">
+
+    <div class="flex h-screen">
+        <!-- Left Side - Brand Section with Animated Illustrations - NO SCROLL -->
+        <div class="hidden lg:flex w-5/12 brand-gradient flex-col justify-between p-12 text-white relative left-side-content">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#ffffff 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+            
+            <!-- Animated Floating Background Shapes -->
+            <div class="floating-shape w-64 h-64 -top-20 -right-20"></div>
+            <div class="floating-shape w-96 h-96 -bottom-40 -left-20 bg-white/5"></div>
+            
+            <!-- Top Section with Static Logo -->
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center shadow-lg logo-icon">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <span class="brand-text font-bold tracking-tight">NeoEdu</span>
+                </div>
+            </div>
+            
+            <!-- Middle Section - All content fits without scroll -->
+            <div class="relative z-10 flex-1 flex flex-col justify-center">
+                <h1 class="text-4xl font-bold leading-tight mb-4">
+                    Student Performance Evaluation<br>
+                    & Management System.
+                </h1>
+                <p class="text-white/80 text-base leading-relaxed mb-6">
+                    A high-performance management system designed for real-time tracking with data-driven academic intelligence
+                </p>
+                
+                <!-- Animated Illustrations below the text -->
+                <div class="illustration-container">
+                    <!-- Floating Student Illustration -->
+                    <div class="float-animation absolute left-0 top-0">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
+                            <i class="fas fa-user-graduate text-3xl text-white/90"></i>
+                            <div class="mt-1 text-xs text-white/70">Smart Learning</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Analytics Illustration -->
+                    <div class="float-animation-delayed absolute right-0 top-0">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
+                            <i class="fas fa-chart-line text-3xl text-white/90"></i>
+                            <div class="mt-1 text-xs text-white/70">Analytics</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating AI Illustration -->
+                    <div class="float-animation-slow absolute left-20 bottom-0">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
+                            <i class="fas fa-microchip text-3xl text-white/90"></i>
+                            <div class="mt-1 text-xs text-white/70">AI Powered</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Security Illustration -->
+                    <div class="float-animation absolute right-16 bottom-0">
+                        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20">
+                            <i class="fas fa-shield-alt text-3xl text-white/90"></i>
+                            <div class="mt-1 text-xs text-white/70">Secure</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="space-y-3 mt-4">
+                    <div class="feature-card p-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 accent-border">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-face-smile-beam text-white text-lg"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-white">AI-Powered Attendance</p>
+                                <p class="text-xs text-white/60">Face-recognition & biometric integration ready</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-card p-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-chart-line text-white text-lg"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-white">Advanced Analytics</p>
+                                <p class="text-xs text-white/60">Real-time performance tracking & insights</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-card p-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-shield-alt text-white text-lg"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-white">Secure Platform</p>
+                                <p class="text-xs text-white/60">Enterprise-grade security & data protection</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Section - Version Info -->
+            <div class="relative z-10 mt-6">
+                <p class="text-xs text-white/40 font-medium uppercase tracking-widest">
+                    System Version 3.0 // {{ now()->year }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side - Login Form (Scrollable) -->
+        <div class="w-full lg:w-7/12 flex items-center justify-center p-6 md:p-8 bg-white right-side-scroll">
+            <div class="w-full max-w-md">
+                <!-- Mobile Logo -->
+                <div class="lg:hidden text-center mb-8">
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <div class="h-10 w-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-graduation-cap text-white text-lg"></i>
+                        </div>
+                        <span class="text-2xl font-bold tracking-tight text-slate-900">NeoEdu</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Welcome Back</h2>
+                    <p class="text-slate-500 text-sm mt-1">Sign in to continue</p>
+                </div>
+
+                <!-- Desktop Header -->
+                <div class="hidden lg:block text-center mb-8">
+                    <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Secure Portal Access</h2>
+                    <p class="text-slate-500 mt-2">Log in to manage student performance data</p>
+                </div>
+
+                <!-- Login Form -->
+                <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                    @csrf
+
+                    <!-- Email/Username Field -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-700">System ID / Email</label>
+                        <div class="relative group">
+                            <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                            <input type="text" name="identity" value="{{ old('identity') }}" placeholder="Enter your unique ID or email" 
+                                class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all @error('identity') border-red-500 @enderror"
+                                required autofocus>
+                        </div>
+                        @error('identity')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-semibold text-slate-700">Access Key</label>
+                            <a href="{{ route('password.request') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Forgot?</a>
+                        </div>
+                        <div class="relative group">
+                            <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                            <input type="password" name="password" id="password" placeholder="••••••••" 
+                                class="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all @error('password') border-red-500 @enderror"
+                                required>
+                            <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        @error('password')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center justify-between py-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" {{ old('remember') ? 'checked' : '' }}>
+                            <span class="text-sm text-slate-600">Remember this device</span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button with Gradient -->
+                    <button type="submit" class="w-full btn-gradient text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-4" id="submitBtn">
+                        Authenticate <i class="fas fa-arrow-right-long text-xs opacity-70"></i>
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <footer class="mt-10 text-center">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-widest">
+                        <i class="fas fa-shield-alt mr-1"></i> Protected by Secure-Layer Encryption
+                    </p>
+                </footer>
+            </div>
+        </div>
     </div>
-    @endif
-    
-    <!-- Header Section -->
-    @include('partials.login.header')
-    
-    <!-- Main Content Area -->
-    <main class="flex-grow-1">
-        @yield('content')
-    </main>
-    
-    <!-- Footer Section -->
-    @include('partials.login.footer')
-    
-    <!-- Back to Top Button -->
-    <button class="back-to-top no-print" id="backToTop" aria-label="Back to top">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-    
+
     <script>
         (function() {
             'use strict';
             
-            // Page transition indicator
-            const pageTransition = document.getElementById('pageTransition');
+            // Password visibility toggle
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
             
-            if (pageTransition) {
-                pageTransition.classList.add('loading');
-                setTimeout(function() {
-                    pageTransition.classList.remove('loading');
-                }, 500);
-            }
-            
-            // Back to top functionality
-            const backToTop = document.getElementById('backToTop');
-            
-            if (backToTop) {
-                window.addEventListener('scroll', function() {
-                    if (window.pageYOffset > 300) {
-                        backToTop.classList.add('visible');
-                    } else {
-                        backToTop.classList.remove('visible');
-                    }
-                });
-                
-                backToTop.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
                 });
             }
             
-            // Toast notification system
-            window.showToast = function(message, type = 'info', duration = 5000) {
-                const container = document.getElementById('toastContainer');
-                if (!container) return;
-                
-                const toast = document.createElement('div');
-                toast.className = `toast bg-${type}`;
-                toast.setAttribute('role', 'alert');
-                
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    warning: 'fa-exclamation-triangle',
-                    info: 'fa-info-circle'
-                };
-                
-                const bgColors = {
-                    success: '#1cc88a',
-                    error: '#e74a3b',
-                    warning: '#f6c23e',
-                    info: '#36b9cc'
-                };
-                
-                toast.innerHTML = `
-                    <div class="toast-body p-3" style="background: white;">
-                        <div class="d-flex align-items-start">
-                            <div class="flex-shrink-0 me-3">
-                                <i class="fas ${icons[type] || icons.info}" style="color: ${bgColors[type] || bgColors.info}; font-size: 18px;"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <strong class="d-block mb-1" style="color: ${bgColors[type] || bgColors.info};">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
-                                <p class="mb-0 text-dark" style="font-size: 0.875rem;">${message}</p>
-                            </div>
-                            <button type="button" class="btn-close ms-2" data-dismiss="toast" aria-label="Close" style="font-size: 12px; background: transparent; border: none; cursor: pointer;">&times;</button>
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(toast);
-                
-                // Auto remove
-                setTimeout(function() {
-                    toast.classList.add('fade-out');
-                    setTimeout(function() {
-                        if (toast.parentNode) toast.parentNode.removeChild(toast);
-                    }, 300);
-                }, duration);
-                
-                // Close button
-                const closeBtn = toast.querySelector('.btn-close');
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', function() {
-                        toast.classList.add('fade-out');
-                        setTimeout(() => toast.remove(), 300);
-                    });
-                }
-            };
+            // Form loading state
+            const form = document.querySelector('form');
+            const submitBtn = document.getElementById('submitBtn');
             
-            // Offline/online detection
-            window.addEventListener('offline', function() {
-                window.showToast('You are offline. Some features may be unavailable.', 'warning');
-            });
-            
-            window.addEventListener('online', function() {
-                window.showToast('You are back online!', 'success');
-            });
-            
-            // Form loading states
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
+            if (form && submitBtn) {
                 form.addEventListener('submit', function() {
-                    const submitBtn = this.querySelector('[type="submit"]');
-                    if (submitBtn && !submitBtn.classList.contains('no-loading')) {
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<span class="loading-spinner me-2"></span> Processing...';
-                        submitBtn.disabled = true;
-                        submitBtn.dataset.originalText = originalText;
-                    }
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<span class="loading-spinner mr-2"></span> Authenticating...';
+                    submitBtn.disabled = true;
+                    submitBtn.dataset.originalText = originalText;
                 });
-            });
+            }
             
-            // Handle escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const openModals = document.querySelectorAll('.modal.show');
-                    openModals.forEach(modal => {
-                        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                            const bsModal = bootstrap.Modal.getInstance(modal);
-                            if (bsModal) bsModal.hide();
-                        }
-                    });
-                }
-            });
-            
-            // Active navigation state
-            const currentPath = window.location.pathname;
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                }
-            });
-            
-            // Touch feedback improvements
-            const clickableElements = document.querySelectorAll('.btn, .card, .nav-link, .dropdown-item');
-            clickableElements.forEach(el => {
-                el.addEventListener('touchstart', function() {
-                    this.style.opacity = '0.7';
-                });
-                el.addEventListener('touchend', function() {
-                    this.style.opacity = '1';
-                });
-            });
-            
-            console.log('Page fully loaded - responsive layout ready');
+            console.log('NeoEdu Login Page Loaded');
         })();
     </script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 </body>
 
 </html>

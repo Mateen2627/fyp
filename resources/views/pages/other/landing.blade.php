@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>{{ $app_name }} | Smart Student Management System</title>
+    <title>NeoEdu | Smart Student Management System</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -331,7 +331,7 @@
             font-size: 1.1rem;
         }
 
-        /* Features Grid - redesigned accordion style cards but keeping grid for clarity, but enhanced */
+        /* Features Grid */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -606,11 +606,11 @@
 
     <header class="top-nav" id="navbar">
         <div class="container">
-    <div class="inner">
-        <a class="brand" href="{{ route('landing') }}">SPEMS</a>
-        <div class="menu-btn" onclick="toggleMenu()">
-            <i class="fas fa-bars"></i>
-        </div>
+            <div class="inner">
+                <a class="brand" href="{{ route('landing') }}">NeoEdu</a>
+                <div class="menu-btn" onclick="toggleMenu()">
+                    <i class="fas fa-bars"></i>
+                </div>
                 <nav class="nav-links" id="navLinks">
                     <a href="#features">Features</a>
                     <a href="#about">About</a>
@@ -627,10 +627,9 @@
             <div class="container">
                 <div class="hero-wrap">
                     <div data-aos="fade-up" data-aos-duration="800">
-                        <h1>Smart Student Management System</h1>
+                        <h1>Student Performance Evaluation & Management System.</h1>
                         <p>
-                            Welcome to <strong>{{ $app_name }}</strong> — a comprehensive platform designed to streamline 
-                            student information, academic records, fee management, and institutional operations.
+                            Welcome to <strong>NeoEdu</strong> your all-in-one platform for managing student information, academic records, fee operations, and institutional workflows with efficiency and ease.
                         </p>
                         <div class="hero-actions">
                             <a class="btn btn-primary btn-large" href="{{ route('login') }}">
@@ -670,7 +669,7 @@
             </div>
         </section>
 
-        <!-- Features Section: Updated according to requirements -->
+        <!-- Features Section -->
         <section id="features">
             <div class="container">
                 <h2 class="section-title" data-aos="fade-up">Powerful Features</h2>
@@ -716,20 +715,20 @@
                         <ul>
                             <li><i class="fas fa-chart-simple"></i> Monitor real-time performance</li>
                             <li><i class="fas fa-bell"></i> Attendance & grade alerts</li>
-                            <li><i class="fas fa-file-signature"></i> Track child’s academic journey</li>
+                            <li><i class="fas fa-file-signature"></i> Track child's academic journey</li>
                         </ul>
                         <div class="ai-badge"><i class="fas fa-eye"></i> Live Tracking</div>
                     </div>
-                    <!-- AI Attendance Special Card (extra highlight) -->
+                    <!-- AI Attendance Special Card -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
                         <div class="feature-icon"><i class="fas fa-fingerprint"></i></div>
-                        <h4>AI Attendance <span style="font-size:0.8rem;">⚡</span></h4>
+                        <h4>AI Attendance </h4>
                         <ul>
                             <li><i class="fas fa-video"></i> Automatic facial recognition marking</li>
                             <li><i class="fas fa-clock"></i> Real-time presence tracking</li>
                             <li><i class="fas fa-chart-line"></i> Attendance analytics dashboard</li>
                         </ul>
-                        <div class="ai-badge"><i class="fas fa-microchip"></i> Powered by TensorFlow</div>
+                        <div class="ai-badge"><i class="fas fa-microchip"></i> Powered by Python</div>
                     </div>
                     <!-- Additional Analytics Module -->
                     <div class="feature-card" data-aos="fade-up" data-aos-delay="700">
@@ -740,25 +739,21 @@
                             <li><i class="fas fa-file-alt"></i> Automated report generation</li>
                             <li><i class="fas fa-envelope-open-text"></i> Smart notifications & insights</li>
                         </ul>
-                        <div class="ai-badge"><i class="fas fa-chart-line"></i> AI Predictive Models</div>
+                        <div class="ai-badge"><i class="fas fa-chart-line"></i> By Reports</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- About Section (unchanged concepts) -->
+        <!-- About Section -->
         <section id="about" class="section-alt">
             <div class="container">
                 <h2 class="section-title" data-aos="fade-up">About This Project</h2>
                 <div class="about-content">
                     <p data-aos="fade-up" data-aos-delay="100">
-                        <strong>{{ $app_name }}</strong> is a comprehensive Student Management System developed as a final year project. 
-                        It aims to digitize and streamline all academic and administrative operations of educational institutions.
+                        <strong>NeoEdu</strong>  an intelligent Student Management System designed to digitize and streamline academic and administrative operations for modern educational institutions. Built with modern web technologies, NeoEdu delivers a secure, scalable, and user-friendly platform that centralizes the management of students, teachers, examinations, fees, and academic records in one unified solution.
                     </p>
-                    <p data-aos="fade-up" data-aos-delay="200">
-                        Built with modern web technologies, this system provides a secure, scalable, and user-friendly platform 
-                        for managing students, teachers, exams, fees, and academic records efficiently.
-                    </p>
+                    
                     <div class="tech-stack" data-aos="fade-up" data-aos-delay="300">
                         <span class="tech-badge">Laravel</span>
                         <span class="tech-badge">MySQL</span>
@@ -790,7 +785,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <h4>{{ $app_name }}</h4>
+                    <h4>NeoEdu</h4>
                     <p>A comprehensive Student Management System for modern educational institutions.</p>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -807,8 +802,8 @@
                 </div>
                 <div class="footer-col">
                     <h4>Contact</h4>
-                    <a href="mailto:support@{{ strtolower(str_replace(' ', '', $app_name)) }}.com">
-                        <i class="fas fa-envelope"></i> support@{{ strtolower(str_replace(' ', '', $app_name)) }}.com
+                    <a href="mailto:support@neoedu.com">
+                        <i class="fas fa-envelope"></i> support@neoedu.com
                     </a>
                     @if(!empty($contact_phone))
                     <a href="tel:{{ preg_replace('/\s+/', '', $contact_phone) }}">
@@ -823,12 +818,12 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>© {{ now()->year }} {{ $app_name }}. All rights reserved. | Final Year Project</p>
+                <p>© {{ now()->year }} NeoEdu. All rights reserved. | Final Year Project</p>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts (Same logic, untouched) -->
+    <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 800, once: true, offset: 100 });
