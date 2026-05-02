@@ -4,7 +4,7 @@
 <div class="sidebar sidebar-dark sidebar-main sidebar-expand-md">
     <div class="sidebar-mobile-toggler text-center">
         <a href="#" class="sidebar-mobile-main-toggle"><i class="fas fa-arrow-left"></i></a>
-        <span class="sidebar-brand">SPAMS</span>
+        <span class="sidebar-brand">NeoEdu</span>
         <a href="#" class="sidebar-mobile-expand"><i class="fas fa-expand"></i><i class="fas fa-compress"></i></a>
     </div>
 
@@ -101,6 +101,7 @@
     .sidebar-dark {
         background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
     }
     
     /* Sidebar Brand */
@@ -131,7 +132,7 @@
     
     .sidebar-mobile-toggler a:hover {
         color: white;
-        transform: scale(1.1);
+        transform: scale(1.05);
     }
     
     /* User Profile Section */
@@ -217,15 +218,17 @@
         flex: 1;
     }
     
-    /* Hover Effects */
-    .nav-sidebar .nav-link:hover {
-        background: rgba(99, 102, 241, 0.15);
-        color: white;
-    }
-    
-    .nav-sidebar .nav-link:hover i {
-        color: #a78bfa;
-        transform: translateX(2px);
+    /* Hover Effects - Desktop only */
+    @media (min-width: 769px) {
+        .nav-sidebar .nav-link:hover {
+            background: rgba(99, 102, 241, 0.15);
+            color: white;
+        }
+        
+        .nav-sidebar .nav-link:hover i {
+            color: #a78bfa;
+            transform: translateX(2px);
+        }
     }
     
     /* Active Link */
@@ -238,77 +241,271 @@
         color: white;
     }
     
-    /* Scrollbar */
-    .sidebar-content {
-        height: 100vh;
-        overflow-y: auto;
+    /* Scrollbar - Desktop only */
+    @media (min-width: 769px) {
+        .sidebar-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 4px;
+        }
     }
     
-    .sidebar-content::-webkit-scrollbar {
-        width: 4px;
+    /* Profile image hover - Desktop only */
+    @media (min-width: 769px) {
+        .sidebar-user img {
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .sidebar-user img:hover {
+            transform: scale(1.05);
+            border-color: #a78bfa;
+        }
+        
+        /* Settings icon hover */
+        .sidebar-user .ml-3 a {
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-user .ml-3 a:hover {
+            transform: rotate(90deg);
+        }
     }
     
-    .sidebar-content::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 4px;
-    }
+    /* ========================================
+       RESPONSIVE STYLES - MOBILE FIRST
+    ======================================== */
     
-    .sidebar-content::-webkit-scrollbar-thumb {
-        background: rgba(99, 102, 241, 0.5);
-        border-radius: 4px;
-    }
-    
-    /* Mobile Responsive */
+    /* Tablet & Mobile Styles */
     @media (max-width: 768px) {
         .sidebar-dark {
-            width: 100%;
+            width: 280px;
+            position: fixed;
+            left: -280px;
+            top: 0;
+            bottom: 0;
+            z-index: 1050;
+            transition: left 0.3s ease;
+        }
+        
+        .sidebar-dark.sidebar-open {
+            left: 0;
+        }
+        
+        /* Overlay when sidebar is open */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
         }
         
         .sidebar-mobile-toggler {
-            padding: 14px 16px;
+            padding: 12px 16px;
+        }
+        
+        .sidebar-mobile-toggler .sidebar-brand {
+            font-size: 16px;
+        }
+        
+        .sidebar-mobile-toggler a {
+            font-size: 14px;
         }
         
         .sidebar-user .card-body {
-            padding: 16px;
+            padding: 14px;
+        }
+        
+        .sidebar-user .media {
+            gap: 10px;
         }
         
         .sidebar-user img {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
+        }
+        
+        .sidebar-user .media-title {
+            font-size: 13px;
+        }
+        
+        .sidebar-user .opacity-75 {
+            font-size: 11px;
         }
         
         .nav-sidebar {
-            padding: 8px 8px;
+            padding: 8px 10px;
         }
         
         .nav-sidebar .nav-link {
             padding: 10px 12px;
+            border-radius: 10px;
+            gap: 12px;
         }
         
         .nav-sidebar .nav-link i {
             font-size: 16px;
             width: 22px;
         }
+        
+        .nav-sidebar .nav-link span {
+            font-size: 13px;
+        }
+        
+        /* Active touch feedback for mobile */
+        .nav-sidebar .nav-link:active {
+            background: rgba(99, 102, 241, 0.3);
+            transform: scale(0.98);
+        }
     }
     
-    /* Profile image hover */
-    .sidebar-user img {
-        transition: all 0.3s ease;
-        border: 2px solid rgba(255, 255, 255, 0.2);
+    /* Small Mobile Devices */
+    @media (max-width: 480px) {
+        .sidebar-dark {
+            width: 260px;
+            left: -260px;
+        }
+        
+        .sidebar-mobile-toggler {
+            padding: 10px 14px;
+        }
+        
+        .sidebar-mobile-toggler .sidebar-brand {
+            font-size: 15px;
+        }
+        
+        .sidebar-user .card-body {
+            padding: 12px;
+        }
+        
+        .sidebar-user img {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .sidebar-user .media-title {
+            font-size: 12px;
+        }
+        
+        .sidebar-user .opacity-75 {
+            font-size: 10px;
+        }
+        
+        .nav-sidebar {
+            padding: 6px 8px;
+        }
+        
+        .nav-sidebar .nav-link {
+            padding: 8px 10px;
+            gap: 10px;
+        }
+        
+        .nav-sidebar .nav-link i {
+            font-size: 14px;
+            width: 20px;
+        }
+        
+        .nav-sidebar .nav-link span {
+            font-size: 12px;
+        }
     }
     
-    .sidebar-user img:hover {
-        transform: scale(1.05);
-        border-color: #a78bfa;
-    }
-    
-    /* Settings icon hover */
-    .sidebar-user .ml-3 a {
-        display: inline-block;
-        transition: all 0.3s ease;
-    }
-    
-    .sidebar-user .ml-3 a:hover {
-        transform: rotate(90deg);
+    /* Desktop Styles - Sidebar visible by default */
+    @media (min-width: 769px) {
+        .sidebar-dark {
+            width: 280px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+        
+        .sidebar-mobile-toggler {
+            display: flex;
+        }
+        
+        .sidebar-mobile-expand {
+            display: inline-block;
+        }
     }
 </style>
+
+<!-- Add this JavaScript for mobile sidebar toggle -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create overlay element
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+        
+        // Toggle sidebar on mobile
+        const sidebarToggle = document.querySelector('.sidebar-mobile-main-toggle');
+        const sidebarExpand = document.querySelector('.sidebar-mobile-expand');
+        const sidebar = document.querySelector('.sidebar-dark');
+        
+        function openSidebar() {
+            if (sidebar) {
+                sidebar.classList.add('sidebar-open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeSidebar() {
+            if (sidebar) {
+                sidebar.classList.remove('sidebar-open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        if (sidebarToggle && window.innerWidth <= 768) {
+            sidebarToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                openSidebar();
+            });
+        }
+        
+        // Close sidebar when clicking overlay
+        overlay.addEventListener('click', function() {
+            closeSidebar();
+        });
+        
+        // Close sidebar when clicking a nav link on mobile
+        const navLinks = document.querySelectorAll('.nav-sidebar .nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    setTimeout(closeSidebar, 150);
+                }
+            });
+        });
+        
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
+            }, 250);
+        });
+    });
+</script>

@@ -1,14 +1,64 @@
-<div class="form-group"><label>Title</label><input name="title" class="form-control" value="{{ old('title', $record->title ?? '') }}" required></div>
-<div class="form-group"><label>Code</label><input name="code" class="form-control" value="{{ old('code', $record->code ?? '') }}"></div>
-<div class="form-group"><label>Description</label><textarea name="description" class="form-control">{{ old('description', $record->description ?? '') }}</textarea></div>
-<div class="form-group">
-    <label>Class</label>
-    <select name="my_class_id" class="form-control">
-        <option value="">Not linked to any class</option>
-        @foreach($classes as $class)
-            <option value="{{ $class->id }}" {{ (string) old('my_class_id', $record->my_class_id ?? '') === (string) $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
-        @endforeach
-    </select>
+<div class="form-grid">
+    <!-- Course Title -->
+    <div class="form-group-modern">
+        <label class="form-label-modern">
+            <i class="fas fa-heading"></i> Course Title <span class="required">*</span>
+        </label>
+        <input type="text" name="title" class="form-control-modern" value="{{ old('title', $record->title ?? '') }}" placeholder="e.g., Introduction to Computer Science" required>
+        <div class="helper-text">
+            <i class="fas fa-info-circle"></i> Enter the full course name
+        </div>
+    </div>
+
+    <!-- Course Code -->
+    <div class="form-group-modern">
+        <label class="form-label-modern">
+            <i class="fas fa-barcode"></i> Course Code
+        </label>
+        <input type="text" name="code" class="form-control-modern" value="{{ old('code', $record->code ?? '') }}" placeholder="e.g., CS101">
+        <div class="helper-text">
+            <i class="fas fa-info-circle"></i> Unique identifier for the course
+        </div>
+    </div>
+
+    <!-- Class Selection -->
+    <div class="form-group-modern">
+        <label class="form-label-modern">
+            <i class="fas fa-chalkboard"></i> Assign to Class
+        </label>
+        <select name="my_class_id" class="form-control-modern">
+            <option value="">— Not linked to any class —</option>
+            @foreach($classes as $class)
+                <option value="{{ $class->id }}" {{ (string) old('my_class_id', $record->my_class_id ?? '') === (string) $class->id ? 'selected' : '' }}>
+                    <i class="fas fa-school"></i> {{ $class->name }}
+                </option>
+            @endforeach
+        </select>
+        <div class="helper-text">
+            <i class="fas fa-info-circle"></i> Optionally link this course to a specific class
+        </div>
+    </div>
+
+    <!-- Course Description (Full Width) -->
+    <div class="form-group-modern full-width">
+        <label class="form-label-modern">
+            <i class="fas fa-align-left"></i> Course Description
+        </label>
+        <textarea name="description" class="form-control-modern" placeholder="Enter detailed course description, objectives, and outcomes...">{{ old('description', $record->description ?? '') }}</textarea>
+        <div class="helper-text">
+            <i class="fas fa-info-circle"></i> Provide a comprehensive description of the course
+        </div>
+    </div>
 </div>
-<button class="btn btn-primary">Save</button>
-<a href="{{ route('admin.courses.index') }}" class="btn btn-light">Cancel</a>
+
+<style>
+    /* Additional styling for full-width */
+    .full-width {
+        grid-column: 1 / -1;
+    }
+    
+    /* Select option styling */
+    select.form-control-modern option {
+        padding: 8px;
+    }
+</style>

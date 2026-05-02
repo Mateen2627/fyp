@@ -1,5 +1,259 @@
 @extends('layouts.master')
 @section('page_title', 'Create Class')
 @section('content')
-<div class="card"><div class="card-header"><h6>Create Class</h6></div><div class="card-body"><form method="POST" action="{{ route('admin.classes.store') }}">@csrf @include('pages.admin.modules.classes.form')</form></div></div>
+
+<style>
+    /* Modern Professional Styling */
+    :root {
+        --primary: #4f46e5;
+        --primary-dark: #4338ca;
+        --primary-light: #818cf8;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --dark: #1e293b;
+        --gray: #64748b;
+        --light: #f8fafc;
+        --border: #e2e8f0;
+    }
+    
+    /* Main Card */
+    .dashboard-card {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    /* Card Header */
+    .card-header-modern {
+        background: white;
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .card-header-modern i {
+        font-size: 20px;
+        color: var(--primary);
+    }
+    
+    .card-header-modern h6 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+    }
+    
+    /* Card Body */
+    .card-body-modern {
+        padding: 28px;
+    }
+    
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+    
+    /* Form Groups */
+    .form-group-modern {
+        margin-bottom: 0;
+    }
+    
+    .form-label-modern {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 6px;
+        letter-spacing: 0.3px;
+    }
+    
+    .form-label-modern .required {
+        color: var(--danger);
+        margin-left: 3px;
+    }
+    
+    .form-label-modern i {
+        margin-right: 6px;
+        font-size: 11px;
+        color: var(--primary);
+    }
+    
+    .form-control-modern {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.2s;
+        background: white;
+    }
+    
+    .form-control-modern:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+    
+    textarea.form-control-modern {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .helper-text {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: 6px;
+    }
+    
+    .helper-text i {
+        font-size: 10px;
+        margin-right: 4px;
+    }
+    
+    /* Full Width Fields */
+    .full-width {
+        grid-column: 1 / -1;
+    }
+    
+    /* Action Buttons */
+    .form-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: flex-end;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+    }
+    
+    .btn-primary-modern {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        border: none;
+        padding: 10px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        color: white;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+    
+    .btn-primary-modern:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    
+    .btn-secondary-modern {
+        background: #f1f5f9;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--gray);
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    
+    .btn-secondary-modern:hover {
+        background: #e2e8f0;
+        color: var(--dark);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-header-modern {
+            padding: 16px 20px;
+        }
+        
+        .card-body-modern {
+            padding: 20px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn-primary-modern, .btn-secondary-modern {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="dashboard-card">
+    <div class="card-header-modern">
+        <i class="fas fa-chalkboard"></i>
+        <h6 class="mb-0">Create New Class</h6>
+    </div>
+    <div class="card-body-modern">
+        <form method="POST" action="{{ route('admin.classes.store') }}" id="createClassForm">
+            @csrf
+            @include('pages.admin.modules.classes.form')
+            
+            <div class="form-actions">
+                <a href="{{ route('admin.classes.index') }}" class="btn-secondary-modern">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-primary-modern">
+                    <i class="fas fa-save"></i> Create Class
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Form submit loading state
+    const form = document.getElementById('createClassForm');
+    const submitBtn = document.querySelector('.btn-primary-modern');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function() {
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Creating...';
+            submitBtn.disabled = true;
+            submitBtn.dataset.originalText = originalText;
+        });
+    }
+    
+    // Loading spinner style
+    const style = document.createElement('style');
+    style.textContent = `
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
 @endsection
