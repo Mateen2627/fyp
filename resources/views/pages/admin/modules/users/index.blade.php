@@ -124,6 +124,35 @@
         transform: translateY(-1px);
     }
     
+
+    .filter-bar-modern {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) 220px auto auto;
+        gap: 12px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--light);
+    }
+
+    .filter-control-modern {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 12px;
+        font-size: 13px;
+        background: white;
+    }
+
+    .btn-filter-modern {
+        border: none;
+        border-radius: 10px;
+        padding: 9px 16px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .btn-filter-primary { background: var(--primary); color: white; }
+    .btn-filter-light { background: white; color: var(--gray); border: 1px solid var(--border); }
     /* Table */
     .table-modern {
         width: 100%;
@@ -237,6 +266,10 @@
             padding: 10px 12px;
         }
         
+        .filter-bar-modern {
+            grid-template-columns: 1fr;
+        }
+
         .action-buttons {
             flex-direction: column;
             gap: 6px;
@@ -259,6 +292,17 @@
             <i class="fas fa-user-plus"></i> Add User
         </a>
     </div>
+    <form method="get" action="{{ route('admin.users.index') }}" class="filter-bar-modern">
+        <input type="search" name="search" value="{{ request('search') }}" class="filter-control-modern" placeholder="Search by name, email, or username">
+        <select name="role" class="filter-control-modern">
+            <option value="">All Roles</option>
+            @foreach($roles as $role)
+                <option value="{{ $role }}" {{ request('role') === $role ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $role)) }}</option>
+            @endforeach
+        </select>
+        <button type="submit" class="btn-filter-modern btn-filter-primary"><i class="fas fa-filter"></i> Filter</button>
+        <a href="{{ route('admin.users.index') }}" class="btn-filter-modern btn-filter-light text-center"><i class="fas fa-undo"></i> Reset</a>
+    </form>
     
     <div class="table-responsive">
         <table class="table-modern">

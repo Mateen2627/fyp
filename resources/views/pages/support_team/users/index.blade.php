@@ -59,6 +59,23 @@
         font-size: 20px;
     }
     
+    .table-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--light);
+    }
+
+    .table-filter-bar .form-control {
+        max-width: 320px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 9px 12px;
+        font-size: 13px;
+    }
+
     /* Tabs */
     .nav-tabs-modern {
         border-bottom: 1px solid var(--border);
@@ -588,8 +605,11 @@
                         
                         <div class="section-body p-0">
                             @if($users->where('user_type', $ut->title)->count() > 0)
+                            <div class="table-filter-bar">
+                                <input type="search" class="form-control support-user-search" data-table-target="support-users-{{ Qs::hash($ut->id) }}" placeholder="Search {{ $ut->name }}s by name, username, phone, or email">
+                            </div>
                             <div class="table-responsive">
-                                <table class="table-modern mb-0">
+                                <table class="table-modern mb-0" id="support-users-{{ Qs::hash($ut->id) }}">
                                     <thead>
                                         <tr>
                                             <th width="50">#</th>
@@ -603,7 +623,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach($users->where('user_type', $ut->title) as $u)
-                                        <tr>
+                                        <tr data-search="{{ strtolower($u->name.' '.$u->username.' '.$u->phone.' '.$u->email.' '.$ut->name) }}">
                                             <td class="fw-semibold">{{ $loop->iteration }}</td>
                                             <td>
                                                 <div class="user-avatar">
@@ -694,6 +714,21 @@
 </div>
 
 <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.support-user-search').forEach(function (input) {
+            input.addEventListener('input', function () {
+                const table = document.getElementById(this.dataset.tableTarget);
+                const value = this.value.toLowerCase();
+
+                if (!table) return;
+
+                table.querySelectorAll('tbody tr').forEach(function (row) {
+                    row.style.display = !value || (row.dataset.search || row.textContent.toLowerCase()).includes(value) ? '' : 'none';
+                });
+            });
+        });
+    });
     function togglePassword(fieldId, btn) {
         const field = document.getElementById(fieldId);
         const icon = btn.querySelector('i');

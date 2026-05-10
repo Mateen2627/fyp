@@ -14,9 +14,27 @@ class ManageUserController extends Controller
         $this->middleware('teamSA');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return view('pages.admin.modules.users.index', ['records' => User::latest()->paginate(20)]);
+        $query = User::query();
+
+        if ($request->filled('role')) {
+            $query->where('user_type', $request->role);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%");
+            });
+        }
+
+        $roles = User::select('user_type')->distinct()->orderBy('user_type')->pluck('user_type');
+        $records = $query->latest()->paginate(20)->appends($request->query());
+
+        return view('pages.admin.modules.users.index', compact('records', 'roles'));
     }
 
     public function create()
