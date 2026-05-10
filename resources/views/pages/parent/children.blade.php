@@ -50,6 +50,7 @@
                                         <a href="{{ route('students.show', Qs::hash($s->id)) }}" class="dropdown-item"><i class="icon-eye"></i> View Profile</a>
                                         <a target="_blank" href="{{ route('marks.year_selector', Qs::hash($s->user->id)) }}" class="dropdown-item"><i class="icon-check"></i> Marksheet</a>
                                         <a href="{{ route('parent.attendance.show', $s->id) }}" class="dropdown-item"><i class="icon-calendar3"></i> Attendance</a>
+                                        <a href="{{ route('parent.academics.show', $s->id) }}" class="dropdown-item"><i class="icon-books"></i> Academics (Marks/Assignments/Quizzes)</a>
 
                                     </div>
                                 </div>
