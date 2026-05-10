@@ -8,6 +8,13 @@ Route::get('/privacy-policy', 'HomeController@privacy_policy')->name('privacy_po
 Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use');
 
 
+
+Route::get('/storage/{path}', function ($path) {
+    abort_unless(\Illuminate\Support\Facades\Storage::disk('public')->exists($path), 404);
+
+    return response()->file(\Illuminate\Support\Facades\Storage::disk('public')->path($path));
+})->where('path', '.*')->name('storage.public');
+
 Route::group(['middleware' => 'auth'], function () {
 
     // Route::get('/', 'HomeController@dashboard')->name('home');
