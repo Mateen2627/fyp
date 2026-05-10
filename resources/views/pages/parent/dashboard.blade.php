@@ -337,7 +337,7 @@
         </a>
 
         @if(($children ?? collect())->isNotEmpty())
-            <a href="{{ route('parent.attendance.show', $children->first()->id) }}" class="module-card">
+            <a href="{{ route('parent.attendance.index') }}" class="module-card">
                 <div class="module-card-body">
                     <div class="module-icon warning"><i class="fas fa-calendar-check"></i></div>
                     <h3 class="module-title">Attendance</h3>
@@ -346,7 +346,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('parent.academics.show', $children->first()->id) }}" class="module-card">
+            <a href="{{ route('parent.academics.index') }}" class="module-card">
                 <div class="module-card-body">
                     <div class="module-icon info"><i class="fas fa-book-open"></i></div>
                     <h3 class="module-title">Academics</h3>

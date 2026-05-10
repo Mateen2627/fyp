@@ -55,15 +55,21 @@ class MyController extends Controller
     public function attendanceIndex()
     {
         $students = Qs::findMyChildren(Auth::id());
-        abort_if($students->isEmpty(), 404, 'No children found.');
-        return redirect()->route('parent.attendance.show', $students->first()->id);
+        if ($students->isEmpty()) {
+            return redirect()->route('my_children')->with('flash_info', 'No children records are linked to this parent account yet.');
+        }
+
+        return view('pages.parent.attendance_index', compact('students'));
     }
 
     public function academicsIndex()
     {
         $students = Qs::findMyChildren(Auth::id());
-        abort_if($students->isEmpty(), 404, 'No children found.');
-        return redirect()->route('parent.academics.show', $students->first()->id);
+        if ($students->isEmpty()) {
+            return redirect()->route('my_children')->with('flash_info', 'No children records are linked to this parent account yet.');
+        }
+
+        return view('pages.parent.academics_index', compact('students'));
     }
 
     public function attendance(Request $request, StudentRecord $student)
