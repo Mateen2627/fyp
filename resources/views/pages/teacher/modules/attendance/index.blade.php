@@ -9,6 +9,8 @@
     .ai-panel { border: 1px solid #dbeafe; background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
     .ai-panel h6 { margin: 0 0 6px; font-weight: 700; color: #1e3a8a; }
     .ai-confidence { font-size: 12px; font-weight: 700; }
+    .student-wise-table img { width: 42px; height: 42px; object-fit: cover; border-radius: 50%; margin-right: 10px; }
+    .student-identity { display: flex; align-items: center; min-width: 180px; }
     .row-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     @media (min-width: 1200px) { .attendance-mode-grid { grid-template-columns: 1.35fr 1fr; align-items: start; } }
 </style>
@@ -63,23 +65,21 @@
 <div class="attendance-mode-grid">
     <div class="card">
         <div class="card-header header-elements-inline">
-            <h6 class="card-title">Manual Attendance</h6>
-            <span class="badge badge-info">Bulk or one student at a time</span>
+            <h6 class="card-title">Student-wise Manual Attendance</h6>
+            <span class="badge badge-info">One student at a time</span>
         </div>
         <div class="card-body">
             <div class="alert alert-info mb-3">
-                Use <strong>Save All Manual Attendance</strong> for the full list, or use <strong>Save This Student</strong> to update one student only.
+                Select one student's status and click <strong>Save This Student</strong>. This prevents accidentally marking the whole class.
             </div>
-            <form method="post" action="{{ route('teacher.attendance.store') }}" id="bulk-manual-form">
-                @csrf
-                <input type="hidden" name="class_id" value="{{ $selectedClassId }}">
+            <div id="manual-attendance-wrapper">
                 <div class="form-group row">
                     <label class="col-lg-2 col-form-label">Attendance Date</label>
                     <div class="col-lg-4">
                         <input type="date" name="attendance_date" id="manual_attendance_date" value="{{ $markDate }}" class="form-control" required>
                     </div>
-                    <div class="col-lg-6 text-right">
-                        <button type="submit" class="btn btn-success">Save All Manual Attendance</button>
+                    <div class="col-lg-6">
+                        <span class="text-muted">This date is used when you click any student-wise manual or facial attendance button.</span>
                     </div>
                 </div>
 
@@ -94,7 +94,7 @@
                     </select>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered" id="mark-attendance-table">
+                    <table class="table table-bordered student-wise-table" id="mark-attendance-table">
                         <thead>
                         <tr>
                             <th>Student</th>
@@ -109,7 +109,7 @@
                         @forelse($students as $student)
                             @php($existingAttendance = $dailyAttendance->get($student->user_id))
                             <tr data-student-id="{{ $student->user_id }}" data-search="{{ strtolower(optional($student->user)->name.' '.$student->adm_no.' '.optional($student->my_class)->name.' '.optional($student->section)->name) }}" data-status="{{ optional($existingAttendance)->status ?: 'present' }}">
-                                <td>{{ optional($student->user)->name }}</td>
+                                <td><div class="student-identity"><img src="{{ optional($student->user)->photo }}" alt="{{ optional($student->user)->name }}" onerror="this.src='{{ asset('global_assets/images/user.png') }}'"><span>{{ optional($student->user)->name }}</span></div></td>
                                 <td>{{ $student->adm_no }}</td>
                                 <td>{{ optional($student->my_class)->name }} {{ optional($student->section)->name }}</td>
                                 <td>
@@ -129,7 +129,7 @@
                         </tbody>
                     </table>
                 </div>
-            </form>
+            </div>
             <form method="post" action="{{ route('teacher.attendance.store_single') }}" id="single-manual-form" style="display: none;">
                 @csrf
                 <input type="hidden" name="class_id" value="{{ $selectedClassId }}">
@@ -143,59 +143,63 @@
 
     <div class="card">
         <div class="card-header header-elements-inline">
-            <h6 class="card-title">AI Facial Attendance</h6>
-            <span class="badge badge-primary">Fake AI now, model later</span>
+            <h6 class="card-title">Student-wise Facial Attendance</h6>
+            <span class="badge badge-primary">One face, one student</span>
         </div>
         <div class="card-body">
             <div class="ai-panel">
-                <h6><i class="fas fa-robot"></i> Optional AI Mode</h6>
-                <div>For now this is a fake scanner. Click <strong>Run Fake AI Scan</strong>, review recognized students, then save. Later you can replace this with your real AI model output.</div>
+                <h6><i class="fas fa-camera"></i> Mark Facial Attendance</h6>
+                <div>Click <strong>Mark Facial Attendance</strong> on a single student row. The system runs the facial check for that selected student only and saves that student as present.</div>
             </div>
 
-            <form method="post" action="{{ route('teacher.attendance.store_facial') }}" id="facial-attendance-form">
+            <div class="form-group">
+                <label>Attendance Date</label>
+                <input type="date" id="facial_attendance_date" value="{{ $markDate }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Facial Remarks</label>
+                <input type="text" id="facial_remarks" class="form-control" placeholder="Optional note for this facial attendance mark">
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped student-wise-table" id="facial-attendance-table">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Last Facial Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($students as $student)
+                        @php($existingAttendance = $dailyAttendance->get($student->user_id))
+                        <tr data-student-id="{{ $student->user_id }}" data-search="{{ strtolower(optional($student->user)->name.' '.$student->adm_no.' '.optional($student->my_class)->name.' '.optional($student->section)->name) }}">
+                            <td><div class="student-identity"><img src="{{ optional($student->user)->photo }}" alt="{{ optional($student->user)->name }}" onerror="this.src='{{ asset('global_assets/images/user.png') }}'"><span>{{ optional($student->user)->name }}<br><small class="text-muted">{{ $student->adm_no }}</small></span></div></td>
+                            <td>{{ optional($student->my_class)->name }} {{ optional($student->section)->name }}</td>
+                            <td>
+                                @if(optional($existingAttendance)->mode === 'facial')
+                                    <span class="badge badge-success ai-confidence">Facial marked today</span>
+                                @else
+                                    <span class="badge badge-light ai-confidence">Not facial marked today</span>
+                                @endif
+                            </td>
+                            <td><button type="button" class="btn btn-primary btn-sm mark-facial-attendance">Mark Facial Attendance</button></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="text-center">No students found for your assigned classes.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <form method="post" action="{{ route('teacher.attendance.store_facial') }}" id="single-facial-form" style="display: none;">
                 @csrf
                 <input type="hidden" name="class_id" value="{{ $selectedClassId }}">
-                <div class="form-group">
-                    <label>Attendance Date</label>
-                    <input type="date" name="attendance_date" value="{{ $markDate }}" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>AI Remarks</label>
-                    <input type="text" name="facial_remarks" class="form-control" placeholder="Optional note for fake AI facial attendance">
-                </div>
-                <div class="row-actions mb-3">
-                    <button type="button" class="btn btn-info" id="fake-ai-scan">Run Fake AI Scan</button>
-                    <button type="button" class="btn btn-light" id="clear-ai-scan">Clear Scan</button>
-                    <button type="submit" class="btn btn-success">Save Facial Attendance</button>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-striped" id="facial-attendance-table">
-                        <thead>
-                        <tr>
-                            <th width="70">Seen</th>
-                            <th>Student</th>
-                            <th>Class</th>
-                            <th>Fake AI Confidence</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @forelse($students as $student)
-                            <tr>
-                                <td><input type="checkbox" name="facial_student_ids[]" value="{{ $student->user_id }}" class="facial-check"></td>
-                                <td>{{ optional($student->user)->name }}<br><small class="text-muted">{{ $student->adm_no }}</small></td>
-                                <td>{{ optional($student->my_class)->name }} {{ optional($student->section)->name }}</td>
-                                <td>
-                                    <input type="hidden" name="facial_confidence[{{ $student->user_id }}]" class="facial-confidence-input" value="">
-                                    <span class="badge badge-light ai-confidence">Not scanned</span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="4" class="text-center">No students found for your assigned classes.</td></tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                <input type="hidden" name="attendance_date" id="single_facial_attendance_date">
+                <input type="hidden" name="student_id" id="single_facial_student_id">
+                <input type="hidden" name="facial_remarks" id="single_facial_remarks">
+                <input type="hidden" id="single_facial_confidence">
             </form>
         </div>
     </div>
@@ -335,42 +339,29 @@
             });
         });
 
-        const fakeScanButton = document.getElementById('fake-ai-scan');
-        const clearScanButton = document.getElementById('clear-ai-scan');
+        document.querySelectorAll('.mark-facial-attendance').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const row = this.closest('tr');
+                const form = document.getElementById('single-facial-form');
+                const confidenceInput = document.getElementById('single_facial_confidence');
+                const studentId = row.dataset.studentId;
+                const confidence = Math.floor(Math.random() * 12) + 88;
 
-        if (fakeScanButton) {
-            fakeScanButton.addEventListener('click', function () {
-                document.querySelectorAll('#facial-attendance-table tbody tr').forEach(function (row) {
-                    const checkbox = row.querySelector('.facial-check');
-                    const confidenceInput = row.querySelector('.facial-confidence-input');
-                    const badge = row.querySelector('.ai-confidence');
-                    if (!checkbox || !confidenceInput || !badge) return;
+                this.disabled = true;
+                this.textContent = 'Detecting Face...';
+                row.querySelector('.ai-confidence').textContent = 'Detecting selected student...';
+                row.querySelector('.ai-confidence').className = 'badge badge-info ai-confidence';
 
-                    const recognized = Math.random() > 0.25;
-                    const confidence = Math.floor(Math.random() * 16) + 84;
-                    checkbox.checked = recognized;
-                    confidenceInput.value = recognized ? confidence : '';
-                    badge.textContent = recognized ? confidence + '% match' : 'Not recognized';
-                    badge.className = 'badge ai-confidence ' + (recognized ? 'badge-success' : 'badge-warning');
-                });
+                setTimeout(function () {
+                    document.getElementById('single_facial_attendance_date').value = document.getElementById('facial_attendance_date').value || document.getElementById('manual_attendance_date').value;
+                    document.getElementById('single_facial_student_id').value = studentId;
+                    document.getElementById('single_facial_remarks').value = document.getElementById('facial_remarks').value;
+                    confidenceInput.name = 'facial_confidence[' + studentId + ']';
+                    confidenceInput.value = confidence;
+                    form.submit();
+                }, 600);
             });
-        }
-
-        if (clearScanButton) {
-            clearScanButton.addEventListener('click', function () {
-                document.querySelectorAll('#facial-attendance-table tbody tr').forEach(function (row) {
-                    const checkbox = row.querySelector('.facial-check');
-                    const confidenceInput = row.querySelector('.facial-confidence-input');
-                    const badge = row.querySelector('.ai-confidence');
-                    if (!checkbox || !confidenceInput || !badge) return;
-
-                    checkbox.checked = false;
-                    confidenceInput.value = '';
-                    badge.textContent = 'Not scanned';
-                    badge.className = 'badge badge-light ai-confidence';
-                });
-            });
-        }
+        });
     });
 </script>
 

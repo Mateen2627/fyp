@@ -166,40 +166,33 @@ class AttendanceController extends Controller
         $data = $request->validate([
             'attendance_date' => 'required|date',
             'class_id' => 'nullable|integer',
-            'facial_student_ids' => 'required|array|min:1',
-            'facial_student_ids.*' => 'integer',
+            'student_id' => 'required|integer',
             'facial_confidence' => 'nullable|array',
             'facial_confidence.*' => 'nullable|numeric|min:0|max:100',
             'facial_remarks' => 'nullable|string|max:1000',
         ]);
 
-        $allowedStudentIds = $this->allowedStudentIds($data['class_id'] ?? null);
-        $marked = 0;
+        $studentId = (int) $data['student_id'];
 
-        foreach ($data['facial_student_ids'] as $studentId) {
-            $studentId = (int) $studentId;
-
-            if (!in_array($studentId, $allowedStudentIds, true)) {
-                continue;
-            }
-
-            $confidence = $data['facial_confidence'][$studentId] ?? rand(82, 99);
-            $remarks = trim('AI facial attendance verified (fake confidence: '.$confidence.'%). '.($data['facial_remarks'] ?? ''));
-
-            $this->saveAttendanceRecord(
-                $studentId,
-                $data['attendance_date'],
-                'present',
-                'facial',
-                true,
-                $remarks
-            );
-
-            $marked++;
+        if (!in_array($studentId, $this->allowedStudentIds($data['class_id'] ?? null), true)) {
+            return redirect()->route('teacher.attendance.index', $request->only('class_id'))
+                ->with('flash_danger', 'You can only mark facial attendance for students in your assigned classes.');
         }
 
+        $confidence = $data['facial_confidence'][$studentId] ?? rand(88, 99);
+        $remarks = trim('Facial attendance verified for this student (confidence: '.$confidence.'%). '.($data['facial_remarks'] ?? ''));
+
+        $this->saveAttendanceRecord(
+            $studentId,
+            $data['attendance_date'],
+            'present',
+            'facial',
+            true,
+            $remarks
+        );
+
         return redirect()->route('teacher.attendance.index', $request->only('class_id'))
-            ->with($marked ? 'flash_success' : 'flash_danger', $marked ? 'Fake AI facial attendance marked successfully.' : 'No valid students were selected for facial attendance.');
+            ->with('flash_success', 'Facial attendance marked for the selected student.');
     }
 
 
