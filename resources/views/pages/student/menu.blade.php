@@ -5,6 +5,7 @@
 <li class="nav-item"><a href="{{ route('student.assignments.index') }}" class="nav-link {{ Route::is('student.assignments.*') ? 'active' : '' }}"><i class="icon-task"></i> Assignments</a></li>
 <li class="nav-item"><a href="{{ route('student.quizzes.index') }}" class="nav-link {{ Route::is('student.quizzes.*') ? 'active' : '' }}"><i class="icon-pencil6"></i> Quizzes</a></li>
 <li class="nav-item"><a href="{{ route('student.attendance.index') }}" class="nav-link {{ Route::is('student.attendance.*') ? 'active' : '' }}"><i class="icon-calendar3"></i> Attendance</a></li>
+<li class="nav-item"><a href="{{ route('student.subject_marks.index') }}" class="nav-link {{ Route::is('student.subject_marks.*') ? 'active' : '' }}"><i class="icon-stats-bars2"></i> Subject Marks</a></li>
 <li class="nav-item"><a href="{{ route('student.reports.index') }}" class="nav-link {{ Route::is('student.reports.*') ? 'active' : '' }}"><i class="icon-file-text2"></i> Reports</a></li>
 <li class="nav-item"><a href="{{ route('student.extra-details.index') }}" class="nav-link {{ Route::is('student.extra-details.*') ? 'active' : '' }}"><i class="icon-info22"></i> Extra Details</a></li>
 <li class="nav-item"><a href="{{ route('student.help-support.index') }}" class="nav-link {{ Route::is('student.help-support.*') ? 'active' : '' }}"><i class="icon-lifebuoy"></i> Help & Support</a></li>

@@ -193,6 +193,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('quizzes', 'QuizController', ['as' => 'student'])->only(['index', 'show']);
 
         Route::resource('attendance', 'AttendanceController', ['as' => 'student'])->only(['index']);
+        Route::get('subject-marks', 'SubjectMarkController@index')->name('student.subject_marks.index');
         Route::resource('reports', 'ReportController', ['as' => 'student']);
         Route::resource('extra-details', 'ExtraDetailController', ['as' => 'student', 'parameters' => ['extra-details' => 'extra_detail']]);
         Route::resource('help-support', 'HelpSupportController', ['as' => 'student', 'parameters' => ['help-support' => 'help_support']]);
@@ -220,6 +221,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('/attendance', 'AttendanceController@store')->name('teacher.attendance.store');
         Route::post('/attendance/student', 'AttendanceController@storeSingle')->name('teacher.attendance.store_single');
         Route::post('/attendance/facial', 'AttendanceController@storeFacial')->name('teacher.attendance.store_facial');
+
+        Route::get('/subject-marks', 'SubjectMarkController@index')->name('teacher.subject_marks.index');
+        Route::post('/subject-marks', 'SubjectMarkController@store')->name('teacher.subject_marks.store');
     });
 
     /************************ AJAX ****************************/

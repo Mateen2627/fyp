@@ -4,3 +4,4 @@
 <li class="nav-item"><a href="{{ route('teacher.assignments.index') }}" class="nav-link {{ Route::is('teacher.assignments.*') ? 'active' : '' }}"><i class="icon-clipboard3"></i> Assignments</a></li>
 <li class="nav-item"><a href="{{ route('teacher.quizzes.index') }}" class="nav-link {{ Route::is('teacher.quizzes.*') ? 'active' : '' }}"><i class="icon-question4"></i> Quizzes</a></li>
 <li class="nav-item"><a href="{{ route('teacher.attendance.index') }}" class="nav-link {{ Route::is('teacher.attendance.*') ? 'active' : '' }}"><i class="icon-calendar5"></i> Student Attendance</a></li>
+<li class="nav-item"><a href="{{ route('teacher.subject_marks.index') }}" class="nav-link {{ Route::is('teacher.subject_marks.*') ? 'active' : '' }}"><i class="icon-stats-bars2"></i> Mid & Final Marks</a></li>
