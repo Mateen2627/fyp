@@ -184,8 +184,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('quizzes/{quiz}/submit', 'QuizController@submit')->name('student.quizzes.submit');
         Route::resource('quizzes', 'QuizController', ['as' => 'student'])->only(['index', 'show']);
 
-        Route::post('attendance/register-face', 'AttendanceController@registerFace')->name('student.attendance.register_face');
-        Route::resource('attendance', 'AttendanceController', ['as' => 'student'])->only(['index', 'store']);
+        Route::resource('attendance', 'AttendanceController', ['as' => 'student'])->only(['index']);
         Route::resource('reports', 'ReportController', ['as' => 'student']);
         Route::resource('extra-details', 'ExtraDetailController', ['as' => 'student', 'parameters' => ['extra-details' => 'extra_detail']]);
         Route::resource('help-support', 'HelpSupportController', ['as' => 'student', 'parameters' => ['help-support' => 'help_support']]);
@@ -210,6 +209,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('/quizzes', 'QuizController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
         Route::get('/attendance', 'AttendanceController@index')->name('teacher.attendance.index');
+        Route::post('/attendance', 'AttendanceController@store')->name('teacher.attendance.store');
     });
 
     /************************ AJAX ****************************/
@@ -236,5 +236,6 @@ Route::group(['namespace' => 'SuperAdmin','middleware' => 'super_admin', 'prefix
 Route::group(['namespace' => 'MyParent','middleware' => 'my_parent',], function(){
 
     Route::get('/my_children', 'MyController@children')->name('my_children');
+    Route::get('/children/{student}/attendance', 'MyController@attendance')->name('parent.attendance.show');
 
 });

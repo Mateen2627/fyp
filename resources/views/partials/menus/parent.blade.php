@@ -63,6 +63,15 @@
                     </a>
                 </li>
 
+                <!-- Attendance -->
+                <li class="nav-item">
+                    <a href="{{ route('my_children') }}"
+                       class="nav-link {{ Route::is('parent.attendance.*') ? 'active' : '' }}">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                </li>
+
                 <!-- Academic Timetable -->
                 <li class="nav-item">
                     <a href="{{ route('tt.index') }}" 
