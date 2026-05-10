@@ -628,7 +628,7 @@
                                             <td>
                                                 <div class="user-avatar">
                                                     <img class="rounded-circle" 
-                                                         src="{{ $u->photo }}" 
+                                                         src="{{ Qs::getUserPhoto($u) }}"
                                                          alt="{{ $u->name }}"
                                                          onerror="this.src='{{ asset('global_assets/images/placeholder.jpg') }}'">
                                                 </div>

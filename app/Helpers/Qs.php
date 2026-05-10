@@ -36,9 +36,11 @@ class Qs
 
     public static function userPhotoIsMissing($user = null)
     {
-        $user = $user ?: Auth::user();
+        if (!$user) {
+            return true;
+        }
 
-        if (!$user || !$user->photo) {
+        if (!$user->photo) {
             return true;
         }
 
@@ -50,8 +52,6 @@ class Qs
 
     public static function getUserPhoto($user = null)
     {
-        $user = $user ?: Auth::user();
-
         return self::userPhotoIsMissing($user) ? self::getDefaultUserImage() : $user->photo;
     }
 

@@ -5,7 +5,7 @@
         <div class="col-md-3 text-center">
             <div class="card">
                 <div class="card-body">
-                    <img style="width: 90%; height:90%" src="{{ $user->photo }}" alt="photo" class="rounded-circle">
+                    <img style="width: 90%; height:90%" src="{{ Qs::getUserPhoto($user) }}" alt="photo" class="rounded-circle">
                     <br>
                     <h3 class="mt-3">{{ $user->name }}</h3>
                 </div>

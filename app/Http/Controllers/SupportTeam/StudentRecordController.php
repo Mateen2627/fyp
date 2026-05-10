@@ -11,6 +11,7 @@ use App\Repositories\MyClassRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
 use App\Http\Controllers\Controller;
+use App\Models\StudentFaceProfile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -81,11 +82,7 @@ class StudentRecordController extends Controller
         $data['username'] = strtoupper(Qs::getAppCode().'/'.$ct.'/'.$sr['year_admitted'].'/'.($adm_no ?: mt_rand(1000, 99999)));
 
         if($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Qs::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Qs::getUploadPath('student').$data['code'], $f['name']);
-            $data['photo'] = asset('storage/' . $f['path']);
+            $data['photo'] = $this->storeStudentPhoto($req->file('photo'), $data['code']);
         }
 
         $user = $this->user->create($data); // Create User
@@ -95,6 +92,7 @@ class StudentRecordController extends Controller
         $sr['session'] = Qs::getSetting('current_session');
 
         $this->student->createRecord($sr); // Create Student
+        $this->syncStudentFaceProfile($user->id, $data['photo']);
         return Qs::jsonStoreOk();
     }
 
@@ -164,11 +162,7 @@ class StudentRecordController extends Controller
         $d['name'] = ucwords($req->name);
 
         if($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Qs::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Qs::getUploadPath('student').$sr->user->code, $f['name']);
-            $d['photo'] = asset('storage/' . $f['path']);
+            $d['photo'] = $this->storeStudentPhoto($req->file('photo'), $sr->user->code, $sr->user->id);
         }
 
         $this->user->update($sr->user->id, $d); // Update User Details
@@ -181,6 +175,37 @@ class StudentRecordController extends Controller
         Mk::deleteOldRecord($sr->user->id, $srec['my_class_id']);
 
         return Qs::jsonUpdateOk();
+    }
+
+
+    private function storeStudentPhoto($photo, string $studentCode, ?int $userId = null): string
+    {
+        $f = Qs::getFileMetaData($photo);
+        $f['name'] = 'photo.' . $f['ext'];
+        $f['path'] = $photo->storeAs(Qs::getUploadPath('student').$studentCode, $f['name']);
+        $photoUrl = asset('storage/' . $f['path']);
+
+        if ($userId) {
+            $this->syncStudentFaceProfile($userId, $photoUrl);
+        }
+
+        return $photoUrl;
+    }
+
+    private function syncStudentFaceProfile(int $userId, string $photoUrl): void
+    {
+        if (Qs::userPhotoIsMissing((object) ['photo' => $photoUrl])) {
+            return;
+        }
+
+        StudentFaceProfile::updateOrCreate(
+            ['user_id' => $userId],
+            [
+                'face_token' => Str::random(40),
+                'face_image_path' => $photoUrl,
+                'is_active' => true,
+            ]
+        );
     }
 
     public function destroy($st_id)

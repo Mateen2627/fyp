@@ -22,7 +22,7 @@
                 <div class="media">
                     <div class="mr-3">
                         <a href="{{ route('my_account') }}">
-                            <img src="{{ Auth::user()->photo }}" width="48" height="48" class="rounded-circle" alt="photo" style="border: 2px solid rgba(255,255,255,0.2);">
+                            <img src="{{ Qs::getUserPhoto(Auth::user()) }}" width="48" height="48" class="rounded-circle" alt="photo" style="border: 2px solid rgba(255,255,255,0.2);">
                         </a>
                     </div>
 

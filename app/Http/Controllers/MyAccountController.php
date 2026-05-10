@@ -6,10 +6,12 @@ namespace App\Http\Controllers;
 use App\Helpers\Qs;
 use App\Http\Requests\UserChangePass;
 use App\Http\Requests\UserUpdate;
+use App\Models\StudentFaceProfile;
 use App\Repositories\UserRepo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class MyAccountController extends Controller
 {
@@ -36,15 +38,9 @@ class MyAccountController extends Controller
             return back()->with('pop_error', __('msg.user_invalid'));
         }
 
-        $user_type = $user->user_type;
-        $code = $user->code;
 
         if($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Qs::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Qs::getUploadPath($user_type).$code, $f['name']);
-            $d['photo'] = asset('storage/' . $f['path']);
+            $d['photo'] = $this->storeUserPhoto($user, $req->file('photo'));
         }
 
         $this->user->update($user->id, $d);
@@ -59,14 +55,33 @@ class MyAccountController extends Controller
         ]);
 
         $user = Auth::user();
-        $photo = $req->file('photo');
+        $photoUrl = $this->storeUserPhoto($user, $req->file('photo'));
+
+        $this->user->update($user->id, ['photo' => $photoUrl]);
+
+        return back()->with('flash_success', 'Profile photo uploaded successfully.');
+    }
+
+
+    private function storeUserPhoto($user, $photo): string
+    {
         $f = Qs::getFileMetaData($photo);
         $f['name'] = 'photo.' . $f['ext'];
         $f['path'] = $photo->storeAs(Qs::getUploadPath($user->user_type).$user->code, $f['name']);
+        $photoUrl = asset('storage/' . $f['path']);
 
-        $this->user->update($user->id, ['photo' => asset('storage/' . $f['path'])]);
+        if ($user->user_type === 'student') {
+            StudentFaceProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'face_token' => Str::random(40),
+                    'face_image_path' => $photoUrl,
+                    'is_active' => true,
+                ]
+            );
+        }
 
-        return back()->with('flash_success', 'Profile photo uploaded successfully.');
+        return $photoUrl;
     }
 
     public function change_pass(UserChangePass $req)
