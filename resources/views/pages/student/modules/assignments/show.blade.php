@@ -330,6 +330,15 @@
                 <div class="info-label mb-2"><i class="fas fa-align-left"></i> Description</div>
                 <p>{{ $assignment->description ?: 'No description provided' }}</p>
             </div>
+            @if($assignment->attachment_path)
+                <div class="description-box mt-3">
+                    <div class="info-label mb-2"><i class="fas fa-file-pdf"></i> Assignment File Preview</div>
+                    <div class="mb-2">
+                        <a href="{{ route('student.assignments.view', $assignment->id) }}" target="_blank" class="btn-secondary-modern"><i class="fas fa-eye"></i> Open in System Viewer</a>
+                    </div>
+                    <iframe src="{{ route('student.assignments.view', $assignment->id) }}" style="width: 100%; min-height: 520px; border: 1px solid #e2e8f0; border-radius: 12px;"></iframe>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -384,6 +393,12 @@
                         <span class="submission-label"><i class="fas fa-comment"></i> Teacher Feedback</span>
                         <span class="submission-value">{{ $submission->teacher_feedback ?: '-' }}</span>
                     </div>
+                    @if($submission->attachment_path)
+                        <div class="submission-row">
+                            <span class="submission-label"><i class="fas fa-file-pdf"></i> Uploaded PDF</span>
+                            <span class="submission-value"><a href="{{ route('student.assignments.submission.view', $assignment->id) }}" target="_blank">View in system</a></span>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="action-buttons mt-3">

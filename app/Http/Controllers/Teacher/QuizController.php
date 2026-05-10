@@ -85,6 +85,15 @@ class QuizController extends Controller
         return redirect()->route('teacher.quizzes.index')->with('flash_success', 'Quiz updated.');
     }
 
+
+    public function viewMaterial(Quiz $quiz)
+    {
+        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        abort_unless($quiz->attachment_path && Storage::disk('public')->exists($quiz->attachment_path), 404);
+
+        return $this->inlinePdf($quiz->attachment_path);
+    }
+
     public function downloadMaterial(Quiz $quiz)
     {
         abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
@@ -101,6 +110,16 @@ class QuizController extends Controller
         return view('pages.teacher.modules.quizzes.show', compact('quiz', 'attempts'));
     }
 
+
+    public function viewAttempt(Quiz $quiz, StudentQuizAttempt $attempt)
+    {
+        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        abort_unless((int) $attempt->quiz_id === (int) $quiz->id, 404);
+        abort_unless($attempt->attachment_path && Storage::disk('public')->exists($attempt->attachment_path), 404);
+
+        return $this->inlinePdf($attempt->attachment_path);
+    }
+
     public function downloadAttempt(Quiz $quiz, StudentQuizAttempt $attempt)
     {
         abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
@@ -108,6 +127,15 @@ class QuizController extends Controller
         abort_unless($attempt->attachment_path && Storage::disk('public')->exists($attempt->attachment_path), 404);
 
         return Storage::disk('public')->download($attempt->attachment_path);
+    }
+
+
+    private function inlinePdf(string $path)
+    {
+        return response()->file(Storage::disk('public')->path($path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+        ]);
     }
 
     public function mark(Request $request, Quiz $quiz, StudentQuizAttempt $attempt)

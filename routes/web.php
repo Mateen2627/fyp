@@ -186,9 +186,13 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::resource('courses', 'CourseController', ['as' => 'student'])->only(['index']);
 
+        Route::get('assignments/{assignment}/view', 'AssignmentController@viewMaterial')->name('student.assignments.view');
+        Route::get('assignments/{assignment}/submission/view', 'AssignmentController@viewSubmission')->name('student.assignments.submission.view');
         Route::post('assignments/{assignment}/submit', 'AssignmentController@submit')->name('student.assignments.submit');
         Route::resource('assignments', 'AssignmentController', ['as' => 'student'])->only(['index', 'show']);
 
+        Route::get('quizzes/{quiz}/view', 'QuizController@viewMaterial')->name('student.quizzes.view');
+        Route::get('quizzes/{quiz}/attempt/view', 'QuizController@viewAttempt')->name('student.quizzes.attempt.view');
         Route::post('quizzes/{quiz}/submit', 'QuizController@submit')->name('student.quizzes.submit');
         Route::resource('quizzes', 'QuizController', ['as' => 'student'])->only(['index', 'show']);
 
@@ -207,13 +211,17 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/courses', 'CourseController@index')->name('teacher.courses.index');
         Route::get('/classes', 'ClassController@index')->name('teacher.classes.index');
 
+        Route::get('/assignments/{assignment}/view', 'AssignmentController@viewMaterial')->name('teacher.assignments.view');
         Route::get('/assignments/{assignment}/download', 'AssignmentController@downloadMaterial')->name('teacher.assignments.download');
         Route::post('/assignments/{assignment}/submissions/{submission}/mark', 'AssignmentController@mark')->name('teacher.assignments.mark');
+        Route::get('/assignments/{assignment}/submissions/{submission}/view', 'AssignmentController@viewSubmission')->name('teacher.assignments.submissions.view');
         Route::get('/assignments/{assignment}/submissions/{submission}/download', 'AssignmentController@downloadSubmission')->name('teacher.assignments.submissions.download');
         Route::resource('/assignments', 'AssignmentController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
+        Route::get('/quizzes/{quiz}/view', 'QuizController@viewMaterial')->name('teacher.quizzes.view');
         Route::get('/quizzes/{quiz}/download', 'QuizController@downloadMaterial')->name('teacher.quizzes.download');
         Route::post('/quizzes/{quiz}/attempts/{attempt}/mark', 'QuizController@mark')->name('teacher.quizzes.mark');
+        Route::get('/quizzes/{quiz}/attempts/{attempt}/view', 'QuizController@viewAttempt')->name('teacher.quizzes.attempts.view');
         Route::get('/quizzes/{quiz}/attempts/{attempt}/download', 'QuizController@downloadAttempt')->name('teacher.quizzes.attempts.download');
         Route::resource('/quizzes', 'QuizController', ['as' => 'teacher'])->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 

@@ -357,9 +357,15 @@
             </div>
             @if($quiz->attachment_path)
                 <div style="margin-left: 36px;">
+                    <a href="{{ route('teacher.quizzes.view', $quiz->id) }}" target="_blank" class="btn-download-sm">
+                        <i class="fas fa-eye"></i> View Quiz File
+                    </a>
                     <a href="{{ route('teacher.quizzes.download', $quiz->id) }}" class="btn-download-sm">
                         <i class="fas fa-download"></i> Download Quiz File
                     </a>
+                </div>
+                <div style="margin-left: 36px; margin-top: 12px;">
+                    <iframe src="{{ route('teacher.quizzes.view', $quiz->id) }}" style="width: 100%; min-height: 480px; border: 1px solid #e2e8f0; border-radius: 12px;"></iframe>
                 </div>
             @endif
         </div>
@@ -410,6 +416,9 @@
                             </td>
                             <td>
                                 @if($attempt->attachment_path)
+                                    <a href="{{ route('teacher.quizzes.attempts.view', [$quiz->id, $attempt->id]) }}" target="_blank" class="btn-download-sm">
+                                        <i class="fas fa-eye"></i> View PDF
+                                    </a>
                                     <a href="{{ route('teacher.quizzes.attempts.download', [$quiz->id, $attempt->id]) }}" class="btn-download-sm">
                                         <i class="fas fa-file-pdf"></i> Download PDF
                                     </a>

@@ -8,6 +8,7 @@ use App\Models\StudentAssignmentSubmission;
 use App\Models\StudentRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AssignmentController extends Controller
 {
@@ -33,6 +34,26 @@ class AssignmentController extends Controller
             ->keyBy('assignment_id');
 
         return view('pages.student.modules.assignments.index', compact('assignments', 'submissionMap'));
+    }
+
+
+    public function viewMaterial(Assignment $assignment)
+    {
+        $this->assertBelongsToStudentClass($assignment);
+        abort_unless($assignment->attachment_path && Storage::disk('public')->exists($assignment->attachment_path), 404);
+
+        return $this->inlinePdf($assignment->attachment_path);
+    }
+
+    public function viewSubmission(Assignment $assignment)
+    {
+        $this->assertBelongsToStudentClass($assignment);
+        $submission = StudentAssignmentSubmission::where('assignment_id', $assignment->id)
+            ->where('student_id', Auth::id())
+            ->firstOrFail();
+        abort_unless($submission->attachment_path && Storage::disk('public')->exists($submission->attachment_path), 404);
+
+        return $this->inlinePdf($submission->attachment_path);
     }
 
     public function show(Assignment $assignment)
@@ -69,6 +90,15 @@ class AssignmentController extends Controller
         ]);
 
         return redirect()->route('student.assignments.show', $assignment->id)->with('flash_success', 'Assignment submitted successfully.');
+    }
+
+
+    private function inlinePdf(string $path)
+    {
+        return response()->file(Storage::disk('public')->path($path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+        ]);
     }
 
     private function assertBelongsToStudentClass(Assignment $assignment): void

@@ -82,6 +82,15 @@ class AssignmentController extends Controller
         return redirect()->route('teacher.assignments.index')->with('flash_success', 'Assignment updated.');
     }
 
+
+    public function viewMaterial(Assignment $assignment)
+    {
+        abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
+        abort_unless($assignment->attachment_path && Storage::disk('public')->exists($assignment->attachment_path), 404);
+
+        return $this->inlinePdf($assignment->attachment_path);
+    }
+
     public function downloadMaterial(Assignment $assignment)
     {
         abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
@@ -98,6 +107,16 @@ class AssignmentController extends Controller
         return view('pages.teacher.modules.assignments.show', compact('assignment', 'submissions'));
     }
 
+
+    public function viewSubmission(Assignment $assignment, StudentAssignmentSubmission $submission)
+    {
+        abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
+        abort_unless((int) $submission->assignment_id === (int) $assignment->id, 404);
+        abort_unless($submission->attachment_path && Storage::disk('public')->exists($submission->attachment_path), 404);
+
+        return $this->inlinePdf($submission->attachment_path);
+    }
+
     public function downloadSubmission(Assignment $assignment, StudentAssignmentSubmission $submission)
     {
         abort_unless((int) $assignment->teacher_id === (int) Auth::id(), 403);
@@ -105,6 +124,15 @@ class AssignmentController extends Controller
         abort_unless($submission->attachment_path && Storage::disk('public')->exists($submission->attachment_path), 404);
 
         return Storage::disk('public')->download($submission->attachment_path);
+    }
+
+
+    private function inlinePdf(string $path)
+    {
+        return response()->file(Storage::disk('public')->path($path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+        ]);
     }
 
     public function mark(Request $request, Assignment $assignment, StudentAssignmentSubmission $submission)

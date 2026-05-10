@@ -8,6 +8,7 @@ use App\Models\StudentQuizAttempt;
 use App\Models\StudentRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class QuizController extends Controller
 {
@@ -33,6 +34,26 @@ class QuizController extends Controller
             ->keyBy('quiz_id');
 
         return view('pages.student.modules.quizzes.index', compact('quizzes', 'attemptMap'));
+    }
+
+
+    public function viewMaterial(Quiz $quiz)
+    {
+        $this->assertBelongsToStudentClass($quiz);
+        abort_unless($quiz->attachment_path && Storage::disk('public')->exists($quiz->attachment_path), 404);
+
+        return $this->inlinePdf($quiz->attachment_path);
+    }
+
+    public function viewAttempt(Quiz $quiz)
+    {
+        $this->assertBelongsToStudentClass($quiz);
+        $attempt = StudentQuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', Auth::id())
+            ->firstOrFail();
+        abort_unless($attempt->attachment_path && Storage::disk('public')->exists($attempt->attachment_path), 404);
+
+        return $this->inlinePdf($attempt->attachment_path);
     }
 
     public function show(Quiz $quiz)
@@ -69,6 +90,15 @@ class QuizController extends Controller
         ]);
 
         return redirect()->route('student.quizzes.show', $quiz->id)->with('flash_success', 'Quiz submitted successfully.');
+    }
+
+
+    private function inlinePdf(string $path)
+    {
+        return response()->file(Storage::disk('public')->path($path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+        ]);
     }
 
     private function assertBelongsToStudentClass(Quiz $quiz): void
