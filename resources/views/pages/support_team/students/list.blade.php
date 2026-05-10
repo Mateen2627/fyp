@@ -67,7 +67,7 @@
                                         <div class="student-avatar me-3">
                                             <img class="rounded-circle border border-2 border-white shadow-sm" 
                                                  style="height: 45px; width: 45px; object-fit: cover;" 
-                                                 src="{{ $s->user->photo }}" 
+                                                 src="{{ Qs::getUserPhoto($s->user) }}"
                                                  alt="{{ $s->user->name }}"
                                                  loading="lazy"
                                                  onerror="this.src='{{ asset('global_assets/images/placeholder.jpg') }}'">
@@ -182,7 +182,7 @@
                                             <div class="student-avatar me-3">
                                                 <img class="rounded-circle border border-2 border-white shadow-sm" 
                                                      style="height: 40px; width: 40px; object-fit: cover;" 
-                                                     src="{{ $sr->user->photo }}" 
+                                                     src="{{ Qs::getUserPhoto($sr->user) }}"
                                                      alt="{{ $sr->user->name }}"
                                                      loading="lazy"
                                                      onerror="this.src='{{ asset('global_assets/images/placeholder.jpg') }}'">

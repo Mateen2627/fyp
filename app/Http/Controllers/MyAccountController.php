@@ -7,6 +7,7 @@ use App\Helpers\Qs;
 use App\Http\Requests\UserChangePass;
 use App\Http\Requests\UserUpdate;
 use App\Repositories\UserRepo;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -48,6 +49,24 @@ class MyAccountController extends Controller
 
         $this->user->update($user->id, $d);
         return back()->with('flash_success', __('msg.update_ok'));
+    }
+
+
+    public function update_photo(Request $req)
+    {
+        $req->validate([
+            'photo' => 'required|image|mimes:jpeg,gif,png,jpg|max:2048',
+        ]);
+
+        $user = Auth::user();
+        $photo = $req->file('photo');
+        $f = Qs::getFileMetaData($photo);
+        $f['name'] = 'photo.' . $f['ext'];
+        $f['path'] = $photo->storeAs(Qs::getUploadPath($user->user_type).$user->code, $f['name']);
+
+        $this->user->update($user->id, ['photo' => asset('storage/' . $f['path'])]);
+
+        return back()->with('flash_success', 'Profile photo uploaded successfully.');
     }
 
     public function change_pass(UserChangePass $req)

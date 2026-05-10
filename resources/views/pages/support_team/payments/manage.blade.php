@@ -86,7 +86,7 @@
                                 <div class="student-avatar me-3">
                                     <img class="rounded-circle border border-2 border-white shadow-sm" 
                                          style="height: 45px; width: 45px; object-fit: cover;" 
-                                         src="{{ $s->user->photo }}" 
+                                         src="{{ Qs::getUserPhoto($s->user) }}"
                                          alt="{{ $s->user->name }}"
                                          onerror="this.src='{{ asset('global_assets/images/placeholder.jpg') }}'">
                                 </div>

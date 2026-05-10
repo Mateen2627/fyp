@@ -34,6 +34,27 @@ class Qs
         return asset('global_assets/images/user.png');
     }
 
+    public static function userPhotoIsMissing($user = null)
+    {
+        $user = $user ?: Auth::user();
+
+        if (!$user || !$user->photo) {
+            return true;
+        }
+
+        $photo = strtolower($user->photo);
+
+        return strpos($photo, 'global_assets/images/user.png') !== false
+            || strpos($photo, 'global_assets/images/placeholder.jpg') !== false;
+    }
+
+    public static function getUserPhoto($user = null)
+    {
+        $user = $user ?: Auth::user();
+
+        return self::userPhotoIsMissing($user) ? self::getDefaultUserImage() : $user->photo;
+    }
+
     public static function getPanelOptions()
     {
         return '    <div class="header-elements">

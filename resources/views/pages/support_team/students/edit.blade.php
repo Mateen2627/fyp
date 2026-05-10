@@ -122,7 +122,7 @@
                             <div class="form-group">
                                 <label class="d-block">Upload Passport Photo:</label>
                                 <input value="{{ old('photo') }}" accept="image/*" type="file" name="photo" class="form-input-styled" data-fouc>
-                                <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
+                                <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb. Students without a real photo will be prompted to upload one.</span>
                             </div>
                         </div>
                     </div>

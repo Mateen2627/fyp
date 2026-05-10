@@ -48,7 +48,7 @@
 
         {{--Photo--}}
         <div style="margin: 15px;">
-            <img style="width: 100px; height: 100px; float: left;" src="{{ $sr->user->photo }}" alt="...">
+            <img style="width: 100px; height: 100px; float: left;" src="{{ Qs::getUserPhoto($sr->user) }}" alt="...">
         </div>
 
        <div style="float: left; margin-left: 20px">

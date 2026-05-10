@@ -22,7 +22,7 @@
                     Change Password
                 </a>
             </li>
-            @if(Qs::userIsPTA())
+            @if(Qs::userIsPTA() || Qs::userIsStudent())
                 <li class="nav-item ms-auto">
                     <a href="#edit-profile" class="nav-link px-3 px-sm-4" data-toggle="tab" role="tab">
                         <i class="icon-user-edit me-1 d-none d-sm-inline"></i>
@@ -154,7 +154,7 @@
             </div>
 
             <!-- Edit Profile Tab -->
-            @if(Qs::userIsPTA())
+            @if(Qs::userIsPTA() || Qs::userIsStudent())
             <div class="tab-pane fade" id="edit-profile" role="tabpanel">
                 <div class="row justify-content-center justify-content-md-start">
                     <div class="col-12 col-md-8">
@@ -172,7 +172,7 @@
                                     <!-- Profile Photo -->
                                     <div class="text-center mb-4">
                                         <div class="profile-photo-wrapper mb-3">
-                                            <img src="{{ $my->photo ?? asset('global_assets/images/placeholder.jpg') }}" 
+                                            <img src="{{ Qs::getUserPhoto($my) }}"
                                                  alt="Profile Photo" 
                                                  class="rounded-circle border border-3 border-white shadow-sm"
                                                  style="width: 120px; height: 120px; object-fit: cover;"
@@ -185,8 +185,8 @@
                                         </div>
                                         <input accept="image/*" type="file" name="photo" 
                                                id="photoUpload" class="d-none" 
-                                               onchange="previewPhoto(this)">
-                                        <p class="small text-muted mb-0">Click camera icon to change photo</p>
+                                               onchange="previewPhoto(this)" {{ Qs::userIsStudent() && Qs::userPhotoIsMissing($my) ? 'required' : '' }}>
+                                        <p class="small text-muted mb-0">{{ Qs::userIsStudent() ? 'Student picture is mandatory for facial attendance training' : 'Click camera icon to change photo' }}</p>
                                     </div>
 
                                     <!-- Read-only Name -->

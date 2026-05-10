@@ -191,13 +191,13 @@
 
                         <div class="col-12 col-md-6">
                             <div class="form-group">
-                                <label class="form-label fw-semibold d-block">Passport Photograph</label>
+                                <label class="form-label fw-semibold d-block">Passport Photograph <span class="text-danger">*</span></label>
                                 <div class="custom-file-upload">
                                     <input value="{{ old('photo') }}" accept="image/*" type="file" 
-                                           name="photo" class="form-input-styled" data-fouc>
+                                           name="photo" class="form-input-styled" required data-fouc>
                                     <span class="form-text text-muted small">
                                         <i class="icon-info3 me-1"></i>
-                                        Accepted: jpeg, png. Max size: 2MB
+                                        Required for facial attendance training. Accepted: jpeg, png. Max size: 2MB
                                     </span>
                                 </div>
                             </div>

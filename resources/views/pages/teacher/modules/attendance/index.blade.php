@@ -120,8 +120,8 @@
                         <tbody>
                         @forelse($students as $student)
                             @php($existingAttendance = $dailyAttendance->get($student->user_id))
-                            <tr data-student-id="{{ $student->user_id }}" data-student-name="{{ optional($student->user)->name }}" data-student-adm="{{ $student->adm_no }}" data-student-photo="{{ optional($student->user)->photo }}" data-search="{{ strtolower(optional($student->user)->name.' '.$student->adm_no.' '.optional($student->my_class)->name.' '.optional($student->section)->name) }}" data-status="{{ optional($existingAttendance)->status ?: 'present' }}">
-                                <td><div class="student-identity"><img src="{{ optional($student->user)->photo }}" alt="{{ optional($student->user)->name }}" onerror="this.src='{{ asset('global_assets/images/user.png') }}'"><span>{{ optional($student->user)->name }}</span></div></td>
+                            <tr data-student-id="{{ $student->user_id }}" data-student-name="{{ optional($student->user)->name }}" data-student-adm="{{ $student->adm_no }}" data-student-photo="{{ Qs::getUserPhoto($student->user) }}" data-search="{{ strtolower(optional($student->user)->name.' '.$student->adm_no.' '.optional($student->my_class)->name.' '.optional($student->section)->name) }}" data-status="{{ optional($existingAttendance)->status ?: 'present' }}">
+                                <td><div class="student-identity"><img src="{{ Qs::getUserPhoto($student->user) }}" alt="{{ optional($student->user)->name }}" onerror="this.src='{{ asset('global_assets/images/user.png') }}'"><span>{{ optional($student->user)->name }}</span></div></td>
                                 <td>{{ $student->adm_no }}</td>
                                 <td>{{ optional($student->my_class)->name }} {{ optional($student->section)->name }}</td>
                                 <td>
@@ -212,8 +212,8 @@
                     <tbody>
                     @forelse($students as $student)
                         @php($existingAttendance = $dailyAttendance->get($student->user_id))
-                        <tr data-student-id="{{ $student->user_id }}" data-student-name="{{ optional($student->user)->name }}" data-student-adm="{{ $student->adm_no }}" data-student-photo="{{ optional($student->user)->photo }}" data-search="{{ strtolower(optional($student->user)->name.' '.$student->adm_no.' '.optional($student->my_class)->name.' '.optional($student->section)->name) }}">
-                            <td><div class="student-identity"><img src="{{ optional($student->user)->photo }}" alt="{{ optional($student->user)->name }}" onerror="this.src='{{ asset('global_assets/images/user.png') }}'"><span>{{ optional($student->user)->name }}<br><small class="text-muted">{{ $student->adm_no }}</small></span></div></td>
+                        <tr data-student-id="{{ $student->user_id }}" data-student-name="{{ optional($student->user)->name }}" data-student-adm="{{ $student->adm_no }}" data-student-photo="{{ Qs::getUserPhoto($student->user) }}" data-search="{{ strtolower(optional($student->user)->name.' '.$student->adm_no.' '.optional($student->my_class)->name.' '.optional($student->section)->name) }}">
+                            <td><div class="student-identity"><img src="{{ Qs::getUserPhoto($student->user) }}" alt="{{ optional($student->user)->name }}" onerror="this.src='{{ asset('global_assets/images/user.png') }}'"><span>{{ optional($student->user)->name }}<br><small class="text-muted">{{ $student->adm_no }}</small></span></div></td>
                             <td>{{ optional($student->my_class)->name }} {{ optional($student->section)->name }}</td>
                             <td>
                                 @if(optional($existingAttendance)->mode === 'facial')

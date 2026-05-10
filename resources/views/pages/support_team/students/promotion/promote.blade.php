@@ -14,7 +14,7 @@
         @foreach($students->sortBy('user.name') as $sr)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td><img class="rounded-circle" style="height: 30px; width: 30px;" src="{{ $sr->user->photo }}" alt="img"></td>
+                <td><img class="rounded-circle" style="height: 30px; width: 30px;" src="{{ Qs::getUserPhoto($sr->user) }}" alt="img"></td>
                 <td>{{ $sr->user->name }}</td>
                 <td>{{ $sr->session }}</td>
                 <td>

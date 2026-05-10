@@ -43,7 +43,7 @@
         <ul class="navbar-nav">
             <li class="nav-item dropdown dropdown-user">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                    <img src="{{ $authUser->photo }}" class="user-avatar" alt="photo">
+                    <img src="{{ Qs::getUserPhoto($authUser) }}" class="user-avatar" alt="photo" onerror="this.src='{{ Qs::getDefaultUserImage() }}'">
                     <span class="user-name">{{ $authUser->name }}</span>
                 </a>
 

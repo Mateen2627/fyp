@@ -52,6 +52,24 @@
         border-radius: 50%;
     }
     
+    .welcome-content {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-photo {
+        width: 82px;
+        height: 82px;
+        border-radius: 24px;
+        object-fit: cover;
+        border: 4px solid rgba(255, 255, 255, 0.45);
+        box-shadow: 0 16px 35px rgba(15, 23, 42, 0.22);
+        background: rgba(255, 255, 255, 0.2);
+    }
+
     .welcome-title {
         font-size: 24px;
         font-weight: 700;
@@ -59,7 +77,7 @@
         position: relative;
         z-index: 1;
     }
-    
+
     .welcome-title i {
         margin-right: 10px;
     }
@@ -299,11 +317,16 @@
 <div class="student-dashboard">
     <!-- Welcome Banner -->
     <div class="welcome-banner">
-        <div class="welcome-title">
-            <i class="fas fa-user-graduate"></i> Welcome back, {{ Auth::user()->name }}!
-        </div>
-        <div class="welcome-subtitle">
-            Track your assignments, quizzes, attendance and support requests in one place.
+        <div class="welcome-content">
+            <img src="{{ Qs::getUserPhoto(Auth::user()) }}" class="welcome-photo" alt="{{ Auth::user()->name }}" onerror="this.src='{{ Qs::getDefaultUserImage() }}'">
+            <div>
+                <div class="welcome-title">
+                    <i class="fas fa-user-graduate"></i> Welcome back, {{ Auth::user()->name }}!
+                </div>
+                <div class="welcome-subtitle">
+                    Track your assignments, quizzes, attendance and support requests in one place.
+                </div>
+            </div>
         </div>
     </div>
 

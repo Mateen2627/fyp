@@ -27,6 +27,10 @@
         @include('partials.header')
 
         <div class="content">
+            @if(Auth::check() && Qs::userIsStudent() && Qs::userPhotoIsMissing(Auth::user()))
+                @include('partials.student_photo_prompt')
+            @endif
+
             {{--Error Alert Area--}}
             @if($errors->any())
                 <div class="alert alert-danger border-0 alert-dismissible">
