@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
+use App\Models\StudentAttendance;
+use App\Models\SubjectAssessmentMark;
 use App\Repositories\UserRepo;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -66,6 +69,23 @@ class HomeController extends Controller
         }
 
         if (Qs::userIsParent()) {
+            $children = Qs::findMyChildren(Auth::id());
+            $studentIds = $children->pluck('user_id')->filter()->values();
+
+            $d['children'] = $children;
+            $d['stats'] = [
+                'children_count' => $children->count(),
+                'attendance_total' => StudentAttendance::whereIn('user_id', $studentIds)->count(),
+                'attendance_present' => StudentAttendance::whereIn('user_id', $studentIds)->where('status', 'present')->count(),
+                'mid_total' => SubjectAssessmentMark::whereIn('student_id', $studentIds)->sum('mid_marks'),
+                'final_total' => SubjectAssessmentMark::whereIn('student_id', $studentIds)->sum('final_marks'),
+            ];
+            $d['recent_attendance'] = StudentAttendance::with('markedBy')
+                ->whereIn('user_id', $studentIds)
+                ->latest('attendance_date')
+                ->take(8)
+                ->get();
+
             return view('pages.parent.dashboard', $d);
         }
 

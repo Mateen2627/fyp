@@ -296,6 +296,14 @@
         </div>
     </div>
 
+    <!-- Dashboard Stats -->
+    <div class="row mb-3">
+        <div class="col-md-3"><div class="card"><div class="card-body"><h4 class="mb-1">{{ $stats['children_count'] ?? 0 }}</h4><span>Total Children</span></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><h4 class="mb-1">{{ $stats['attendance_total'] ?? 0 }}</h4><span>Total Attendance Logs</span></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><h4 class="mb-1">{{ number_format($stats['mid_total'] ?? 0, 2) }}</h4><span>Combined Mid Marks</span></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><h4 class="mb-1">{{ number_format($stats['final_total'] ?? 0, 2) }}</h4><span>Combined Final Marks</span></div></div></div>
+    </div>
+
     <!-- Dashboard Modules Grid -->
     <div class="dashboard-grid">
         <!-- My Children Module -->
@@ -327,7 +335,48 @@
                 </div>
             </div>
         </a>
+
+        @if(($children ?? collect())->isNotEmpty())
+            <a href="{{ route('parent.attendance.show', $children->first()->id) }}" class="module-card">
+                <div class="module-card-body">
+                    <div class="module-icon warning"><i class="fas fa-calendar-check"></i></div>
+                    <h3 class="module-title">Attendance</h3>
+                    <p class="module-desc">Track daily attendance for your child with present, absent, late, and excused records.</p>
+                    <div class="module-link"><span>Open Attendance</span><i class="fas fa-arrow-right"></i></div>
+                </div>
+            </a>
+
+            <a href="{{ route('parent.academics.show', $children->first()->id) }}" class="module-card">
+                <div class="module-card-body">
+                    <div class="module-icon info"><i class="fas fa-book-open"></i></div>
+                    <h3 class="module-title">Academics</h3>
+                    <p class="module-desc">See mid/final marks, assignments, and quizzes submitted by your child.</p>
+                    <div class="module-link"><span>Open Academics</span><i class="fas fa-arrow-right"></i></div>
+                </div>
+            </a>
+        @endif
     </div>
+
+    @if(($recent_attendance ?? collect())->isNotEmpty())
+        <div class="card mt-3">
+            <div class="card-header"><h6 class="mb-0">Recent Attendance Updates</h6></div>
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead><tr><th>Date</th><th>Student ID</th><th>Status</th><th>Marked By</th></tr></thead>
+                    <tbody>
+                    @foreach($recent_attendance as $row)
+                        <tr>
+                            <td>{{ optional($row->attendance_date)->format('Y-m-d') }}</td>
+                            <td>{{ $row->user_id }}</td>
+                            <td><span class="badge badge-{{ $row->status === 'present' ? 'success' : ($row->status === 'absent' ? 'danger' : 'warning') }}">{{ ucfirst($row->status) }}</span></td>
+                            <td>{{ optional($row->markedBy)->name ?: '—' }}</td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 
     <!-- Quick Tips Section -->
     <div class="tips-card">

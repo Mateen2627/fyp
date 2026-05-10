@@ -72,6 +72,14 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a href="{{ route('my_children') }}"
+                       class="nav-link {{ Route::is('parent.academics.*') ? 'active' : '' }}">
+                        <i class="fas fa-book-open"></i>
+                        <span>Academics</span>
+                    </a>
+                </li>
+
                 <!-- Academic Timetable -->
                 <li class="nav-item">
                     <a href="{{ route('tt.index') }}" 
