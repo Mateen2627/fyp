@@ -210,6 +210,8 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('/attendance', 'AttendanceController@index')->name('teacher.attendance.index');
         Route::post('/attendance', 'AttendanceController@store')->name('teacher.attendance.store');
+        Route::post('/attendance/student', 'AttendanceController@storeSingle')->name('teacher.attendance.store_single');
+        Route::post('/attendance/facial', 'AttendanceController@storeFacial')->name('teacher.attendance.store_facial');
     });
 
     /************************ AJAX ****************************/

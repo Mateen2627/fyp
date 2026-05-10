@@ -108,16 +108,7 @@ class AttendanceController extends Controller
             'remarks.*' => 'nullable|string|max:1000',
         ]);
 
-        $classIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('my_class_id')->filter()->unique();
-        $studentQuery = StudentRecord::whereIn('my_class_id', $classIds);
-
-        if (!empty($data['class_id']) && $classIds->contains((int) $data['class_id'])) {
-            $studentQuery->where('my_class_id', (int) $data['class_id']);
-        }
-
-        $allowedStudentIds = $studentQuery->pluck('user_id')->filter()->map(function ($id) {
-            return (int) $id;
-        })->all();
+        $allowedStudentIds = $this->allowedStudentIds($data['class_id'] ?? null);
 
         foreach ($data['attendance'] as $studentId => $status) {
             $studentId = (int) $studentId;
@@ -126,20 +117,118 @@ class AttendanceController extends Controller
                 continue;
             }
 
-            StudentAttendance::updateOrCreate(
-                ['user_id' => $studentId, 'attendance_date' => $data['attendance_date']],
-                [
-                    'status' => $status,
-                    'mode' => 'manual',
-                    'facial_verified' => 0,
-                    'remarks' => $data['remarks'][$studentId] ?? null,
-                    'marked_by' => Auth::id(),
-                ]
+            $this->saveAttendanceRecord(
+                $studentId,
+                $data['attendance_date'],
+                $status,
+                'manual',
+                false,
+                $data['remarks'][$studentId] ?? null
             );
         }
 
         return redirect()->route('teacher.attendance.index', $request->only('class_id'))
-            ->with('flash_success', 'Attendance saved successfully.');
+            ->with('flash_success', 'Manual attendance saved for the selected class.');
+    }
+
+    public function storeSingle(Request $request)
+    {
+        $data = $request->validate([
+            'attendance_date' => 'required|date',
+            'class_id' => 'nullable|integer',
+            'student_id' => 'required|integer',
+            'status' => 'required|in:present,absent,late,excused',
+            'remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $studentId = (int) $data['student_id'];
+
+        if (!in_array($studentId, $this->allowedStudentIds($data['class_id'] ?? null), true)) {
+            return redirect()->route('teacher.attendance.index', $request->only('class_id'))
+                ->with('flash_danger', 'You can only mark attendance for students in your assigned classes.');
+        }
+
+        $this->saveAttendanceRecord(
+            $studentId,
+            $data['attendance_date'],
+            $data['status'],
+            'manual',
+            false,
+            $data['remarks'] ?? null
+        );
+
+        return redirect()->route('teacher.attendance.index', $request->only('class_id'))
+            ->with('flash_success', 'Manual attendance saved for one student.');
+    }
+
+    public function storeFacial(Request $request)
+    {
+        $data = $request->validate([
+            'attendance_date' => 'required|date',
+            'class_id' => 'nullable|integer',
+            'facial_student_ids' => 'required|array|min:1',
+            'facial_student_ids.*' => 'integer',
+            'facial_confidence' => 'nullable|array',
+            'facial_confidence.*' => 'nullable|numeric|min:0|max:100',
+            'facial_remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $allowedStudentIds = $this->allowedStudentIds($data['class_id'] ?? null);
+        $marked = 0;
+
+        foreach ($data['facial_student_ids'] as $studentId) {
+            $studentId = (int) $studentId;
+
+            if (!in_array($studentId, $allowedStudentIds, true)) {
+                continue;
+            }
+
+            $confidence = $data['facial_confidence'][$studentId] ?? rand(82, 99);
+            $remarks = trim('AI facial attendance verified (fake confidence: '.$confidence.'%). '.($data['facial_remarks'] ?? ''));
+
+            $this->saveAttendanceRecord(
+                $studentId,
+                $data['attendance_date'],
+                'present',
+                'facial',
+                true,
+                $remarks
+            );
+
+            $marked++;
+        }
+
+        return redirect()->route('teacher.attendance.index', $request->only('class_id'))
+            ->with($marked ? 'flash_success' : 'flash_danger', $marked ? 'Fake AI facial attendance marked successfully.' : 'No valid students were selected for facial attendance.');
+    }
+
+
+    private function allowedStudentIds($classId = null): array
+    {
+        $classIds = TeacherAssignment::where('teacher_id', Auth::id())->pluck('my_class_id')->filter()->unique();
+        $studentQuery = StudentRecord::whereIn('my_class_id', $classIds);
+
+        if ($classId && $classIds->contains((int) $classId)) {
+            $studentQuery->where('my_class_id', (int) $classId);
+        }
+
+        return $studentQuery->pluck('user_id')->filter()->map(function ($id) {
+            return (int) $id;
+        })->all();
+    }
+
+    private function saveAttendanceRecord(int $studentId, string $attendanceDate, string $status, string $mode, bool $facialVerified, ?string $remarks): void
+    {
+        StudentAttendance::updateOrCreate(
+            ['user_id' => $studentId, 'attendance_date' => $attendanceDate],
+            [
+                'status' => $status,
+                'mode' => $mode,
+                'facial_verified' => $facialVerified,
+                'remarks' => $remarks,
+                'marked_by' => Auth::id(),
+            ]
+        );
     }
 
     private function resolveDateRange(Request $request): array
