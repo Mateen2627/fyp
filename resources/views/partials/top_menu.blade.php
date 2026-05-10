@@ -1,3 +1,11 @@
+@php
+    $authUser = Auth::user();
+    $studentRecord = Qs::userIsStudent() ? Qs::findStudentRecord($authUser->id) : null;
+    $profileUrl = $studentRecord
+        ? route('students.show', Qs::hash($studentRecord->id))
+        : route('users.show', Qs::hash($authUser->id));
+@endphp
+
 <div class="navbar navbar-expand-md navbar-dark">
     <!-- Brand Area -->
     <div class="d-flex align-items-center">
@@ -35,12 +43,12 @@
         <ul class="navbar-nav">
             <li class="nav-item dropdown dropdown-user">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                    <img src="{{ Auth::user()->photo }}" class="user-avatar" alt="photo">
-                    <span class="user-name">{{ Auth::user()->name }}</span>
+                    <img src="{{ $authUser->photo }}" class="user-avatar" alt="photo">
+                    <span class="user-name">{{ $authUser->name }}</span>
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a href="{{ Qs::userIsStudent() ? route('students.show', Qs::hash(Qs::findStudentRecord(Auth::user()->id)->id)) : route('users.show', Qs::hash(Auth::user()->id)) }}" class="dropdown-item">
+                    <a href="{{ $profileUrl }}" class="dropdown-item">
                         <i class="fas fa-user"></i> My Profile
                     </a>
                     <a href="{{ route('my_account') }}" class="dropdown-item">
