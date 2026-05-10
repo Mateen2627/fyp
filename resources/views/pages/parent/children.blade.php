@@ -26,6 +26,9 @@
                     <th>Name</th>
                     <th>ADM_No</th>
                     <th>Section</th>
+                    <th>Attendance</th>
+                    <th>Present %</th>
+                    <th>Mid/Final Totals</th>
                     <th>Email</th>
                     <th>Action</th>
                 </tr>
@@ -38,6 +41,18 @@
                         <td>{{ $s->user->name }}</td>
                         <td>{{ $s->adm_no }}</td>
                         <td>{{ $s->my_class->name.' '.$s->section->name }}</td>
+                        @php
+                            $attendanceTotal = (int) ($attendanceCounts[$s->user_id] ?? 0);
+                            $presentTotal = (int) ($presentCounts[$s->user_id] ?? 0);
+                            $presentPct = $attendanceTotal > 0 ? round(($presentTotal / $attendanceTotal) * 100, 1) : 0;
+                            $totals = $markTotals[$s->user_id] ?? null;
+                        @endphp
+                        <td>{{ $attendanceTotal }}</td>
+                        <td>{{ $presentPct }}%</td>
+                        <td>
+                            Mid: {{ number_format((float) ($totals->mid_total ?? 0), 2) }}<br>
+                            Final: {{ number_format((float) ($totals->final_total ?? 0), 2) }}
+                        </td>
                         <td>{{ $s->user->email }}</td>
                         <td class="text-center">
                             <div class="list-icons">

@@ -258,7 +258,9 @@ Route::group(['namespace' => 'SuperAdmin','middleware' => 'super_admin', 'prefix
 Route::group(['namespace' => 'MyParent','middleware' => 'my_parent',], function(){
 
     Route::get('/my_children', 'MyController@children')->name('my_children');
+    Route::get('/parent/attendance', 'MyController@attendanceIndex')->name('parent.attendance.index');
     Route::get('/children/{student}/attendance', 'MyController@attendance')->name('parent.attendance.show');
+    Route::get('/parent/academics', 'MyController@academicsIndex')->name('parent.academics.index');
     Route::get('/children/{student}/academics', 'MyController@academics')->name('parent.academics.show');
 
 });

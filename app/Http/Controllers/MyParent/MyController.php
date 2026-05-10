@@ -24,9 +24,46 @@ class MyController extends Controller
 
     public function children()
     {
-        $data['students'] = Qs::findMyChildren(Auth::user()->id);
+        $students = Qs::findMyChildren(Auth::user()->id);
+        $studentIds = $students->pluck('user_id')->filter()->values();
+
+        $attendanceCounts = StudentAttendance::selectRaw('user_id, count(*) as total')
+            ->whereIn('user_id', $studentIds)
+            ->groupBy('user_id')
+            ->pluck('total', 'user_id');
+
+        $presentCounts = StudentAttendance::selectRaw('user_id, count(*) as total')
+            ->whereIn('user_id', $studentIds)
+            ->where('status', 'present')
+            ->groupBy('user_id')
+            ->pluck('total', 'user_id');
+
+        $markTotals = SubjectAssessmentMark::selectRaw('student_id, sum(mid_marks) as mid_total, sum(final_marks) as final_total')
+            ->whereIn('student_id', $studentIds)
+            ->groupBy('student_id')
+            ->get()
+            ->keyBy('student_id');
+
+        $data['students'] = $students;
+        $data['attendanceCounts'] = $attendanceCounts;
+        $data['presentCounts'] = $presentCounts;
+        $data['markTotals'] = $markTotals;
 
         return view('pages.parent.children', $data);
+    }
+
+    public function attendanceIndex()
+    {
+        $students = Qs::findMyChildren(Auth::id());
+        abort_if($students->isEmpty(), 404, 'No children found.');
+        return redirect()->route('parent.attendance.show', $students->first()->id);
+    }
+
+    public function academicsIndex()
+    {
+        $students = Qs::findMyChildren(Auth::id());
+        abort_if($students->isEmpty(), 404, 'No children found.');
+        return redirect()->route('parent.academics.show', $students->first()->id);
     }
 
     public function attendance(Request $request, StudentRecord $student)

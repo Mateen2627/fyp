@@ -65,7 +65,7 @@
 
                 <!-- Attendance -->
                 <li class="nav-item">
-                    <a href="{{ route('my_children') }}"
+                    <a href="{{ route('parent.attendance.index') }}"
                        class="nav-link {{ Route::is('parent.attendance.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-check"></i>
                         <span>Attendance</span>
@@ -73,7 +73,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{ route('my_children') }}"
+                    <a href="{{ route('parent.academics.index') }}"
                        class="nav-link {{ Route::is('parent.academics.*') ? 'active' : '' }}">
                         <i class="fas fa-book-open"></i>
                         <span>Academics</span>
