@@ -229,7 +229,7 @@ body {
   .sidebar-main,
   .sidebar-main .sidebar-content, .sidebar-secondary,
   .sidebar-secondary .sidebar-content {
-    left: -18.5625rem; }
+    left: -68.5625rem; }
   .sidebar-right,
   .sidebar-right .sidebar-content {
     right: -18.5625rem; }
@@ -238,7 +238,7 @@ body {
 
 .sidebar:not(.sidebar-component) .sidebar-content {
   position: fixed;
-  top: 3.12503rem;
+  top: 75px;
   bottom: 0;
   width: inherit;
   overflow-y: scroll;

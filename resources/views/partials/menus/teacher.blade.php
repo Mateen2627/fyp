@@ -1,7 +1,7 @@
 <div class="sidebar sidebar-dark sidebar-main sidebar-expand-md">
     <div class="sidebar-mobile-toggler text-center">
         <a href="#" class="sidebar-mobile-main-toggle"><i class="fas fa-arrow-left"></i></a>
-        <span class="sidebar-brand">SPAMS</span>
+        <span class="sidebar-brand">NeoEdu</span>
         <a href="#" class="sidebar-mobile-expand"><i class="fas fa-expand"></i><i class="fas fa-compress"></i></a>
     </div>
 

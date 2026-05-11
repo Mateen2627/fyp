@@ -11,7 +11,7 @@
                     <i class="icon-shield text-primary"></i>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-1">Hello, {{ Auth::user()->name }}!</h5>
+                    <h5 class="fw-bold mb-1">Welcome back, {{ Auth::user()->name }}!</h5>
                     <p class="text-muted mb-0 small">Manage school operations efficiently with the modules below</p>
                 </div>
             </div>

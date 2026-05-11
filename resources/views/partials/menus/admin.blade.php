@@ -1,11 +1,16 @@
-<!-- Make sure Font Awesome is loaded in your layout header -->
+{{-- <!-- Make sure Font Awesome is loaded in your layout header -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div class="sidebar sidebar-dark sidebar-main sidebar-expand-md">
+<div class="sidebar sidebar-dark sidebar-main sidebar-expand-md" id="mainSidebar">
     <div class="sidebar-mobile-toggler text-center">
-        <a href="#" class="sidebar-mobile-main-toggle"><i class="fas fa-arrow-left"></i></a>
+        <a href="#" class="sidebar-mobile-main-toggle" id="closeSidebarBtn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
         <span class="sidebar-brand">NeoEdu</span>
-        <a href="#" class="sidebar-mobile-expand"><i class="fas fa-expand"></i><i class="fas fa-compress"></i></a>
+        <a href="#" class="sidebar-mobile-expand" id="expandSidebarBtn">
+            <i class="fas fa-expand"></i>
+            <i class="fas fa-compress"></i>
+        </a>
     </div>
 
     <div class="sidebar-content">
@@ -14,7 +19,7 @@
                 <div class="media">
                     <div class="mr-3">
                         <a href="{{ route('my_account') }}">
-                            <img src="{{ Qs::getUserPhoto(Auth::user()) }}" width="48" height="48" class="rounded-circle" alt="photo" style="border: 2px solid rgba(255,255,255,0.2);">
+                            <img src="{{ Qs::getUserPhoto(Auth::user()) }}" width="48" height="48" class="rounded-circle" alt="photo">
                         </a>
                     </div>
                     <div class="media-body">
@@ -87,21 +92,16 @@
     </div>
 </div>
 
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <style>
-    /* Make sure icons are visible */
-    .nav-sidebar .nav-link i {
-        display: inline-block;
-        font-style: normal;
-        font-variant: normal;
-        text-rendering: auto;
-        line-height: 1;
-    }
-    
     /* Modern Sidebar Styling */
     .sidebar-dark {
         background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        transition: transform 0.3s ease-in-out;
+        will-change: transform;
     }
     
     /* Sidebar Brand */
@@ -128,6 +128,7 @@
         color: rgba(255, 255, 255, 0.6);
         transition: all 0.2s ease;
         font-size: 14px;
+        cursor: pointer;
     }
     
     .sidebar-mobile-toggler a:hover {
@@ -281,35 +282,59 @@
         }
     }
     
+    /* Sidebar Overlay */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    
+    
     /* ========================================
-       RESPONSIVE STYLES - MOBILE FIRST
+       RESPONSIVE STYLES
     ======================================== */
+    
+    /* Desktop Styles - Sidebar visible by default */
+    @media (min-width: 769px) {
+        .sidebar-dark {
+            width: 280px;
+            position: sticky;
+            top: 0;
+            transform: translateX(0) !important;
+        }
+        
+        .sidebar-overlay {
+            display: none !important;
+        }
+    }
     
     /* Tablet & Mobile Styles */
     @media (max-width: 768px) {
         .sidebar-dark {
             width: 280px;
             position: fixed;
-            left: -280px;
+            left: 0;
             top: 0;
             bottom: 0;
             z-index: 1050;
-            transition: left 0.3s ease;
+            transform: translateX(-100%);
         }
         
         .sidebar-dark.sidebar-open {
-            left: 0;
+            transform: translateX(0);
         }
         
-        /* Overlay when sidebar is open */
         .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
             display: none;
         }
         
@@ -325,29 +350,13 @@
             font-size: 16px;
         }
         
-        .sidebar-mobile-toggler a {
-            font-size: 14px;
-        }
-        
         .sidebar-user .card-body {
             padding: 14px;
-        }
-        
-        .sidebar-user .media {
-            gap: 10px;
         }
         
         .sidebar-user img {
             width: 36px;
             height: 36px;
-        }
-        
-        .sidebar-user .media-title {
-            font-size: 13px;
-        }
-        
-        .sidebar-user .opacity-75 {
-            font-size: 11px;
         }
         
         .nav-sidebar {
@@ -356,23 +365,11 @@
         
         .nav-sidebar .nav-link {
             padding: 10px 12px;
-            border-radius: 10px;
-            gap: 12px;
         }
         
         .nav-sidebar .nav-link i {
             font-size: 16px;
             width: 22px;
-        }
-        
-        .nav-sidebar .nav-link span {
-            font-size: 13px;
-        }
-        
-        /* Active touch feedback for mobile */
-        .nav-sidebar .nav-link:active {
-            background: rgba(99, 102, 241, 0.3);
-            transform: scale(0.98);
         }
     }
     
@@ -380,19 +377,6 @@
     @media (max-width: 480px) {
         .sidebar-dark {
             width: 260px;
-            left: -260px;
-        }
-        
-        .sidebar-mobile-toggler {
-            padding: 10px 14px;
-        }
-        
-        .sidebar-mobile-toggler .sidebar-brand {
-            font-size: 15px;
-        }
-        
-        .sidebar-user .card-body {
-            padding: 12px;
         }
         
         .sidebar-user img {
@@ -400,112 +384,295 @@
             height: 32px;
         }
         
-        .sidebar-user .media-title {
-            font-size: 12px;
-        }
-        
-        .sidebar-user .opacity-75 {
-            font-size: 10px;
-        }
-        
-        .nav-sidebar {
-            padding: 6px 8px;
-        }
-        
         .nav-sidebar .nav-link {
             padding: 8px 10px;
-            gap: 10px;
         }
         
         .nav-sidebar .nav-link i {
             font-size: 14px;
             width: 20px;
         }
-        
-        .nav-sidebar .nav-link span {
-            font-size: 12px;
-        }
-    }
-    
-    /* Desktop Styles - Sidebar visible by default */
-    @media (min-width: 769px) {
-        .sidebar-dark {
-            width: 280px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-        }
-        
-        .sidebar-mobile-toggler {
-            display: flex;
-        }
-        
-        .sidebar-mobile-expand {
-            display: inline-block;
-        }
     }
 </style>
 
-<!-- Add this JavaScript for mobile sidebar toggle -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Create overlay element
-        const overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        document.body.appendChild(overlay);
+    (function() {
+        'use strict';
         
-        // Toggle sidebar on mobile
-        const sidebarToggle = document.querySelector('.sidebar-mobile-main-toggle');
-        const sidebarExpand = document.querySelector('.sidebar-mobile-expand');
-        const sidebar = document.querySelector('.sidebar-dark');
-        
-        function openSidebar() {
-            if (sidebar) {
-                sidebar.classList.add('sidebar-open');
-                overlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-        
-        function closeSidebar() {
-            if (sidebar) {
-                sidebar.classList.remove('sidebar-open');
-                overlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }
-        
-        if (sidebarToggle && window.innerWidth <= 768) {
-            sidebarToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                openSidebar();
-            });
-        }
-        
-        // Close sidebar when clicking overlay
-        overlay.addEventListener('click', function() {
-            closeSidebar();
-        });
-        
-        // Close sidebar when clicking a nav link on mobile
-        const navLinks = document.querySelectorAll('.nav-sidebar .nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    setTimeout(closeSidebar, 150);
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const closeBtn = document.getElementById('closeSidebarBtn');
+            const expandBtn = document.getElementById('expandSidebarBtn');
+            
+            // Function to open sidebar
+            function openSidebar() {
+                if (sidebar) {
+                    sidebar.classList.add('sidebar-open');
+                    if (overlay) overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
                 }
-            });
-        });
-        
-        // Handle window resize
-        let resizeTimer;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
-                if (window.innerWidth > 768) {
+            }
+            
+            // Function to close sidebar
+            function closeSidebar() {
+                if (sidebar) {
+                    sidebar.classList.remove('sidebar-open');
+                    if (overlay) overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+            
+            // Toggle function
+            function toggleSidebar() {
+                if (sidebar && sidebar.classList.contains('sidebar-open')) {
                     closeSidebar();
+                } else {
+                    openSidebar();
                 }
-            }, 250);
+            }
+            
+            // Close button click (the arrow icon)
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeSidebar();
+                });
+            }
+            
+            // Expand button click
+            if (expandBtn) {
+                expandBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Optional: Add expand/collapse functionality here
+                    console.log('Expand button clicked');
+                });
+            }
+            
+            // Close sidebar when clicking overlay
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    closeSidebar();
+                });
+            }
+            
+            // Handle mobile toggle from navbar (if exists)
+            const mobileNavToggle = document.querySelector('.sidebar-mobile-main-toggle');
+            if (mobileNavToggle) {
+                mobileNavToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
+            
+            // Also listen for navbar toggler that triggers sidebar
+            const sideNavToggle = document.querySelector('[data-toggle="sidebar"]');
+            if (sideNavToggle) {
+                sideNavToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+            }
+            
+            // Close sidebar when clicking a nav link on mobile
+            const navLinks = document.querySelectorAll('.nav-sidebar .nav-link');
+            navLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        setTimeout(closeSidebar, 200);
+                    }
+                });
+            });
+            
+            // Handle window resize
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    if (window.innerWidth > 768) {
+                        closeSidebar();
+                    }
+                }, 250);
+            });
+            
+            // Also handle the navbar toggler from top_menu
+            const navbarToggler = document.querySelector('#mobileSidebarToggle');
+            if (navbarToggler) {
+                navbarToggler.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
         });
-    });
-</script>
+    })();
+</script> --}}
+
+
+{{-- Admin sidebar — replace karo pura file content isse: --}}
+
+<div class="sidebar sidebar-dark sidebar-main sidebar-expand-md">
+    <div class="sidebar-mobile-toggler text-center">
+        <a href="#" class="sidebar-mobile-main-toggle">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <span class="sidebar-brand">NeoEdu</span>
+        <a href="#" class="sidebar-mobile-expand">
+            <i class="fas fa-expand"></i>
+            <i class="fas fa-compress"></i>
+        </a>
+    </div>
+
+    <div class="sidebar-content">
+        <div class="sidebar-user">
+            <div class="card-body">
+                <div class="media">
+                    <div class="mr-3">
+                        <a href="{{ route('my_account') }}">
+                            <img src="{{ Qs::getUserPhoto(Auth::user()) }}"
+                                 width="48" height="48"
+                                 class="rounded-circle" alt="photo"
+                                 style="border: 2px solid rgba(255,255,255,0.2);"
+                                 onerror="this.src='{{ Qs::getDefaultUserImage() }}'">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <div class="media-title font-weight-semibold text-white">
+                            {{ Auth::user()->name }}
+                        </div>
+                        <div class="font-size-xs opacity-75">
+                            <i class="fas fa-user-shield font-size-sm"></i> &nbsp;Administrator
+                        </div>
+                    </div>
+                    <div class="ml-3 align-self-center">
+                        <a href="{{ route('my_account') }}" class="text-white-50 hover-text-white">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-sidebar-mobile">
+            <ul class="nav nav-sidebar" data-nav-type="accordion">
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="nav-link {{ Route::is('admin.dashboard') ? 'active' : '' }}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.users.index') }}"
+                       class="nav-link {{ Route::is('admin.users.*') ? 'active' : '' }}">
+                        <i class="fas fa-users"></i>
+                        <span>Manage Users</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.courses.index') }}"
+                       class="nav-link {{ Route::is('admin.courses.*') ? 'active' : '' }}">
+                        <i class="fas fa-book"></i>
+                        <span>Manage Courses</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.classes.index') }}"
+                       class="nav-link {{ Route::is('admin.classes.*') ? 'active' : '' }}">
+                        <i class="fas fa-chalkboard"></i>
+                        <span>Manage Classes</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.assign-teachers.index') }}"
+                       class="nav-link {{ Route::is('admin.assign-teachers.*') ? 'active' : '' }}">
+                        <i class="fas fa-user-check"></i>
+                        <span>Assign Teachers</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.reports.index') }}"
+                       class="nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('admin.system-settings.index') }}"
+                       class="nav-link {{ Route::is('admin.system-settings.*') ? 'active' : '' }}">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>System Settings</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar-dark {
+        background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-mobile-toggler .sidebar-brand {
+        font-weight: 800;
+        font-size: 18px;
+        background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: 1px;
+    }
+    .sidebar-user {
+        background: rgba(99, 102, 241, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 16px;
+    }
+    .card-sidebar-mobile {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .nav-sidebar .nav-link {
+        padding: 12px 16px;
+        margin: 4px 12px;
+        border-radius: 12px;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .nav-sidebar .nav-link i {
+        font-size: 1.1rem;
+        width: 24px;
+        text-align: center;
+        color: rgba(167, 139, 250, 0.7);
+    }
+    .nav-sidebar .nav-link:hover {
+        background: rgba(99, 102, 241, 0.2);
+        color: white;
+    }
+    .nav-sidebar .nav-link.active {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+    }
+    .nav-sidebar .nav-link.active i {
+        color: white;
+    }
+    .text-white-50 { color: rgba(255, 255, 255, 0.5); }
+    .hover-text-white:hover { color: white !important; }
+</style>
