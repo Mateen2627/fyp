@@ -315,6 +315,22 @@
                 <form method="POST" action="{{ route('login') }}" class="space-y-5">
                     @csrf
 
+                    @if ($errors->any())
+                        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-circle-exclamation mt-0.5 text-red-500"></i>
+                                <div>
+                                    <p class="font-bold">Unable to sign in</p>
+                                    <ul class="mt-1 list-disc space-y-1 pl-4">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Email/Username Field -->
                     <div class="space-y-2">
                         <label class="text-sm font-semibold text-slate-700">System ID / Email</label>

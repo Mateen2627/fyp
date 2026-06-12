@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -37,14 +38,37 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    /*
-     *  Login with Username or Email
-     * */
+    /**
+     * Use one visible field for the login identifier so validation and
+     * authentication errors appear next to the field the user actually filled.
+     */
     public function username()
     {
-        $identity = request()->identity;
+        return 'identity';
+    }
+
+    /**
+     * Validate the login request using the visible form fields.
+     */
+    protected function validateLogin(Request $request)
+    {
+        $request->validate([
+            'identity' => 'required|string',
+            'password' => 'required|string',
+        ]);
+    }
+
+    /**
+     * Login with either username or email.
+     */
+    protected function credentials(Request $request)
+    {
+        $identity = $request->input('identity');
         $field = filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-        request()->merge([$field => $identity]);
-        return $field;
+
+        return [
+            $field => $identity,
+            'password' => $request->input('password'),
+        ];
     }
 }
