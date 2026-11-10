@@ -45,7 +45,21 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "audit": {
+            "ignore": {
+                "PKSA-cv56-2228-pzr6": "Required for Laravel 8 compatibility",
+                "PKSA-6r8f-nxsb-67bq": "Required for Laravel 8 compatibility",
+                "PKSA-gh7h-hhy4-byg7": "Required for Laravel 8 compatibility",
+                "PKSA-mwt3-h9tv-kx78": "Required for Laravel 8 compatibility",
+                "PKSA-hp6n-n4kz-21wk": "Required for Laravel 8 compatibility",
+                "PKSA-mckv-s5hg-868k": "Required for Laravel 8 compatibility",
+                "PKSA-7ztm-rpt3-qqzk": "Required for Laravel 8 compatibility",
+                "PKSA-2kw5-jd8w-5mvh": "Required for Laravel 8 compatibility",
+                "PKSA-4jrs-y99s-q8j6": "Required for Laravel 8 compatibility",
+                "PKSA-hbk6-2vfz-8f8n": "Required for Laravel 8 compatibility"
+            }
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
