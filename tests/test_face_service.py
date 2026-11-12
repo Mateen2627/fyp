@@ -57,8 +57,14 @@ class FaceServiceTests(unittest.TestCase):
             self.assertFalse(path.exists(), "Temporary face image was retained")
 
     def test_match_contract_and_fixed_filenames(self):
-        result = self.result({"verified": True, "distance": 0.1, "threshold": 0.25})
-        self.assertEqual(result, {"verified": True, "distance": 0.1, "threshold": 0.25})
+        result = self.result({
+            "verified": True, "distance": 0.1, "threshold": 0.25, "confidence": 91.2,
+            "facial_areas": {"img2": {"x": 20, "y": 30, "w": 80, "h": 90}},
+        })
+        self.assertEqual(result, {
+            "verified": True, "distance": 0.1, "threshold": 0.25, "match_confidence": 91.2,
+            "face_box": {"x": 20, "y": 30, "w": 80, "h": 90}, "spoof_check": "passed",
+        })
         self.assertEqual(self.paths[0].name, "reference.jpg")
 
     def test_mismatch(self):
@@ -108,7 +114,7 @@ class FaceServiceTests(unittest.TestCase):
             verify.assert_not_called()
 
     def test_health(self):
-        self.assertEqual(self.api.health(), {"status": "ok"})
+        self.assertEqual(self.api.health(), {"status": "ok", "models_ready": False})
         self.assertEqual(self.api.root(), {
             "service": "NUML Face Verification",
             "status": "running",

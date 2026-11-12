@@ -60,7 +60,14 @@ class FaceAttendanceService
         if ($oldCapture && strpos($oldCapture, 'attendance_captures/') === 0 && strpos($oldCapture, '..') === false) {
             Storage::disk('local')->delete($oldCapture);
         }
-        return ['attendance' => $attendance, 'distance' => $result['distance'] ?? null, 'threshold' => $result['threshold'] ?? null];
+        return [
+            'attendance' => $attendance,
+            'distance' => $result['distance'] ?? null,
+            'threshold' => $result['threshold'] ?? null,
+            'match_confidence' => $result['match_confidence'] ?? null,
+            'face_box' => $result['face_box'] ?? null,
+            'spoof_check' => $result['spoof_check'] ?? 'passed',
+        ];
     }
 
     private function context(User $user, $lessonId, StudentRecord $student = null)

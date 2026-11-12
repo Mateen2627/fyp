@@ -11,6 +11,18 @@ logger = logging.getLogger(__name__)
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
 FACE_THRESHOLD = 0.25
 verification_lock = Lock()
+models_ready = False
+
+
+@app.on_event("startup")
+def warm_face_models():
+    """Load FaceNet and the anti-spoof model before the first student checks in."""
+    global models_ready
+    logger.info("Loading FaceNet512 and anti-spoofing models; first startup can take a few minutes.")
+    DeepFace.build_model(model_name="Facenet512", task="facial_recognition")
+    DeepFace.build_model(model_name="Fasnet", task="spoofing")
+    models_ready = True
+    logger.info("Face verification models are ready.")
 
 
 @app.get("/")
@@ -38,8 +50,7 @@ def save_upload(upload: UploadFile, destination: Path):
 
 @app.get("/health")
 def health():
-    # Health confirms the API is running; models may still need their first load.
-    return {"status": "ok"}
+    return {"status": "ok", "models_ready": models_ready}
 
 
 @app.post("/verify-face")
@@ -69,10 +80,36 @@ def verify_face(
                 raise RuntimeError("Invalid verification metrics")
             if not math.isclose(threshold, FACE_THRESHOLD, rel_tol=0, abs_tol=1e-6):
                 raise RuntimeError("Unexpected verification threshold")
+            areas = result.get("facial_areas") or {}
+            live_area = areas.get("img2") if isinstance(areas, dict) else None
+            face_box = None
+            if isinstance(live_area, dict):
+                coordinates = {}
+                for key in ("x", "y", "w", "h"):
+                    value = live_area.get(key)
+                    try:
+                        number = float(value)
+                    except (TypeError, ValueError):
+                        break
+                    if not math.isfinite(number):
+                        break
+                    coordinates[key] = int(number)
+                if len(coordinates) == 4 and coordinates["w"] > 0 and coordinates["h"] > 0:
+                    face_box = coordinates
+            face_confidence = result.get("confidence")
+            try:
+                face_confidence = float(face_confidence)
+            except (TypeError, ValueError):
+                face_confidence = None
+            if face_confidence is not None and (not math.isfinite(face_confidence) or not 0 <= face_confidence <= 100):
+                face_confidence = None
             return {
                 "verified": bool(result["verified"]) and distance <= threshold,
                 "distance": distance,
                 "threshold": threshold,
+                "match_confidence": face_confidence,
+                "face_box": face_box,
+                "spoof_check": "passed",
             }
     except HTTPException:
         raise

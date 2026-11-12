@@ -4,7 +4,7 @@ return [
 
     'face_verification' => [
         'url' => env('FACE_SERVICE_URL', 'http://127.0.0.1:8001/verify-face'),
-        'timeout' => (int) env('FACE_SERVICE_TIMEOUT', 60),
+        'timeout' => (int) env('FACE_SERVICE_TIMEOUT', 300),
         'connect_timeout' => (int) env('FACE_SERVICE_CONNECT_TIMEOUT', 5),
         'threshold' => 0.25,
     ],

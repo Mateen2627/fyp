@@ -56,6 +56,7 @@ class FaceVerificationService
         if (!is_array($result) || !array_key_exists('verified', $result) || !is_bool($result['verified'])) {
             throw new FaceVerificationException('The recognition service returned an invalid response. Attendance was not marked.', 502, 'invalid_service_response');
         }
+        $details = $this->displayDetails($result);
         if ($result['verified'] !== true) {
             $error = strtolower(is_string($result['error'] ?? null) ? $result['error'] : '');
             if (strpos($error, 'spoof') !== false || strpos($error, 'fake') !== false) {
@@ -64,7 +65,7 @@ class FaceVerificationService
             if (strpos($error, 'face') !== false && (strpos($error, 'detect') !== false || strpos($error, 'found') !== false)) {
                 throw new FaceVerificationException('A clear face could not be detected. Face the camera in good lighting and try again.', 422, 'face_not_detected');
             }
-            throw new FaceVerificationException('Your face did not match your official reference photo. Attendance was not marked.', 422, 'face_mismatch');
+            throw new FaceVerificationException('Your face did not match your official reference photo. Attendance was not marked.', 422, 'face_mismatch', $details);
         }
         $distance = $result['distance'] ?? null;
         $threshold = $result['threshold'] ?? null;
@@ -76,6 +77,37 @@ class FaceVerificationService
         if ($distance > $threshold) {
             throw new FaceVerificationException('Your face did not match your official reference photo. Attendance was not marked.', 422, 'face_mismatch');
         }
-        return ['verified' => true, 'distance' => (float) $distance, 'threshold' => (float) $threshold];
+        return array_merge(['verified' => true, 'distance' => (float) $distance, 'threshold' => (float) $threshold], $details, ['spoof_check' => 'passed']);
+    }
+
+    private function displayDetails(array $result)
+    {
+        $details = [];
+        $distance = $result['distance'] ?? null;
+        $threshold = $result['threshold'] ?? null;
+        $numeric = function ($value) { return (is_int($value) || is_float($value)) && is_finite((float) $value); };
+        if ($numeric($distance) && $numeric($threshold) && $distance >= 0 &&
+            abs($threshold - (float) config('services.face_verification.threshold')) <= 0.000001) {
+            $details['distance'] = (float) $distance;
+            $details['threshold'] = (float) $threshold;
+        }
+        $confidence = $result['match_confidence'] ?? null;
+        if ($numeric($confidence) && $confidence >= 0 && $confidence <= 100) {
+            $details['match_confidence'] = round((float) $confidence, 1);
+        }
+        $box = $result['face_box'] ?? null;
+        if (is_array($box)) {
+            $coordinates = [];
+            foreach (['x', 'y', 'w', 'h'] as $key) {
+                $value = $box[$key] ?? null;
+                if (!$numeric($value)) { return $details; }
+                $coordinates[$key] = (int) $value;
+            }
+            if ($coordinates['x'] >= 0 && $coordinates['y'] >= 0 && $coordinates['w'] > 0 && $coordinates['h'] > 0) {
+                $details['face_box'] = $coordinates;
+            }
+        }
+        if (($result['spoof_check'] ?? null) === 'passed') { $details['spoof_check'] = 'passed'; }
+        return $details;
     }
 }

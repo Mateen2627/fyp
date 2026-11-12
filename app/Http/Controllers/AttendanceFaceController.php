@@ -25,14 +25,19 @@ class AttendanceFaceController extends Controller
         if ($validation->fails()) {
             return response()->json(['verified' => false, 'code' => 'invalid_capture', 'message' => $validation->errors()->first(), 'errors' => $validation->errors()], 422);
         }
+        // DeepFace may load its weights on the first request. Keep PHP alive long enough
+        // for the configured FastAPI timeout plus a short response/cleanup margin.
+        @set_time_limit(max(330, (int) config('services.face_verification.timeout', 300) + 30));
         try {
             $result = $attendance->mark($request->user(), $request->input('time_table_id'), $capture, $verifier);
         } catch (FaceVerificationException $error) {
-            return response()->json(['verified' => false, 'code' => $error->reason, 'message' => $error->getMessage()], $error->status);
+            return response()->json(array_merge(['verified' => false, 'code' => $error->reason, 'message' => $error->getMessage()], $error->details), $error->status);
         }
         return response()->json([
             'verified' => true, 'status' => 'verified', 'message' => 'Face verified. Your attendance has been marked present.',
             'attendance_id' => $result['attendance']->id, 'distance' => $result['distance'], 'threshold' => $result['threshold'],
+            'match_confidence' => $result['match_confidence'] ?? null, 'face_box' => $result['face_box'] ?? null,
+            'spoof_check' => $result['spoof_check'] ?? 'passed',
         ]);
     }
 }

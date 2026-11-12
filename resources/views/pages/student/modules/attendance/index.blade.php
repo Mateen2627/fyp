@@ -9,8 +9,11 @@
             <div class="alert alert-warning">Your official reference photo is missing. Ask your department coordinator or an administrator to upload it before marking attendance. Changing your profile picture does not change your official photo.</div>
         @endif
         <div id="camera-message" class="alert alert-info" role="status" aria-live="polite">Select a lesson, enable your camera, then capture your face.</div>
-        <video id="attendance-camera" autoplay playsinline muted aria-label="Live webcam preview" style="width:100%;max-width:480px;border-radius:8px" hidden></video>
-        <canvas id="attendance-canvas" hidden></canvas>
+        <div id="camera-frame" style="position:relative;width:100%;max-width:480px;line-height:0">
+            <video id="attendance-camera" autoplay playsinline muted aria-label="Live webcam preview" style="width:100%;border-radius:8px" hidden></video>
+            <canvas id="attendance-canvas" aria-label="Captured attendance photo" style="width:100%;border-radius:8px" hidden></canvas>
+            <canvas id="face-box-overlay" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" hidden></canvas>
+        </div>
         <form id="check-in-form" method="post" enctype="multipart/form-data" action="{{ route('attendance.mark-face') }}" data-reference-ready="{{ $referenceReady ? '1' : '0' }}">
             @csrf
             <div class="form-group">
@@ -53,6 +56,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('check-in-form');
     const video = document.getElementById('attendance-camera');
+    const faceOverlay = document.getElementById('face-box-overlay');
+    const captureCanvas = document.getElementById('attendance-canvas');
     const message = document.getElementById('camera-message');
     const enable = document.getElementById('enable-camera');
     const capture = document.getElementById('capture-attendance');
@@ -60,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const lesson = document.getElementById('lesson');
     const ready = form.dataset.referenceReady === '1';
     let stream = null, busy = false;
+    let lastCaptureSize = { width: 0, height: 0 };
 
     function show(text, state = 'info') {
         message.className = 'alert alert-' + state;
@@ -71,9 +77,62 @@ document.addEventListener('DOMContentLoaded', function () {
         stopButton.hidden = !stream;
         stopButton.disabled = busy;
     }
-    function stop() {
+    function closeLoadingAlert() {
+        if (window.Swal && typeof window.Swal.close === 'function') window.Swal.close();
+    }
+    function showLoadingAlert() {
+        if (window.Swal && typeof window.Swal.fire === 'function') {
+            window.Swal.fire({
+                title: 'Verifying your face',
+                text: 'The face model may take a few minutes the first time it runs. Please keep this page open.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                onOpen: function () { window.Swal.showLoading(); }
+            });
+        }
+    }
+    function showFaceResultAlert(title, text, type) {
+        if (window.Swal && typeof window.Swal.fire === 'function') {
+            return window.Swal.fire({ title: title, text: text, type: type, confirmButtonText: 'OK' });
+        }
+        return null;
+    }
+    function drawFaceBox(box, verified) {
+        const values = box && ['x', 'y', 'w', 'h'].map(key => Number(box[key]));
+        if (!values || values.some(value => !Number.isFinite(value)) || !lastCaptureSize.width) return;
+        faceOverlay.width = captureCanvas.width;
+        faceOverlay.height = captureCanvas.height;
+        const context = faceOverlay.getContext('2d');
+        context.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
+        context.strokeStyle = verified ? '#16a34a' : '#f59e0b';
+        context.lineWidth = Math.max(3, Math.round(captureCanvas.width / 160));
+        context.strokeRect(values[0], values[1], values[2], values[3]);
+        faceOverlay.hidden = false;
+    }
+    function freezeCapturePreview(box, verified) {
+        if (video.pause) video.pause();
+        video.hidden = true;
+        captureCanvas.hidden = false;
+        if (box) drawFaceBox(box, verified);
+        else faceOverlay.hidden = true;
+        stop(true);
+    }
+    function resultSummary(body) {
+        const parts = [];
+        if (body.match_confidence !== null && body.match_confidence !== undefined && Number.isFinite(Number(body.match_confidence))) parts.push('Match confidence: ' + Number(body.match_confidence).toFixed(1) + '% (not model accuracy)');
+        if (Number.isFinite(Number(body.distance)) && Number.isFinite(Number(body.threshold))) parts.push('distance ' + Number(body.distance).toFixed(4) + ' / threshold ' + Number(body.threshold).toFixed(2));
+        if (body.spoof_check === 'passed') parts.push('anti-spoof check passed');
+        return parts.join(' | ');
+    }
+    function stop(preservePreview = false) {
         if (stream) stream.getTracks().forEach(track => track.stop());
         stream = null; video.srcObject = null; video.hidden = true;
+        if (!preservePreview) {
+            captureCanvas.hidden = true;
+            faceOverlay.hidden = true;
+            faceOverlay.getContext('2d').clearRect(0, 0, faceOverlay.width, faceOverlay.height);
+        }
         updateButtons();
     }
     lesson.addEventListener('change', updateButtons);
@@ -84,7 +143,9 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             if (!navigator.mediaDevices?.getUserMedia) throw new Error('Camera access requires HTTPS or localhost and a supported browser.');
             stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            captureCanvas.hidden = true;
             video.srcObject = stream; video.hidden = false; await video.play();
+            faceOverlay.hidden = true;
             show('Camera ready. Face the camera clearly, then capture your photo.');
             updateButtons();
         } catch (error) {
@@ -101,36 +162,57 @@ document.addEventListener('DOMContentLoaded', function () {
         if (busy || !stream || !video.videoWidth || !form.reportValidity()) return;
         busy = true; capture.textContent = 'Verifying your face...'; updateButtons();
         show('Checking your face and verifying attendance. Please wait.');
-        const canvas = document.getElementById('attendance-canvas');
+        showLoadingAlert();
         const scale = Math.min(1, 1280 / video.videoWidth, 1280 / video.videoHeight);
-        canvas.width = Math.round(video.videoWidth * scale);
-        canvas.height = Math.round(video.videoHeight * scale);
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(async function (blob) {
+        captureCanvas.width = Math.round(video.videoWidth * scale);
+        captureCanvas.height = Math.round(video.videoHeight * scale);
+        lastCaptureSize = { width: captureCanvas.width, height: captureCanvas.height };
+        captureCanvas.getContext('2d').drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+        captureCanvas.toBlob(async function (blob) {
+            let body = null;
             try {
                 if (!blob) throw new Error('The photo could not be captured. Please try again.');
                 const payload = new FormData(form);
                 payload.append('live_image', blob, 'live.jpg');
-                const response = await fetch(form.action, {
+                const controller = new AbortController();
+                const requestTimeout = window.setTimeout(() => controller.abort(), 330000);
+                let response;
+                try {
+                    response = await fetch(form.action, {
                     method: 'POST', body: payload, credentials: 'same-origin',
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': form.querySelector('[name="_token"]').value }
-                });
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': form.querySelector('[name="_token"]').value },
+                    signal: controller.signal
+                    });
+                } finally {
+                    window.clearTimeout(requestTimeout);
+                }
                 if (response.status === 401 || response.status === 419 || response.redirected) throw new Error('Your session expired. Refresh the page and sign in again.');
                 if (response.status === 429) throw new Error('Too many attempts. Wait a minute before trying again.');
-                const body = await response.json().catch(() => null);
+                body = await response.json().catch(() => null);
+                if (body && (body.verified !== undefined || body.face_box)) freezeCapturePreview(body.face_box, body.verified === true);
                 if (!response.ok || body?.verified !== true) {
                     if (body?.code === 'attendance_already_marked') {
                         lesson.selectedOptions[0].disabled = true;
                         lesson.value = ''; stop();
                     }
                     const reason = body?.code ? ' (' + body.code + ')' : '';
-                    throw new Error((body?.message || 'Face verification could not be completed. Attendance was not marked.') + reason);
+                    const details = body ? resultSummary(body) : '';
+                    throw new Error((body?.message || 'Face verification could not be completed. Attendance was not marked.') + reason + (details ? '\n' + details : ''));
                 }
-                show(body.message || 'Attendance marked successfully.', 'success');
-                stop();
-                window.setTimeout(() => window.location.reload(), 1400);
+                const summary = resultSummary(body);
+                show((body.message || 'Attendance marked successfully.') + (summary ? ' ' + summary : ''), 'success');
+                closeLoadingAlert();
+                stop(true);
+                const resultAlert = showFaceResultAlert('Attendance marked', (body.message || 'Face verified and attendance recorded.') + (summary ? '\n' + summary : ''), 'success');
+                if (resultAlert && typeof resultAlert.then === 'function') resultAlert.then(() => window.location.reload());
+                else window.setTimeout(() => window.location.reload(), 5000);
             } catch (error) {
-                show(error.message || 'Unable to reach the server. Please try again.', 'danger');
+                closeLoadingAlert();
+                const errorMessage = error.name === 'AbortError'
+                    ? 'Face verification took too long. The model may still be warming up; restart FastAPI and try again.'
+                    : (error.message || 'Unable to reach the server. Please try again.');
+                show(errorMessage, 'danger');
+                showFaceResultAlert('Attendance not marked', errorMessage, 'error');
             } finally {
                 busy = false; capture.textContent = 'Capture and Mark Attendance'; updateButtons();
             }
