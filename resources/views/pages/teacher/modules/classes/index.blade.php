@@ -277,6 +277,7 @@
                         <th><i class="fas fa-calendar-day me-1"></i> Day / Date</th>
                         <th><i class="fas fa-clock me-1"></i> Time Slot</th>
                         <th><i class="fas fa-book me-1"></i> Subject</th>
+                        <th><i class="fas fa-map-marker-alt me-1"></i> Teacher</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -17,9 +17,10 @@ use Illuminate\Support\Facades\Storage;
 
 class FaceAttendanceService
 {
-    public function mark(User $user, $lessonId, UploadedFile $capture, FaceVerificationService $verifier)
+    public function mark(User $user, $lessonId, UploadedFile $capture, FaceVerificationService $verifier, array $location)
     {
         list($student, $lesson, $course) = $this->context($user, $lessonId);
+        $this->assertWithinCampus($location);
         $date = Carbon::today()->toDateString();
         $this->assertNotMarked($user->id, $lesson->id, $date);
         $referencePhoto = $user->reference_photo_path;
@@ -68,6 +69,50 @@ class FaceAttendanceService
             'face_box' => $result['face_box'] ?? null,
             'spoof_check' => $result['spoof_check'] ?? 'passed',
         ];
+    }
+
+    private function assertWithinCampus(array $location)
+    {
+        $latitude = $location['latitude'] ?? null;
+        $longitude = $location['longitude'] ?? null;
+        $accuracy = $location['accuracy'] ?? null;
+        $geofence = config('services.attendance_geofence', []);
+        $campusLatitude = $geofence['latitude'] ?? null;
+        $campusLongitude = $geofence['longitude'] ?? null;
+        $radius = $geofence['radius_meters'] ?? null;
+        $maxAccuracy = $geofence['max_accuracy_meters'] ?? null;
+
+        if (!is_numeric($campusLatitude) || !is_numeric($campusLongitude) || !is_numeric($radius) ||
+            (float) $campusLatitude < -90 || (float) $campusLatitude > 90 ||
+            (float) $campusLongitude < -180 || (float) $campusLongitude > 180 || (float) $radius <= 0) {
+            throw new FaceVerificationException('Campus attendance location is not configured. Contact an administrator.', 503, 'campus_location_unconfigured');
+        }
+        if (!is_numeric($latitude) || !is_numeric($longitude) || !is_numeric($accuracy) ||
+            (float) $latitude < -90 || (float) $latitude > 90 ||
+            (float) $longitude < -180 || (float) $longitude > 180 || (float) $accuracy <= 0) {
+            throw new FaceVerificationException('A valid device location is required to mark attendance.', 422, 'invalid_location');
+        }
+        if (!is_numeric($maxAccuracy) || (float) $maxAccuracy <= 0 || (float) $accuracy > (float) $maxAccuracy) {
+            throw new FaceVerificationException('Your location is not accurate enough. Enable precise location and try again.', 422, 'location_accuracy_insufficient');
+        }
+
+        $earthRadius = 6371000;
+        $latDelta = deg2rad((float) $latitude - (float) $campusLatitude);
+        $lonDelta = deg2rad((float) $longitude - (float) $campusLongitude);
+        $lat1 = deg2rad((float) $campusLatitude);
+        $lat2 = deg2rad((float) $latitude);
+        $a = sin($latDelta / 2) * sin($latDelta / 2) +
+            cos($lat1) * cos($lat2) * sin($lonDelta / 2) * sin($lonDelta / 2);
+        $distance = 2 * $earthRadius * asin(min(1, sqrt($a)));
+
+        if ($distance > (float) $radius) {
+            throw new FaceVerificationException(
+                'You must be within '.round((float) $radius).' meters of the campus location to mark attendance.',
+                403,
+                'outside_campus_geofence',
+                ['distance_meters' => round($distance, 1), 'radius_meters' => (float) $radius]
+            );
+        }
     }
 
     private function context(User $user, $lessonId, StudentRecord $student = null)

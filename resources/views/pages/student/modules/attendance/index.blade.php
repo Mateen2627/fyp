@@ -4,11 +4,11 @@
 <div class="card">
     <div class="card-header"><h5 class="mb-0">Mark Attendance</h5></div>
     <div class="card-body">
-        <p>Select your class and capture a live webcam photo. Attendance opens 15 minutes before the lesson and closes when it ends.</p>
+        <p>Select your class and capture a live webcam photo while sharing your device location. Attendance is available within {{ round(config('services.attendance_geofence.radius_meters', 100)) }} meters of campus, from 15 minutes before the lesson until it ends.</p>
         @if(!$referenceReady)
             <div class="alert alert-warning">Your official reference photo is missing. Ask your department coordinator or an administrator to upload it before marking attendance. Changing your profile picture does not change your official photo.</div>
         @endif
-        <div id="camera-message" class="alert alert-info" role="status" aria-live="polite">Select a lesson, enable your camera, then capture your face.</div>
+        <div id="camera-message" class="alert alert-info" role="status" aria-live="polite">Select a lesson, enable your camera, and allow precise location when you capture your face.</div>
         <div id="camera-frame" style="position:relative;width:100%;max-width:480px;line-height:0">
             <video id="attendance-camera" autoplay playsinline muted aria-label="Live webcam preview" style="width:100%;border-radius:8px" hidden></video>
             <canvas id="attendance-canvas" aria-label="Captured attendance photo" style="width:100%;border-radius:8px" hidden></canvas>
@@ -70,6 +70,22 @@ document.addEventListener('DOMContentLoaded', function () {
     function show(text, state = 'info') {
         message.className = 'alert alert-' + state;
         message.textContent = text;
+    }
+    function getCurrentPosition() {
+        return new Promise(function (resolve, reject) {
+            if (!navigator.geolocation) {
+                reject(new Error('Location access is not supported by this browser.'));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(resolve, function (error) {
+                const messages = {
+                    1: 'Location permission was denied. Allow precise location in your browser, then try again.',
+                    2: 'Your device could not determine its location. Turn on location services and try again.',
+                    3: 'Getting your location took too long. Move to an open area and try again.'
+                };
+                reject(new Error(messages[error.code] || 'Unable to get your device location.'));
+            }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+        });
     }
     function updateButtons() {
         capture.disabled = busy || !ready || !stream || !video.videoWidth || !lesson.value;
@@ -161,8 +177,12 @@ document.addEventListener('DOMContentLoaded', function () {
     capture.addEventListener('click', function () {
         if (busy || !stream || !video.videoWidth || !form.reportValidity()) return;
         busy = true; capture.textContent = 'Verifying your face...'; updateButtons();
-        show('Checking your face and verifying attendance. Please wait.');
+        show('Getting your location and checking your face. Please allow precise location and keep this page open.');
         showLoadingAlert();
+        const locationPromise = getCurrentPosition().then(
+            function (position) { return { position: position }; },
+            function (error) { return { error: error }; }
+        );
         const scale = Math.min(1, 1280 / video.videoWidth, 1280 / video.videoHeight);
         captureCanvas.width = Math.round(video.videoWidth * scale);
         captureCanvas.height = Math.round(video.videoHeight * scale);
@@ -172,8 +192,14 @@ document.addEventListener('DOMContentLoaded', function () {
             let body = null;
             try {
                 if (!blob) throw new Error('The photo could not be captured. Please try again.');
+                const locationResult = await locationPromise;
+                if (locationResult.error) throw locationResult.error;
+                const position = locationResult.position;
                 const payload = new FormData(form);
                 payload.append('live_image', blob, 'live.jpg');
+                payload.append('latitude', String(position.coords.latitude));
+                payload.append('longitude', String(position.coords.longitude));
+                payload.append('location_accuracy', String(position.coords.accuracy));
                 const controller = new AbortController();
                 const requestTimeout = window.setTimeout(() => controller.abort(), 330000);
                 let response;

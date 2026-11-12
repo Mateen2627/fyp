@@ -9,6 +9,13 @@ return [
         'threshold' => 0.25,
     ],
 
+    'attendance_geofence' => [
+        'latitude' => env('ATTENDANCE_CAMPUS_LATITUDE'),
+        'longitude' => env('ATTENDANCE_CAMPUS_LONGITUDE'),
+        'radius_meters' => (float) env('ATTENDANCE_GEOFENCE_RADIUS_METERS', 100),
+        'max_accuracy_meters' => (float) env('ATTENDANCE_LOCATION_MAX_ACCURACY_METERS', 100),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
