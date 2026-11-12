@@ -81,7 +81,7 @@
         <div class="student-photo-reminder-header">
             <button type="button" class="student-photo-reminder-close" id="student-photo-reminder-close" aria-label="Close reminder">&times;</button>
             <h5><i class="fas fa-camera"></i> Student photo required</h5>
-            <div>Please upload your clear face picture. It will be used later to train the facial attendance model.</div>
+            <div>You can upload a profile picture here. Your official facial attendance photo is managed separately by an administrator.</div>
         </div>
         <div class="student-photo-reminder-body">
             <div class="student-photo-reminder-preview">

@@ -20,6 +20,8 @@ class UserUpdate extends FormRequest
     public function rules()
     {
         return [
+            'reference_photo_path' => 'prohibited',
+            'reference_photo' => 'prohibited',
             'phone' => 'sometimes|nullable|string|min:6|max:20',
             'phone2' => 'sometimes|nullable|string|min:6|max:20',
             'email' => 'sometimes|nullable|email|max:100|unique:users,id',

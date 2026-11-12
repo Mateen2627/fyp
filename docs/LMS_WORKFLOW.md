@@ -25,6 +25,7 @@ Seeded passwords remain `cj`. English, Psychology, and Management Sciences retai
 | --- | --- | --- | --- | --- | --- |
 | Add/edit/remove active teachers and students | Yes | No | No | No | No |
 | Move a student to a semester and matching section | Yes | No | No | No | No |
+| Upload/replace official face reference photos | Yes | No | Own departments | No | No |
 | Maintain semester, section and subject catalog | Yes | No | No | No | No |
 | Assign/reassign/revoke subject teachers | No | Own departments | No | No | No |
 | Create/edit/delete timetable lessons and slots | No | No | Own departments | No | No |
@@ -43,7 +44,8 @@ These rules are checked on the server. Older duplicate school-management routes 
 3. The department coordinator opens **Manage Timetables**, creates a timetable for a semester and section, adds time slots, and schedules subjects with assigned teachers. The server rejects section overlaps, teacher double bookings, mismatched subjects/slots, and cross-department edits. A teacher reassignment that introduces a timetable clash is also rejected.
 4. Subject teachers publish assignments/quizzes using their assigned subject/class/section pairs. Students see the relevant work, submit text or a PDF, and view the teacher's marks and feedback. Assignment deadlines and quiz opening times are enforced. Duplicate submissions are rejected. Marks cannot exceed the activity's total marks.
 5. HODs and coordinators open **Department Progress** to inspect each semester/section, attendance, pending check-ins, assignments, quizzes, responses, and subject marks. These pages have no write actions. Their personal teaching tools remain separate.
-6. Administrators change student placement through **Manage Users → Edit**. Both semester and section are validated together. Removing an account archives access and preserves academic history. A serving HOD/coordinator must have their responsibilities reassigned before their account can be removed.
+6. Coordinators open **Manage Student Reference Photos** from Department Progress to upload or replace official student photos in their own departments. Administrators can also upload a photo while creating or editing a student. Students may change their profile photo, but cannot change the official face reference.
+7. Administrators change student placement through **Manage Users → Edit**. Both semester and section are validated together. Removing an account archives access and preserves academic history. A serving HOD/coordinator must have their responsibilities reassigned before their account can be removed.
 
 Teacher assignments support a specific section or all sections. Existing class-wide assignments continue working. The legacy subject's teacher field remains a display reference; authorization and section-specific marks use the actual teaching assignments.
 
@@ -51,7 +53,13 @@ Teacher assignments support a specific section or all sections. Existing class-w
 
 Students open **My Attendance**, choose a scheduled lesson, enable the camera, and submit a capture. Camera access requires HTTPS or localhost and browser permission. The server determines the student, class, section, subject, date, and attendance window; browser-provided identities, verification flags, statuses, and confidence scores do not establish attendance. The check-in window starts 15 minutes before class and ends when class finishes. One check-in is allowed per student/lesson/date.
 
-`App\Services\FaceVerificationService::verify()` is the model integration point. It receives the authenticated student, uploaded capture, and lesson. The default implementation returns **pending**. It does not create a present attendance record. Connect a server-side identity and liveness verifier here; only a trusted `verified => true` result creates lesson-specific facial attendance. Captures are stored on the private local disk; they are not publicly downloadable. Pending captures will need processing by the future model integration if they are to be verified later.
+The Laravel app sends the authenticated student's protected official photo and live capture to the FastAPI service at `FACE_SERVICE_URL` (default `http://127.0.0.1:8001/verify-face`). Set this URL in `.env` if your service listens elsewhere. Start the service from the project directory with:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn main:app --host 127.0.0.1 --port 8001
+```
+
+The service accepts multipart fields `reference_image` and `live_image`, runs DeepFace `Facenet512` with anti-spoofing and threshold `0.25`, and responds with `verified`, `distance`, and `threshold`. Laravel records attendance only when `verified` is the boolean `true`, the threshold matches the configured value, and the distance is within the threshold. Mismatches, spoof results, inconsistent responses, and service errors do not record attendance. Reference photos are served through authenticated coordinator/admin routes; the generic public-storage route blocks the reference-photo directory. Captures are stored on the private local disk and are not publicly downloadable.
 
 The teacher's old simulated facial-attendance endpoint and manual attendance writes are disabled. Attendance displays distinguish pending check-ins from recorded attendance. Counts refer to recorded entries; they do not assume an unpublished semester calendar or manufacture absences.
 
@@ -66,6 +74,8 @@ Run the integration checks without changing your configured database:
 ```sh
 php tests/verify_numl_seed.php
 php tests/verify_lms_workflow.php
+php tests/verify_face_attendance.php
+.\venv\Scripts\python.exe -m unittest discover -s tests -p test_face_service.py -v
 ```
 
-They use SQLite in memory and temporary file storage. The workflow check sends real requests through Laravel's HTTP kernel, renders the screens, and exercises both allowed and forbidden operations. The accepted-verification case uses a test-only server verifier; it does not demonstrate a working face model.
+They use SQLite in memory and temporary file storage. The workflow checks send requests through Laravel's HTTP kernel, render screens, and exercise allowed and forbidden operations. Face verification integration tests fake the HTTP response from the local service; they do not establish real-world recognition accuracy. The Python tests exercise the FastAPI contract without loading model weights.

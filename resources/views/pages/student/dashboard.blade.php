@@ -458,7 +458,7 @@
             </div>
             <div class="action-content">
                 <div class="action-title">Attendance</div>
-                <div class="action-desc">View your attendance records</div>
+                <div class="action-desc">Mark facial attendance and view your records</div>
             </div>
             <div class="action-arrow">
                 <i class="fas fa-chevron-right"></i>

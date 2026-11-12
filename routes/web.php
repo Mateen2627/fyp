@@ -11,7 +11,7 @@ Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use')
 
 Route::get('/storage/{path}', function ($path) {
     // LMS work is served through authorized material/submission actions.
-    abort_if(preg_match('#^(assignment_materials|quiz_materials|student_submissions|quiz_attempts)/#', $path), 403);
+    abort_if(preg_match('#^(assignment_materials|quiz_materials|student_submissions|quiz_attempts|student_references)/#', $path), 403);
     abort_unless(\Illuminate\Support\Facades\Storage::disk('public')->exists($path), 404);
 
     return response()->file(\Illuminate\Support\Facades\Storage::disk('public')->path($path));
@@ -35,6 +35,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => 'teamSA'], function () {
         Route::get('/dashboard', 'DashboardController@index')->name('admin.dashboard');
         Route::resource('users', 'ManageUserController', ['as' => 'admin'])->except(['show']);
+        Route::get('users/{user}/reference-photo', 'ManageUserController@referencePhoto')->name('admin.users.reference_photo');
         Route::resource('courses', 'ManageCourseController', ['as' => 'admin'])->except(['show']);
         Route::resource('classes', 'ManageClassController', ['as' => 'admin']);
         Route::resource('reports', 'ReportController', ['as' => 'admin'])->except(['show']);
@@ -51,6 +52,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('progress/{kind}/{activityId}', 'ProgressController@activity')->name('academic.progress.activity');
         Route::get('progress/{kind}/{activityId}/material', 'ProgressController@material')->name('academic.progress.material');
         Route::get('progress/{kind}/{activityId}/responses/{response}', 'ProgressController@responseFile')->name('academic.progress.response');
+        Route::group(['middleware' => 'departmentRole:coordinator'], function () {
+            Route::get('reference-photos', 'ReferencePhotoController@index')->name('academic.reference-photos.index');
+            Route::put('reference-photos/{user}', 'ReferencePhotoController@update')->name('academic.reference-photos.update');
+            Route::get('reference-photos/{user}', 'ReferencePhotoController@show')->name('academic.reference-photos.show');
+        });
     });
 
     /*************** Support Team *****************/
@@ -277,4 +283,11 @@ Route::group(['namespace' => 'MyParent','middleware' => 'my_parent',], function(
     Route::get('/parent/academics', 'MyController@academicsIndex')->name('parent.academics.index');
     Route::get('/children/{student}/academics', 'MyController@academics')->name('parent.academics.show');
 
+});
+
+use App\Http\Controllers\AttendanceFaceController;
+
+Route::middleware(['auth', 'student', 'throttle:10,1'])->group(function () {
+    Route::post('/attendance/mark-face', [AttendanceFaceController::class, 'markAttendance'])
+        ->name('attendance.mark-face');
 });

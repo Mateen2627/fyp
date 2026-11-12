@@ -51,6 +51,8 @@ class MyAccountController extends Controller
     public function update_photo(Request $req)
     {
         $req->validate([
+            'reference_photo_path' => 'prohibited',
+            'reference_photo' => 'prohibited',
             'photo' => 'required|image|mimes:jpeg,gif,png,jpg|max:2048',
         ]);
 

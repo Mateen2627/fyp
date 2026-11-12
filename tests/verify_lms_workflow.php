@@ -25,6 +25,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 $assertions = 0;
 $temporaryRoot = sys_get_temp_dir().'/numl-lms-'.bin2hex(random_bytes(6));
@@ -187,17 +188,23 @@ try {
     lmsRequest($teacher, 'POST', '/assignments', [], 403);
 
     // Facial check-in never trusts client-supplied confidence/verified/status/user ID.
+    $officialReference = 'student_references/workflow_reference.jpg';
+    $referenceUpload = UploadedFile::fake()->image('reference.jpg');
+    Storage::disk('public')->put($officialReference, file_get_contents($referenceUpload->getRealPath()));
+    $student->update(['reference_photo_path' => $officialReference]);
+    Http::fake(function () { return Http::response(['verified' => false, 'distance' => 0.8, 'threshold' => 0.25]); });
     $capture = function () { return ['capture' => UploadedFile::fake()->image('capture.jpg', 120, 120)]; };
     lmsRequest($studentB, 'POST', '/student/attendance/check-in', ['time_table_id' => $lesson->id], 403, $capture());
-    lmsRequest($student, 'POST', '/student/attendance/check-in', ['time_table_id' => $lesson->id, 'facial_verified' => true, 'status' => 'verified', 'user_id' => $studentB->id, 'confidence' => 100], 202, $capture());
-    checkSeed(AttendanceCheckIn::where('user_id', $student->id)->firstOrFail()->status === 'pending', 'Client forged a verified face check-in.');
-    checkSeed(StudentAttendance::where('user_id', $student->id)->count() === 0, 'Pending verification marked a student present.');
-    lmsRequest($student, 'POST', '/student/attendance/check-in', ['time_table_id' => $lesson->id], 422, $capture());
+    lmsRequest($student, 'POST', '/student/attendance/check-in', ['time_table_id' => $lesson->id, 'facial_verified' => true, 'status' => 'verified', 'user_id' => $studentB->id, 'confidence' => 100], 422, $capture());
+    checkSeed(AttendanceCheckIn::where('user_id', $student->id)->count() === 0, 'A failed face match created a check-in.');
+    checkSeed(StudentAttendance::where('user_id', $student->id)->count() === 0, 'A failed face match marked the student present.');
+    Http::swap(new \Illuminate\Http\Client\Factory());
+    Http::fake(function () { return Http::response(['verified' => true, 'distance' => 0.1, 'threshold' => 0.25]); });
+    lmsRequest($student, 'POST', '/student/attendance/check-in', ['time_table_id' => $lesson->id], 200, $capture());
+    lmsRequest($student, 'POST', '/student/attendance/check-in', ['time_table_id' => $lesson->id], 409, $capture());
     lmsRequest($teacher, 'POST', '/teacher/attendance/facial', ['student_id' => $student->id, 'facial_confidence' => 100], 403);
-    app()->instance(FaceVerificationService::class, new class extends FaceVerificationService {
-        public function verify(User $student, UploadedFile $capture, TimeTable $lesson) { return ['verified' => true, 'message' => 'Test-only server verifier accepted the capture.']; }
-    });
     $secondStudent = User::where('username', 'mateen')->firstOrFail();
+    $secondStudent->update(['reference_photo_path' => $officialReference]);
     lmsRequest($secondStudent, 'POST', '/student/attendance/check-in', ['time_table_id' => $lesson->id], 200, $capture());
     checkSeed(StudentAttendance::where('user_id', $secondStudent->id)->where('course_id', $course->id)->where('facial_verified', true)->exists(), 'Trusted server verifier did not persist lesson attendance.');
     lmsRequest($teacher, 'GET', '/teacher/attendance');

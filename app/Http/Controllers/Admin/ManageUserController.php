@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -43,6 +44,14 @@ class ManageUserController extends Controller
     {
         $this->protectAdmin($user);
         return view('pages.admin.modules.users.edit', $this->formData($user));
+    }
+
+    public function referencePhoto(User $user)
+    {
+        abort_unless($user->user_type === 'student', 404);
+        try { $path = app(\App\Services\FaceVerificationService::class)->referencePath($user); }
+        catch (\App\Exceptions\FaceVerificationException $error) { abort(404); }
+        return response()->file($path, ['Cache-Control' => 'private, no-store']);
     }
 
     public function store(Request $request)
@@ -89,6 +98,10 @@ class ManageUserController extends Controller
             'username' => ['required', 'string', 'max:100', Rule::unique('users')->ignore($id)],
             'user_type' => 'required|in:'.$types,
             'password' => 'nullable|string|min:2|confirmed',
+            'reference_photo_path' => 'prohibited',
+            'reference_photo' => $request->user_type === 'student'
+                ? 'nullable|image|mimes:jpeg,jpg,png|max:5120|dimensions:max_width=4096,max_height=4096'
+                : 'prohibited',
         ];
         if ($request->user_type === 'student') {
             $rules += [
@@ -106,8 +119,16 @@ class ManageUserController extends Controller
         if ($user && $user->user_type !== $data['user_type']) {
             throw ValidationException::withMessages(['user_type' => 'Existing account roles cannot be changed. Create a separate account to preserve academic history.']);
         }
-        DB::transaction(function () use ($data, $user) {
+        $newReference = null;
+        $oldReference = $user ? $user->reference_photo_path : null;
+        try {
+        if ($request->hasFile('reference_photo')) {
+            $newReference = $request->file('reference_photo')->store('student_references', 'public');
+            if (!$newReference) { throw new \RuntimeException('The official reference photo could not be saved.'); }
+        }
+        DB::transaction(function () use ($data, $user, $newReference) {
             $values = collect($data)->only(['name', 'email', 'username', 'user_type'])->all();
+            if ($newReference !== null) { $values['reference_photo_path'] = $newReference; }
             if (!$user || !empty($data['password'])) { $values['password'] = Hash::make($data['password'] ?? 'cj'); }
             if ($user) { $user->update($values); }
             else { $user = User::create(array_merge($values, ['code' => strtoupper(Str::random(12))])); }
@@ -129,6 +150,13 @@ class ManageUserController extends Controller
                 StaffRecord::firstOrCreate(['user_id' => $user->id], ['code' => $user->code, 'emp_date' => now()->toDateString()]);
             }
         });
+        } catch (\Throwable $error) {
+            if ($newReference) { Storage::disk('public')->delete($newReference); }
+            throw $error;
+        }
+        if ($newReference && $oldReference && preg_match('#^student_references/[a-zA-Z0-9_-]+\.(jpg|jpeg|png)$#i', $oldReference)) {
+            Storage::disk('public')->delete($oldReference);
+        }
     }
 
     private function protectAdmin($user)
