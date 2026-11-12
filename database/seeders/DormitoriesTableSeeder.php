@@ -2,7 +2,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DormitoriesTableSeeder extends Seeder
 {
@@ -13,14 +12,7 @@ class DormitoriesTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('dormitories')->delete();
-        $data = [
-            ['name' => 'Faith Hostel'],
-            ['name' => 'Peace Hostel'],
-            ['name' => 'Grace Hostel'],
-            ['name' => 'Success Hostel'],
-            ['name' => 'Trust Hostel'],
-        ];
-        DB::table('dormitories')->insert($data);
+        // Backwards-compatible entry point; the actual schema uses dorms.
+        $this->call(DormsTableSeeder::class);
     }
 }

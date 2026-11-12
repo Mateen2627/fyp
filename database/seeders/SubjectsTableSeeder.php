@@ -2,55 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\MyClass;
-use App\User;
+use App\Models\Subject;
+use Database\Seeders\Support\NumlSeedData;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class SubjectsTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        DB::table('subjects')->delete();
-
-        $this->createSubjects();
-    }
-
-    protected function createSubjects()
-    {
-        $subjects = ['English Language', 'Mathematics'];
-        $sub_slug = ['Eng', 'Math'];
-        $teacher_id = User::where(['user_type' => 'teacher'])->first()->id;
-        $my_classes = MyClass::all();
-
-        foreach ($my_classes as $my_class) {
-
-            $data = [
-
-                [
-                    'name' => $subjects[0],
-                    'slug' => $sub_slug[0],
-                    'my_class_id' => $my_class->id,
-                    'teacher_id' => $teacher_id
-                ],
-
-                [
-                    'name' => $subjects[1],
-                    'slug' => $sub_slug[1],
-                    'my_class_id' => $my_class->id,
-                    'teacher_id' => $teacher_id
-                ],
-
-            ];
-
-            DB::table('subjects')->insert($data);
+        foreach (NumlSeedData::classes() as $class) {
+            list($department, $semester) = NumlSeedData::classDetails($class);
+            $teachers = NumlSeedData::teachers($department);
+            foreach (NumlSeedData::curriculum($department, $semester) as $index => $name) {
+                Subject::updateOrCreate(['my_class_id' => $class->id, 'name' => $name], [
+                    'slug' => sprintf('%s-%d%02d', $department, $semester, $index + 1),
+                    'teacher_id' => $teachers[($semester - 1 + $index) % count($teachers)]->id,
+                ]);
+            }
         }
-
     }
-
 }

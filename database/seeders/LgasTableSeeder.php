@@ -4,14 +4,11 @@ namespace Database\Seeders;
 use App\Models\Lga;
 use App\Models\State;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class LgasTableSeeder extends Seeder
 {
     public function run()
     {
-        DB::table('lgas')->delete();
-
         // Districts grouped by province name.
         // state_id is resolved from the states table by name, so no hardcoded IDs.
         $districts = [
@@ -34,7 +31,7 @@ class LgasTableSeeder extends Seeder
                 'Mirpur Khas', 'Naushahro Feroze', 'Qambar Shahdadkot',
                 'Sanghar', 'Shaheed Benazirabad', 'Shikarpur', 'Sujawal',
                 'Sukkur', 'Tando Allahyar', 'Tando Muhammad Khan', 'Tharparkar',
-                'Thatta', 'Umerkot', 'Kemari', 'Keamari',
+                'Thatta', 'Umerkot', 'Keamari',
             ],
 
             'Khyber Pakhtunkhwa' => [
@@ -83,7 +80,7 @@ class LgasTableSeeder extends Seeder
             $stateId = $stateIds[$stateName];
 
             foreach ($districtNames as $districtName) {
-                Lga::create([
+                Lga::firstOrCreate([
                     'state_id' => $stateId,
                     'name'     => $districtName,
                 ]);

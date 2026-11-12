@@ -14,8 +14,6 @@ class SkillsTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('skills')->delete();
-
         $this->createSkills();
     }
 
@@ -41,7 +39,12 @@ class SkillsTableSeeder extends Seeder
             [ 'name' => 'FLEXIBILITY', 'skill_type' => $types[1] ],
 
         ];
-        DB::table('skills')->insert($d);
+        foreach ($d as $skill) {
+            DB::table('skills')->updateOrInsert([
+                'name' => $skill['name'],
+                'skill_type' => $skill['skill_type'],
+            ], $skill);
+        }
     }
 
 }

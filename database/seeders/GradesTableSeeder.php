@@ -14,8 +14,6 @@ class GradesTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('grades')->delete();
-
         $this->createGrades();
     }
 
@@ -33,6 +31,12 @@ class GradesTableSeeder extends Seeder
 
 
         ];
-        DB::table('grades')->insert($d);
+        // Retain the existing generic demonstration scale, not an official NUML scale.
+        foreach ($d as $grade) {
+            DB::table('grades')->updateOrInsert([
+                'name' => $grade['name'],
+                'class_type_id' => null,
+            ], $grade);
+        }
     }
 }

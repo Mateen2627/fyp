@@ -2,30 +2,17 @@
 
 namespace Database\Seeders;
 
+use App\Models\ClassType;
+use Database\Seeders\Support\NumlSeedData;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ClassTypesTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        DB::table('class_types')->delete();
-
-        $data = [
-            ['name' => 'Creche', 'code' => 'C'],
-            ['name' => 'Pre Nursery', 'code' => 'PN'],
-            ['name' => 'Nursery', 'code' => 'N'],
-            ['name' => 'Primary', 'code' => 'P'],
-            ['name' => 'Junior Secondary', 'code' => 'J'],
-            ['name' => 'Senior Secondary', 'code' => 'S'],
-        ];
-
-        DB::table('class_types')->insert($data);
-
+        // Class types represent departments in the existing schema.
+        foreach (NumlSeedData::departments() as $code => $name) {
+            ClassType::updateOrCreate(['code' => $code], ['name' => $name]);
+        }
     }
 }

@@ -3,30 +3,41 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
     public function run()
     {
-        $this->call(BloodGroupsTableSeeder::class);
-        $this->call(GradesTableSeeder::class);
-        $this->call(DormsTableSeeder::class);
-        $this->call(ClassTypesTableSeeder::class);
-        $this->call(UserTypesTableSeeder::class);
-        $this->call(MyClassesTableSeeder::class);
-        $this->call(NationalitiesTableSeeder::class);
-        $this->call(StatesTableSeeder::class);
-        $this->call(LgasTableSeeder::class);
-        $this->call(SettingsTableSeeder::class);
-        $this->call(UsersTableSeeder::class);
-        $this->call(SubjectsTableSeeder::class);
-        $this->call(SectionsTableSeeder::class);
-        $this->call(StudentRecordsTableSeeder::class);
-        $this->call(SkillsTableSeeder::class);
+        // Roll back the complete dataset if a dependent seeder fails.
+        DB::transaction(function () {
+            $this->call([
+                BloodGroupsTableSeeder::class,
+                NationalitiesTableSeeder::class,
+                StatesTableSeeder::class,
+                LgasTableSeeder::class,
+                UserTypesTableSeeder::class,
+                ClassTypesTableSeeder::class,
+                GradesTableSeeder::class,
+                DormsTableSeeder::class,
+                SettingsTableSeeder::class,
+                UsersTableSeeder::class,
+                DepartmentStaffTableSeeder::class,
+                MyClassesTableSeeder::class,
+                SectionsTableSeeder::class,
+                SubjectsTableSeeder::class,
+                CoursesTableSeeder::class,
+                TeacherAssignmentsTableSeeder::class,
+                StudentRecordsTableSeeder::class,
+                SkillsTableSeeder::class,
+            ]);
+        });
+
+        if ($this->command) {
+            $this->command->info('NUML demo ready: 7 departments, 8 semesters each, sections A/B, 1,120 students.');
+            $this->command->info('All seeded passwords: cj. First-name usernames; duplicates get 2, 3, etc.');
+            $this->command->info('Fresh database logins: cj / admin / faisal / rao / neelofer / marjan / mateen.');
+            $this->command->info('See database/seeders/README.md for sample data and existing-data behavior.');
+        }
     }
 }
