@@ -4,7 +4,7 @@
 <div class="card">
     <div class="card-header"><h5 class="mb-0">Mark Attendance</h5></div>
     <div class="card-body">
-        <p>Select your class and capture a live webcam photo while sharing your device location. Attendance is available within {{ round(config('services.attendance_geofence.radius_meters', 100)) }} meters of campus, from 15 minutes before the lesson until it ends.</p>
+        <p>Select your class and capture a live webcam photo while sharing your device location. Attendance is available within {{ round(config('services.attendance_geofence.radius_meters', 100)) }} meters of campus. Your device location must be accurate to {{ round(config('services.attendance_geofence.max_accuracy_meters', 100)) }} meters or better. Check-in opens 15 minutes before the lesson and closes when it ends.</p>
         @if(!$referenceReady)
             <div class="alert alert-warning">Your official reference photo is missing. Ask your department coordinator or an administrator to upload it before marking attendance. Changing your profile picture does not change your official photo.</div>
         @endif
@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function show(text, state = 'info') {
         message.className = 'alert alert-' + state;
+        message.style.whiteSpace = 'pre-line';
         message.textContent = text;
     }
     function getCurrentPosition() {
@@ -190,11 +191,16 @@ document.addEventListener('DOMContentLoaded', function () {
         captureCanvas.getContext('2d').drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
         captureCanvas.toBlob(async function (blob) {
             let body = null;
+            let browserLocation = null;
             try {
                 if (!blob) throw new Error('The photo could not be captured. Please try again.');
                 const locationResult = await locationPromise;
                 if (locationResult.error) throw locationResult.error;
                 const position = locationResult.position;
+                browserLocation = {
+                    latitude: String(position.coords.latitude),
+                    longitude: String(position.coords.longitude)
+                };
                 const payload = new FormData(form);
                 payload.append('live_image', blob, 'live.jpg');
                 payload.append('latitude', String(position.coords.latitude));
@@ -229,7 +235,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         Number.isFinite(reportedAccuracy) && Number.isFinite(maximumAccuracy)
                         ? '\nYour device reports ±' + reportedAccuracy.toFixed(1) + ' m accuracy; this page requires ' + maximumAccuracy.toFixed(0) + ' m or better. Try a phone with precise location enabled.'
                         : '';
-                    throw new Error((body?.message || 'Face verification could not be completed. Attendance was not marked.') + reason + (details ? '\n' + details : '') + locationHelp);
+                    const measuredDistance = Number(body?.distance_meters);
+                    const allowedRadius = Number(body?.radius_meters);
+                    const geofenceHelp = body?.code === 'outside_campus_geofence' &&
+                        Number.isFinite(measuredDistance) && Number.isFinite(allowedRadius)
+                        ? '\nYour reported location is ' + measuredDistance.toFixed(1) + ' m from campus; the allowed radius is ' + allowedRadius.toFixed(0) + ' m.'
+                        : '';
+                    const locationCoordinates = browserLocation && ['outside_campus_geofence', 'location_accuracy_insufficient'].includes(body?.code)
+                        ? '\nBrowser-reported coordinates: latitude ' + browserLocation.latitude + ', longitude ' + browserLocation.longitude + '.'
+                        : '';
+                    throw new Error((body?.message || 'Face verification could not be completed. Attendance was not marked.') + reason + (details ? '\n' + details : '') + locationHelp + geofenceHelp + locationCoordinates);
                 }
                 const summary = resultSummary(body);
                 show((body.message || 'Attendance marked successfully.') + (summary ? ' ' + summary : ''), 'success');
