@@ -352,12 +352,12 @@
             </div>
         </a>
 
-        <a href="{{ route('admin.assign-teachers.index') }}" class="action-card">
+        <a href="{{ route('tt.index') }}" class="action-card">
             <div class="action-icon">
                 <i class="fas fa-chalkboard-user"></i>
             </div>
             <div class="action-content">
-                <div class="action-title">Assign Teachers</div>
+                <div class="action-title">View Timetables</div>
                 <div class="action-desc">Assign teachers to classes and courses</div>
             </div>
             <div class="action-arrow">

@@ -17,6 +17,8 @@ class Teacher
      */
     public function handle($request, Closure $next)
     {
-        return (Auth::check() && Qs::userIsTeacher()) ? $next($request) : redirect()->route('login');
+        if (!Auth::check()) { return redirect()->route('login'); }
+        abort_unless(Qs::userIsTeacher(), 403);
+        return $next($request);
     }
 }

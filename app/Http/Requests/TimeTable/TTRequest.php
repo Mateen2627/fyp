@@ -19,8 +19,8 @@ class TTRequest extends FormRequest
     public function rules()
     {
         return [
-            'exam_date' => 'sometimes|required|string|min:8',
-            'day' => 'sometimes|required|string|min:6',
+            'exam_date' => 'nullable|date',
+            'day' => 'nullable|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
             'subject_id' => 'required|exists:subjects,id',
             'ttr_id' => 'required|exists:time_table_records,id',
             'ts_id' => 'required|exists:time_slots,id',

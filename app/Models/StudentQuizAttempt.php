@@ -10,6 +10,11 @@ class StudentQuizAttempt extends Eloquent
 
     protected $dates = ['submitted_at'];
 
+    public function student()
+    {
+        return $this->belongsTo(\App\User::class, 'student_id')->withTrashed();
+    }
+
     public function quiz()
     {
         return $this->belongsTo(Quiz::class);

@@ -15,7 +15,7 @@ class SettingsTableSeeder extends Seeder
             'system_title' => 'NUML',
             'system_name' => 'National University of Modern Languages',
             'address' => 'Islamabad, Pakistan',
-            'numl_seed_note' => 'FYP demonstration data. Staff appointments and unsupplied curricula are samples.',
+            'numl_seed_note' => 'FYP data with specified CS/AI/IT/SE leaders. Other appointments and unsupplied curricula are samples.',
         ];
         foreach ($settings as $type => $description) {
             Setting::updateOrCreate(['type' => $type], ['description' => $description]);

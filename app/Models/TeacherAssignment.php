@@ -6,7 +6,12 @@ use Eloquent;
 
 class TeacherAssignment extends Eloquent
 {
-    protected $fillable = ['course_id', 'my_class_id', 'teacher_id', 'assigned_by', 'notes'];
+    protected $fillable = ['course_id', 'my_class_id', 'section_id', 'teacher_id', 'assigned_by', 'notes'];
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
+    }
 
     public function course()
     {

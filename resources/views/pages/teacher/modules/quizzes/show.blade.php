@@ -397,7 +397,7 @@
                     @forelse($attempts as $attempt)
                         <tr>
                             <td>
-                                <span class="student-id">#{{ $attempt->student_id }}</span>
+                                <span class="student-id">{{ optional($attempt->student)->name ?: ("Student #".$attempt->student_id) }}</span>
                             </td>
                             <td>
                                 @if($attempt->submitted_at)
@@ -429,24 +429,18 @@
                             <td>
                                 <form action="{{ route('teacher.quizzes.mark', [$quiz->id, $attempt->id]) }}" method="post">
                                     @csrf
-                                    <input type="number" step="0.01" min="0" max="100" name="marks" 
+                                    <input type="number" step="0.01" min="0" max="{{ $quiz->total_marks ?: 100 }}" name="marks"
                                            value="{{ $attempt->marks }}" 
                                            class="marks-input mb-2" 
                                            placeholder="Marks" 
-                                           {{ !is_null($attempt->marks) ? 'disabled' : '' }}>
+                                           >
                                     <textarea name="teacher_feedback" 
                                               class="feedback-textarea mb-2" 
                                               placeholder="Write feedback here..." 
-                                              {{ !is_null($attempt->marks) ? 'disabled' : '' }}>{{ $attempt->teacher_feedback }}</textarea>
-                                    @if(is_null($attempt->marks))
-                                        <button type="submit" class="btn-save-sm">
+                                              >{{ $attempt->teacher_feedback }}</textarea>
+                                    <button type="submit" class="btn-save-sm">
                                             <i class="fas fa-save"></i> Save Feedback
                                         </button>
-                                    @else
-                                        <span class="locked-badge">
-                                            <i class="fas fa-lock"></i> Locked
-                                        </span>
-                                    @endif
                                 </form>
                             </td>
                         </tr>

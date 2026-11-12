@@ -12,6 +12,11 @@ class StudentAssignmentSubmission extends Eloquent
 
     protected $dates = ['submitted_at'];
 
+    public function student()
+    {
+        return $this->belongsTo(\App\User::class, 'student_id')->withTrashed();
+    }
+
     public function assignment()
     {
         return $this->belongsTo(Assignment::class);

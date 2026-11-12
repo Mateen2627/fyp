@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Services\LmsAccess;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use App\Models\Quiz;
 use App\Models\StudentQuizAttempt;
 use App\Models\StudentRecord;
@@ -22,9 +25,7 @@ class QuizController extends Controller
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
         $studentId = Auth::id();
 
-        $quizzes = Quiz::with(['course', 'teacher'])
-            ->whereNotNull('teacher_id')
-            ->where('my_class_id', $record->my_class_id)
+        $quizzes = LmsAccess::scopeStudentActivities(Quiz::with(['course', 'teacher']), $record)
             ->latest()
             ->paginate(20);
 
@@ -40,7 +41,7 @@ class QuizController extends Controller
     public function viewMaterial(Quiz $quiz)
     {
         $this->assertBelongsToStudentClass($quiz);
-        abort_unless($quiz->attachment_path && Storage::disk('public')->exists($quiz->attachment_path), 404);
+        abort_unless($quiz->attachment_path && Storage::disk('local')->exists($quiz->attachment_path), 404);
 
         return $this->inlinePdf($quiz->attachment_path);
     }
@@ -51,7 +52,7 @@ class QuizController extends Controller
         $attempt = StudentQuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', Auth::id())
             ->firstOrFail();
-        abort_unless($attempt->attachment_path && Storage::disk('public')->exists($attempt->attachment_path), 404);
+        abort_unless($attempt->attachment_path && Storage::disk('local')->exists($attempt->attachment_path), 404);
 
         return $this->inlinePdf($attempt->attachment_path);
     }
@@ -71,21 +72,22 @@ class QuizController extends Controller
     {
         $this->assertBelongsToStudentClass($quiz);
 
+        if ($quiz->scheduled_at && $quiz->scheduled_at->isFuture()) { throw ValidationException::withMessages(['submission' => 'This quiz is not open yet.']); }
         $existing = StudentQuizAttempt::where('quiz_id', $quiz->id)->where('student_id', Auth::id())->first();
         if ($existing) {
             return redirect()->route('student.quizzes.show', $quiz->id)->with('flash_danger', 'You have already submitted this quiz. Resubmission is not allowed.');
         }
 
         $data = $request->validate([
-            'answers' => 'nullable|string',
-            'attachment' => 'required|file|mimes:pdf|max:5120',
+            'answers' => 'required_without:attachment|nullable|string|max:30000',
+            'attachment' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
         StudentQuizAttempt::create([
             'quiz_id' => $quiz->id,
             'student_id' => Auth::id(),
             'answers' => $data['answers'] ?? null,
-            'attachment_path' => $request->file('attachment')->store('quiz_attempts', 'public'),
+            'attachment_path' => $request->hasFile('attachment') ? $request->file('attachment')->store('quiz_attempts', 'local') : null,
             'submitted_at' => now(),
         ]);
 
@@ -95,7 +97,7 @@ class QuizController extends Controller
 
     private function inlinePdf(string $path)
     {
-        return response()->file(Storage::disk('public')->path($path), [
+        return response()->file(Storage::disk('local')->path($path), [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.basename($path).'"',
         ]);
@@ -104,6 +106,6 @@ class QuizController extends Controller
     private function assertBelongsToStudentClass(Quiz $quiz): void
     {
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
-        abort_unless((int) $quiz->my_class_id === (int) $record->my_class_id, 403);
+        LmsAccess::assertStudentActivity($quiz);
     }
 }

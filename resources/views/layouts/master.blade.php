@@ -17,7 +17,7 @@
 
 @include('partials.top_menu')
 <div class="page-content">
-  @php($roleMenu = Auth::check() ? 'partials.menus.'.Auth::user()->user_type : null)
+  @php($roleMenu = Auth::check() ? 'partials.menus.'.(Auth::user()->user_type === 'super_admin' ? 'admin' : Auth::user()->user_type) : null)
     @if($roleMenu && view()->exists($roleMenu))
         @include($roleMenu)
     @else

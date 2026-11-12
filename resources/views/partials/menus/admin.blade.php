@@ -62,12 +62,7 @@
                     </a>
                 </li>
                 
-                <li class="nav-item">
-                    <a href="{{ route('admin.assign-teachers.index') }}" class="nav-link {{ Route::is('admin.assign-teachers.*') ? 'active' : '' }}">
-                        <i class="fas fa-user-check"></i>
-                        <span>Assign Teachers</span>
-                    </a>
-                </li>
+                <li class="nav-item"><a href="{{ route('tt.index') }}" class="nav-link"><i class="fas fa-calendar-alt"></i><span>View Timetables</span></a></li>
                 
                 <li class="nav-item">
                     <a href="{{ route('admin.reports.index') }}" class="nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">

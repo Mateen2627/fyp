@@ -34,7 +34,8 @@ class DatabaseSeeder extends Seeder
         });
 
         if ($this->command) {
-            $this->command->info('NUML demo ready: 7 departments, 8 semesters each, sections A/B, 1,120 students.');
+            $students = \App\User::where('user_type', 'student')->where('code', 'like', 'NUML-%')->count();
+            $this->command->info('NUML demo ready: 7 departments, 8 semesters each, sections A/B, '.number_format($students).' active seeded students.');
             $this->command->info('All seeded passwords: cj. First-name usernames; duplicates get 2, 3, etc.');
             $this->command->info('Fresh database logins: cj / admin / faisal / rao / neelofer / marjan / mateen.');
             $this->command->info('See database/seeders/README.md for sample data and existing-data behavior.');

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Services\LmsAccess;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use App\Models\Assignment;
 use App\Models\StudentAssignmentSubmission;
 use App\Models\StudentRecord;
@@ -22,9 +25,7 @@ class AssignmentController extends Controller
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
         $studentId = Auth::id();
 
-        $assignments = Assignment::with(['course', 'teacher'])
-            ->whereNotNull('teacher_id')
-            ->where('my_class_id', $record->my_class_id)
+        $assignments = LmsAccess::scopeStudentActivities(Assignment::with(['course', 'teacher']), $record)
             ->latest()
             ->paginate(20);
 
@@ -40,7 +41,7 @@ class AssignmentController extends Controller
     public function viewMaterial(Assignment $assignment)
     {
         $this->assertBelongsToStudentClass($assignment);
-        abort_unless($assignment->attachment_path && Storage::disk('public')->exists($assignment->attachment_path), 404);
+        abort_unless($assignment->attachment_path && Storage::disk('local')->exists($assignment->attachment_path), 404);
 
         return $this->inlinePdf($assignment->attachment_path);
     }
@@ -51,7 +52,7 @@ class AssignmentController extends Controller
         $submission = StudentAssignmentSubmission::where('assignment_id', $assignment->id)
             ->where('student_id', Auth::id())
             ->firstOrFail();
-        abort_unless($submission->attachment_path && Storage::disk('public')->exists($submission->attachment_path), 404);
+        abort_unless($submission->attachment_path && Storage::disk('local')->exists($submission->attachment_path), 404);
 
         return $this->inlinePdf($submission->attachment_path);
     }
@@ -71,21 +72,22 @@ class AssignmentController extends Controller
     {
         $this->assertBelongsToStudentClass($assignment);
 
+        if ($assignment->due_date && $assignment->due_date->copy()->endOfDay()->isPast()) { throw ValidationException::withMessages(['submission' => 'The assignment deadline has passed.']); }
         $existing = StudentAssignmentSubmission::where('assignment_id', $assignment->id)->where('student_id', Auth::id())->first();
         if ($existing) {
             return redirect()->route('student.assignments.show', $assignment->id)->with('flash_danger', 'You have already submitted this assignment. Resubmission is not allowed.');
         }
 
         $data = $request->validate([
-            'submission_text' => 'nullable|string',
-            'attachment' => 'required|file|mimes:pdf|max:5120',
+            'submission_text' => 'required_without:attachment|nullable|string|max:30000',
+            'attachment' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
         StudentAssignmentSubmission::create([
             'assignment_id' => $assignment->id,
             'student_id' => Auth::id(),
             'submission_text' => $data['submission_text'] ?? null,
-            'attachment_path' => $request->file('attachment')->store('student_submissions', 'public'),
+            'attachment_path' => $request->hasFile('attachment') ? $request->file('attachment')->store('student_submissions', 'local') : null,
             'submitted_at' => now(),
         ]);
 
@@ -95,7 +97,7 @@ class AssignmentController extends Controller
 
     private function inlinePdf(string $path)
     {
-        return response()->file(Storage::disk('public')->path($path), [
+        return response()->file(Storage::disk('local')->path($path), [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.basename($path).'"',
         ]);
@@ -104,6 +106,6 @@ class AssignmentController extends Controller
     private function assertBelongsToStudentClass(Assignment $assignment): void
     {
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
-        abort_unless((int) $assignment->my_class_id === (int) $record->my_class_id, 403);
+        LmsAccess::assertStudentActivity($assignment);
     }
 }

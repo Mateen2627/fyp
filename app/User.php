@@ -11,12 +11,28 @@ use App\Models\StudentRecord;
 use App\Models\TeacherAssignment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
+
+    public function departmentRoles()
+    {
+        return $this->hasMany(\App\Models\DepartmentStaff::class, 'user_id');
+    }
+
+    public function isHod()
+    {
+        return $this->user_type === 'teacher' && $this->departmentRoles()->where('is_hod', true)->exists();
+    }
+
+    public function isCoordinator()
+    {
+        return $this->user_type === 'teacher' && $this->departmentRoles()->where('is_coordinator', true)->exists();
+    }
 
     /**
      * The attributes that are mass assignable.

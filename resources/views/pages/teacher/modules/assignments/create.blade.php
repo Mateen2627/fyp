@@ -225,6 +225,7 @@
             @csrf
             
             <div class="form-grid">
+                <div class="form-group-modern"><label class="form-label-modern">Total Marks</label><input name="total_marks" type="number" min="1" max="999" class="form-control-modern" required value="{{ old('total_marks', isset($assignment) ? $assignment->total_marks : 100) }}"></div>
                 <!-- Assignment Title -->
                 <div class="form-group-modern full-width">
                     <label class="form-label-modern">
@@ -244,14 +245,14 @@
                     <select class="form-control-modern" id="pair_select" required>
                         <option value="">— Select Class and Course —</option>
                         @foreach($pairs as $pair)
-                            <option value="{{ $pair->course_id }}|{{ $pair->my_class_id }}">
+                            <option value="{{ $pair->course_id }}|{{ $pair->my_class_id }}|{{ $pair->section_id }}">
                                 <i class="fas fa-school"></i> {{ optional($pair->my_class)->name ?: 'Class '.$pair->my_class_id }} — 
-                                <i class="fas fa-book"></i> {{ optional($pair->course)->title ?: 'Course '.$pair->course_id }}
+                                <i class="fas fa-book"></i> {{ optional($pair->course)->title ?: 'Course '.$pair->course_id }} · {{ optional($pair->section)->name ?: 'All sections' }}
                             </option>
                         @endforeach
                     </select>
                     <input type="hidden" name="course_id" id="course_id">
-                    <input type="hidden" name="my_class_id" id="my_class_id">
+                    <input type="hidden" name="my_class_id" id="my_class_id"><input type="hidden" name="section_id" id="section_id">
                     <div class="helper-text">
                         <i class="fas fa-info-circle"></i> Select the class and course for this assignment
                     </div>
@@ -306,9 +307,10 @@
 <script>
     // Pair selection handler
     document.getElementById('pair_select').addEventListener('change', function(){
-        const [courseId, classId] = (this.value || '|').split('|');
+        const [courseId, classId, sectionId] = (this.value || '|').split('|');
         document.getElementById('course_id').value = courseId || '';
         document.getElementById('my_class_id').value = classId || '';
+        document.getElementById('section_id').value = sectionId || '';
     });
     
     // Form submit loading state

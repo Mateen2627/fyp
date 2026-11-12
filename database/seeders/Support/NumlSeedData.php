@@ -25,8 +25,8 @@ class NumlSeedData
 
     public static function faculty()
     {
-        // First two teachers are the sample HOD and coordinator, respectively.
-        // Appointments and departments are illustrative, including for supplied names.
+        // DepartmentStaffTableSeeder applies the owner's named CS/AI/IT/SE leaders.
+        // The first two teachers are sample leaders for the other departments.
         return [
             'CS' => ['Mr Faisal Hussain', 'Dr Rao Kashif', "Ma'am Neelofer", 'Mr Kashif', 'M Zainulabideen', 'Mustajeeb ur Rehman'],
             'SE' => ['Dr Ayesha Ahmed', 'Mr Salman Akhtar', 'Ms Hira Mahmood', 'Mr Farhan Ali'],
@@ -47,8 +47,8 @@ class NumlSeedData
     {
         $teachers = [];
         foreach (self::faculty()[$department] as $index => $name) {
-            $teachers[] = User::where('code', self::staffCode($department, $index))
-                ->where('user_type', 'teacher')->firstOrFail();
+            $teacher = User::where('code', self::staffCode($department, $index))->where('user_type', 'teacher')->first();
+            if ($teacher) { $teachers[] = $teacher; }
         }
         return $teachers;
     }
@@ -83,12 +83,17 @@ class NumlSeedData
 
     public static function seedUser($code, $name, $type, $password, array $attributes = [])
     {
+        $existing = User::withTrashed()->where('code', $code)->first();
+        if ($existing) {
+            if (!$existing->trashed()) { $existing->update(['password' => $password]); }
+            return $existing;
+        }
         // Strip titles and the abbreviated M initial for an easy first-name login.
         $plainName = preg_replace('/^(?:(?:mr|mrs|ms|dr|prof|ma\x27am|m)\.?\s+)+/i', '', $name);
         $firstName = Str::slug(explode(' ', trim($plainName))[0], '');
         $username = $firstName;
         $suffix = 2;
-        while (User::where('username', $username)->where('code', '<>', $code)->exists()) {
+        while (User::withTrashed()->where('username', $username)->where('code', '<>', $code)->exists()) {
             $username = $firstName.$suffix++;
         }
         return User::updateOrCreate(['code' => $code], array_merge($attributes, [

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Services\LmsAccess;
 use App\Models\Assignment;
 use App\Models\Quiz;
 use App\Models\StudentAssignmentSubmission;
@@ -27,19 +28,19 @@ class DashboardController extends Controller
         $quizQuery = Quiz::query()->whereNotNull('teacher_id');
 
         if ($record) {
-            $assignmentQuery->where('my_class_id', $record->my_class_id);
-            $quizQuery->where('my_class_id', $record->my_class_id);
+            LmsAccess::scopeStudentActivities($assignmentQuery, $record);
+            LmsAccess::scopeStudentActivities($quizQuery, $record);
         } else {
             $assignmentQuery->whereRaw('1 = 0');
             $quizQuery->whereRaw('1 = 0');
         }
 
         $totalAssignments = (clone $assignmentQuery)->count();
-        $submittedAssignments = StudentAssignmentSubmission::where('student_id', Auth::id())->count();
+        $submittedAssignments = StudentAssignmentSubmission::where('student_id', Auth::id())->whereIn('assignment_id', (clone $assignmentQuery)->pluck('id'))->count();
         $pendingAssignments = max($totalAssignments - $submittedAssignments, 0);
 
         $totalQuizzes = (clone $quizQuery)->count();
-        $attemptedQuizzes = StudentQuizAttempt::where('student_id', Auth::id())->count();
+        $attemptedQuizzes = StudentQuizAttempt::where('student_id', Auth::id())->whereIn('quiz_id', (clone $quizQuery)->pluck('id'))->count();
         $pendingQuizzes = max($totalQuizzes - $attemptedQuizzes, 0);
 
         $attendancePresent = StudentAttendance::where('user_id', Auth::id())->where('status', 'present')->count();

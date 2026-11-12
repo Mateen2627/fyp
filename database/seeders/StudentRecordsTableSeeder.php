@@ -51,8 +51,9 @@ class StudentRecordsTableSeeder extends Seeder
         list($department, $semester) = NumlSeedData::classDetails($section->my_class);
         $code = sprintf('NUML-2023-%s-S%d-%s-%03d', $department, $semester, $section->name, $number);
         $user = NumlSeedData::seedUser($code, $name, 'student', $password, $attributes);
+        if ($user->trashed()) { return; }
 
-        StudentRecord::updateOrCreate(['user_id' => $user->id], [
+        StudentRecord::firstOrCreate(['user_id' => $user->id], [
             'my_class_id' => $section->my_class_id,
             'section_id' => $section->id,
             'session' => NumlSeedData::SESSION,

@@ -17,6 +17,7 @@ class CoursesTableSeeder extends Seeder
                 // Modern course screens and legacy marks screens use separate tables.
                 Course::updateOrCreate(['my_class_id' => $class->id, 'code' => $subject->slug], [
                     'title' => $subject->name,
+                    'subject_id' => $subject->id,
                     'description' => NumlSeedData::courseDescription($department, $semester, $subject->name),
                 ]);
             }

@@ -6,7 +6,12 @@ use Eloquent;
 
 class Course extends Eloquent
 {
-    protected $fillable = ['title', 'code', 'description', 'my_class_id'];
+    protected $fillable = ['title', 'code', 'description', 'my_class_id', 'subject_id', 'teaching_initialized'];
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
 
     public function assignments()
     {

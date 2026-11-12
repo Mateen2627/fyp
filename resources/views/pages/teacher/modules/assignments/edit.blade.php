@@ -272,6 +272,7 @@
             @method('PUT')
             
             <div class="form-grid">
+                <div class="form-group-modern"><label class="form-label-modern">Total Marks</label><input name="total_marks" type="number" min="1" max="999" class="form-control-modern" required value="{{ old('total_marks', isset($assignment) ? $assignment->total_marks : 100) }}"></div>
                 <!-- Assignment Title -->
                 <div class="form-group-modern full-width">
                     <label class="form-label-modern">

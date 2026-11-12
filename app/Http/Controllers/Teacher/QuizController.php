@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Services\LmsAccess;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use App\Models\Quiz;
 use App\Models\StudentQuizAttempt;
 use App\Models\TeacherAssignment;
@@ -19,14 +22,14 @@ class QuizController extends Controller
 
     public function index()
     {
-        $quizzes = Quiz::with(['course', 'my_class'])->where('teacher_id', Auth::id())->latest()->paginate(20);
+        $quizzes = LmsAccess::scopeTeacherActivities(Quiz::with(['course', 'my_class']))->latest()->paginate(20);
 
         return view('pages.teacher.modules.quizzes.index', compact('quizzes'));
     }
 
     public function create()
     {
-        $pairs = TeacherAssignment::with(['course', 'my_class'])->where('teacher_id', Auth::id())->get();
+        $pairs = LmsAccess::teachingQuery()->with(['course', 'my_class', 'section'])->get();
 
         return view('pages.teacher.modules.quizzes.create', compact('pairs'));
     }
@@ -36,10 +39,11 @@ class QuizController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'course_id' => 'required|integer',
-            'my_class_id' => 'required|integer',
+            'my_class_id' => 'required|integer|exists:my_classes,id',
+            'section_id' => ['nullable', 'integer', Rule::exists('sections', 'id')->where('my_class_id', $request->my_class_id)],
             'description' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:pdf|max:5120',
-            'total_marks' => 'nullable|integer|min:0',
+            'total_marks' => 'required|integer|min:1|max:999',
             'scheduled_at' => 'nullable|date',
         ]);
 
@@ -49,8 +53,9 @@ class QuizController extends Controller
             ->exists();
         abort_unless($isAllowedPair, 403);
 
+        LmsAccess::assertTeaching($data['course_id'], $data['my_class_id'], $data['section_id'] ?? null);
         $data['teacher_id'] = Auth::id();
-        $data['attachment_path'] = $request->hasFile('attachment') ? $request->file('attachment')->store('quiz_materials', 'public') : null;
+        $data['attachment_path'] = $request->hasFile('attachment') ? $request->file('attachment')->store('quiz_materials', 'local') : null;
 
         Quiz::create($data);
 
@@ -59,27 +64,30 @@ class QuizController extends Controller
 
     public function edit(Quiz $quiz)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        LmsAccess::assertActivityOwner($quiz);
 
         return view('pages.teacher.modules.quizzes.edit', compact('quiz'));
     }
 
     public function update(Request $request, Quiz $quiz)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        LmsAccess::assertActivityOwner($quiz);
 
         $data = $request->validate([
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:pdf|max:5120',
-            'total_marks' => 'nullable|integer|min:0',
+            'total_marks' => 'required|integer|min:1|max:999',
             'scheduled_at' => 'nullable|date',
         ]);
 
         if ($request->hasFile('attachment')) {
-            $data['attachment_path'] = $request->file('attachment')->store('quiz_materials', 'public');
+            $data['attachment_path'] = $request->file('attachment')->store('quiz_materials', 'local');
         }
 
+        if (isset($data['total_marks']) && $quiz->attempts()->where('marks', '>', $data['total_marks'])->exists()) {
+            throw ValidationException::withMessages(['total_marks' => 'Total marks cannot be lower than an existing awarded mark.']);
+        }
         $quiz->update($data);
 
         return redirect()->route('teacher.quizzes.index')->with('flash_success', 'Quiz updated.');
@@ -88,23 +96,23 @@ class QuizController extends Controller
 
     public function viewMaterial(Quiz $quiz)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
-        abort_unless($quiz->attachment_path && Storage::disk('public')->exists($quiz->attachment_path), 404);
+        LmsAccess::assertActivityOwner($quiz);
+        abort_unless($quiz->attachment_path && Storage::disk('local')->exists($quiz->attachment_path), 404);
 
         return $this->inlinePdf($quiz->attachment_path);
     }
 
     public function downloadMaterial(Quiz $quiz)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
-        abort_unless($quiz->attachment_path && Storage::disk('public')->exists($quiz->attachment_path), 404);
+        LmsAccess::assertActivityOwner($quiz);
+        abort_unless($quiz->attachment_path && Storage::disk('local')->exists($quiz->attachment_path), 404);
 
-        return Storage::disk('public')->download($quiz->attachment_path);
+        return Storage::disk('local')->download($quiz->attachment_path);
     }
 
     public function show(Quiz $quiz)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        LmsAccess::assertActivityOwner($quiz);
         $attempts = StudentQuizAttempt::where('quiz_id', $quiz->id)->latest()->get();
 
         return view('pages.teacher.modules.quizzes.show', compact('quiz', 'attempts'));
@@ -113,26 +121,26 @@ class QuizController extends Controller
 
     public function viewAttempt(Quiz $quiz, StudentQuizAttempt $attempt)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        LmsAccess::assertActivityOwner($quiz);
         abort_unless((int) $attempt->quiz_id === (int) $quiz->id, 404);
-        abort_unless($attempt->attachment_path && Storage::disk('public')->exists($attempt->attachment_path), 404);
+        abort_unless($attempt->attachment_path && Storage::disk('local')->exists($attempt->attachment_path), 404);
 
         return $this->inlinePdf($attempt->attachment_path);
     }
 
     public function downloadAttempt(Quiz $quiz, StudentQuizAttempt $attempt)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        LmsAccess::assertActivityOwner($quiz);
         abort_unless((int) $attempt->quiz_id === (int) $quiz->id, 404);
-        abort_unless($attempt->attachment_path && Storage::disk('public')->exists($attempt->attachment_path), 404);
+        abort_unless($attempt->attachment_path && Storage::disk('local')->exists($attempt->attachment_path), 404);
 
-        return Storage::disk('public')->download($attempt->attachment_path);
+        return Storage::disk('local')->download($attempt->attachment_path);
     }
 
 
     private function inlinePdf(string $path)
     {
-        return response()->file(Storage::disk('public')->path($path), [
+        return response()->file(Storage::disk('local')->path($path), [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.basename($path).'"',
         ]);
@@ -140,16 +148,12 @@ class QuizController extends Controller
 
     public function mark(Request $request, Quiz $quiz, StudentQuizAttempt $attempt)
     {
-        abort_unless((int) $quiz->teacher_id === (int) Auth::id(), 403);
+        LmsAccess::assertActivityOwner($quiz);
         abort_unless((int) $attempt->quiz_id === (int) $quiz->id, 404);
 
-        if (!is_null($attempt->marks)) {
-            return back()->with('flash_danger', 'Marks already assigned and cannot be overridden.');
-        }
-
         $data = $request->validate([
-            'marks' => 'required|numeric|min:0|max:100',
-            'teacher_feedback' => 'nullable|string',
+            'marks' => 'required|numeric|min:0|max:'.($quiz->total_marks ?: 100),
+            'teacher_feedback' => 'nullable|string|max:3000',
         ]);
         $attempt->update($data);
 

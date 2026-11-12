@@ -112,7 +112,7 @@ try {
     foreach (NumlSeedData::departments() as $code => $name) {
         foreach (['hod', 'coordinator'] as $role) {
             $appointment = json_decode(Setting::where('type', 'numl_'.$role.'_'.strtolower($code))->value('description'), true);
-            checkSeed($appointment && $appointment['sample'], 'Missing sample staff appointment.');
+            checkSeed($appointment && array_key_exists('sample', $appointment), 'Missing staff appointment.');
             checkSeed(User::findOrFail($appointment['user_id'])->user_type === 'teacher', 'Department role removed teaching access.');
             checkSeed(TeacherAssignment::where('teacher_id', $appointment['user_id'])->exists(), 'Department leader has no teaching assignment.');
         }

@@ -1,6 +1,6 @@
 <?php
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 //Route::get('/test', 'TestController@index')->name('test');
 Route::get('/', 'HomeController@landing')->name('landing');
@@ -10,6 +10,8 @@ Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use')
 
 
 Route::get('/storage/{path}', function ($path) {
+    // LMS work is served through authorized material/submission actions.
+    abort_if(preg_match('#^(assignment_materials|quiz_materials|student_submissions|quiz_attempts)/#', $path), 403);
     abort_unless(\Illuminate\Support\Facades\Storage::disk('public')->exists($path), 404);
 
     return response()->file(\Illuminate\Support\Facades\Storage::disk('public')->path($path));
@@ -35,13 +37,24 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('users', 'ManageUserController', ['as' => 'admin'])->except(['show']);
         Route::resource('courses', 'ManageCourseController', ['as' => 'admin'])->except(['show']);
         Route::resource('classes', 'ManageClassController', ['as' => 'admin']);
-        Route::resource('assign-teachers', 'AssignTeacherController', ['as' => 'admin', 'parameters' => ['assign-teachers' => 'assign_teacher']])->except(['show']);
         Route::resource('reports', 'ReportController', ['as' => 'admin'])->except(['show']);
         Route::resource('system-settings', 'SystemSettingController', ['as' => 'admin', 'parameters' => ['system-settings' => 'system_setting']])->except(['show']);
     });
 
+    Route::group(['namespace' => 'Admin', 'prefix' => 'hod', 'middleware' => 'departmentRole:hod'], function () {
+        Route::resource('assign-teachers', 'AssignTeacherController', ['as' => 'hod', 'parameters' => ['assign-teachers' => 'assign_teacher']])->except(['show']);
+    });
+
+    Route::group(['namespace' => 'Academic', 'prefix' => 'academic', 'middleware' => 'departmentRole:leader'], function () {
+        Route::get('progress', 'ProgressController@index')->name('academic.progress.index');
+        Route::get('progress/classes/{class}', 'ProgressController@show')->name('academic.progress.show');
+        Route::get('progress/{kind}/{activityId}', 'ProgressController@activity')->name('academic.progress.activity');
+        Route::get('progress/{kind}/{activityId}/material', 'ProgressController@material')->name('academic.progress.material');
+        Route::get('progress/{kind}/{activityId}/responses/{response}', 'ProgressController@responseFile')->name('academic.progress.response');
+    });
+
     /*************** Support Team *****************/
-    Route::group(['namespace' => 'SupportTeam',], function(){
+    Route::group(['namespace' => 'SupportTeam', 'middleware' => 'legacyLms'], function(){
 
         /*************** Students *****************/
         Route::group(['prefix' => 'students'], function(){
@@ -69,7 +82,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'timetables'], function(){
             Route::get('/', 'TimeTableController@index')->name('tt.index');
 
-            Route::group(['middleware' => 'teamSA'], function() {
+            Route::group(['middleware' => 'departmentRole:coordinator'], function() {
                 Route::post('/', 'TimeTableController@store')->name('tt.store');
                 Route::put('/{tt}', 'TimeTableController@update')->name('tt.update');
                 Route::delete('/{tt}', 'TimeTableController@delete')->name('tt.delete');
@@ -78,7 +91,7 @@ Route::group(['middleware' => 'auth'], function () {
             /*************** TimeTable Records *****************/
             Route::group(['prefix' => 'records'], function(){
 
-                Route::group(['middleware' => 'teamSA'], function(){
+                Route::group(['middleware' => 'departmentRole:coordinator'], function(){
                     Route::get('manage/{ttr}', 'TimeTableController@manage')->name('ttr.manage');
                     Route::post('/', 'TimeTableController@store_record')->name('ttr.store');
                     Route::get('edit/{ttr}', 'TimeTableController@edit_record')->name('ttr.edit');
@@ -92,7 +105,7 @@ Route::group(['middleware' => 'auth'], function () {
             });
 
             /*************** Time Slots *****************/
-            Route::group(['prefix' => 'time_slots', 'middleware' => 'teamSA'], function(){
+            Route::group(['prefix' => 'time_slots', 'middleware' => 'departmentRole:coordinator'], function(){
                 Route::post('/', 'TimeTableController@store_time_slot')->name('ts.store');
                 Route::post('/use/{ttr}', 'TimeTableController@use_time_slot')->name('ts.use');
                 Route::get('edit/{ts}', 'TimeTableController@edit_time_slot')->name('ts.edit');
@@ -196,6 +209,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('quizzes/{quiz}/submit', 'QuizController@submit')->name('student.quizzes.submit');
         Route::resource('quizzes', 'QuizController', ['as' => 'student'])->only(['index', 'show']);
 
+        Route::post('attendance/check-in', 'AttendanceController@checkIn')->name('student.attendance.check_in');
         Route::resource('attendance', 'AttendanceController', ['as' => 'student'])->only(['index']);
         Route::get('subject-marks', 'SubjectMarkController@index')->name('student.subject_marks.index');
         Route::resource('reports', 'ReportController', ['as' => 'student']);

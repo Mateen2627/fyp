@@ -21,11 +21,11 @@ class TSRequest extends FormRequest
         return [
             'ttr_id' => 'required|exists:time_table_records,id',
             'hour_from' => 'required|numeric|between:1,12',
-            'min_from' => 'required|string|size:2',
-            'meridian_from' => 'required|string|size:2',
+            'min_from' => ['required', 'regex:/^[0-5][0-9]$/'],
+            'meridian_from' => 'required|in:AM,PM',
             'hour_to' => 'required|numeric|between:1,12',
-            'min_to' => 'required|string|size:2',
-            'meridian_to' => 'required|string|size:2',
+            'min_to' => ['required', 'regex:/^[0-5][0-9]$/'],
+            'meridian_to' => 'required|in:AM,PM',
         ];
     }
 

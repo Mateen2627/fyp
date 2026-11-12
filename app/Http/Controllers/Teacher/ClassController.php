@@ -24,6 +24,7 @@ class ClassController extends Controller
         $selected = $request->get('ttr_id');
         $timeTables = collect();
         if ($selected) {
+            abort_unless($records->contains('id', (int) $selected), 403);
             $timeTables = TimeTable::with(['subject', 'time_slot'])->where('ttr_id', $selected)->orderBy('day_num')->get();
         }
 

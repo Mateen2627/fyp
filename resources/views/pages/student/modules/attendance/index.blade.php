@@ -1,115 +1,55 @@
 @extends('layouts.master')
-@section('page_title', 'Attendance History')
+@section('page_title', 'My Attendance')
 @section('content')
-
-<style>
-    .table-filter-bar { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
-    .table-filter-bar .form-control { max-width: 280px; }
-</style>
-
-<div class="card">
-    <div class="card-header header-elements-inline">
-        <h6 class="card-title">My Attendance History</h6>
-        {!! Qs::getPanelOptions() !!}
-    </div>
-
-    <div class="card-body">
-        <form method="get" action="{{ route('student.attendance.index') }}" class="row align-items-end">
-            <div class="col-md-3">
-                <label>Filter</label>
-                <select name="period" class="form-control">
-                    <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>This Month</option>
-                    <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>This Week</option>
-                    <option value="custom" {{ $period === 'custom' ? 'selected' : '' }}>Custom Range</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label>From</label>
-                <input type="date" name="from" value="{{ $from->format('Y-m-d') }}" class="form-control">
-            </div>
-            <div class="col-md-3">
-                <label>To</label>
-                <input type="date" name="to" value="{{ $to->format('Y-m-d') }}" class="form-control">
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary btn-block">Apply Filter</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-3"><div class="card card-body text-center"><h3>{{ $summary['total'] }}</h3><span>Total Records</span></div></div>
-    <div class="col-md-3"><div class="card card-body text-center"><h3 class="text-success">{{ $summary['present'] }}</h3><span>Present</span></div></div>
-    <div class="col-md-3"><div class="card card-body text-center"><h3 class="text-warning">{{ $summary['late'] }}</h3><span>Late</span></div></div>
-    <div class="col-md-3"><div class="card card-body text-center"><h3 class="text-primary">{{ $summary['percentage'] }}%</h3><span>Attendance Percentage</span></div></div>
-</div>
-
-<div class="card">
-    <div class="card-header header-elements-inline">
-        <h6 class="card-title">Records from {{ $from->format('d M Y') }} to {{ $to->format('d M Y') }}</h6>
-    </div>
-    <div class="table-filter-bar">
-        <input type="search" class="form-control table-search" data-table-target="student-attendance-table" placeholder="Search date, teacher, status, or remarks">
-        <select class="form-control table-status-filter" data-table-target="student-attendance-table">
-            <option value="">All Statuses</option>
-            <option value="present">Present</option>
-            <option value="absent">Absent</option>
-            <option value="late">Late</option>
-            <option value="excused">Excused</option>
-        </select>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-striped mb-0" id="student-attendance-table">
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Marked By</th>
-                <th>Remarks</th>
-            </tr>
-            </thead>
-            <tbody>
-            @forelse($records as $row)
-                <tr data-status="{{ $row->status }}" data-search="{{ strtolower(optional($row->attendance_date)->format('Y-m-d').' '.$row->status.' '.optional($row->markedBy)->name.' '.$row->remarks) }}">
-                    <td>{{ optional($row->attendance_date)->format('Y-m-d') }}</td>
-                    <td><span class="badge badge-{{ $row->status === 'present' ? 'success' : ($row->status === 'absent' ? 'danger' : 'warning') }}">{{ ucfirst($row->status) }}</span></td>
-                    <td>{{ optional($row->markedBy)->name ?: '-' }}</td>
-                    <td>{{ $row->remarks ?: '-' }}</td>
-                </tr>
-            @empty
-                <tr><td colspan="4" class="text-center">No attendance records found for this period.</td></tr>
-            @endforelse
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer">{{ $records->links() }}</div>
-</div>
-
-
+<div class="card"><div class="card-header"><h5>Today's Classes and Face Check-in</h5></div><div class="card-body">
+<p>Check in during your scheduled lesson, starting 15 minutes before class. Captures remain pending until the face verification service is connected. Pending captures do not mark you present.</p>
+<div id="camera-message" class="alert alert-info">Select a class, enable your camera, then capture and submit. Your browser needs camera permission.</div>
+<video id="attendance-camera" autoplay playsinline muted style="width:100%;max-width:420px;border-radius:8px" hidden></video>
+<canvas id="attendance-canvas" hidden></canvas>
+<form id="check-in-form" method="post" enctype="multipart/form-data" action="{{ route('student.attendance.check_in') }}">@csrf
+<div class="form-group"><label for="lesson">Lesson</label><select id="lesson" class="form-control" name="time_table_id" required><option value="">Select today's lesson</option>
+@foreach($lessons as $lesson)<option value="{{ $lesson->id }}" {{ $checkIns->has($lesson->id) ? 'disabled' : '' }}>{{ optional($lesson->subject)->name }} · {{ optional($lesson->time_slot)->full }} {{ $checkIns->has($lesson->id) ? '('.$checkIns[$lesson->id]->status.')' : '' }}</option>@endforeach
+</select></div>
+<button type="button" class="btn btn-light" id="enable-camera">Enable Camera</button>
+<button type="button" class="btn btn-primary" id="capture-attendance" disabled>Capture and Check In</button>
+</form>
+@if($lessons->isEmpty())<p class="text-muted mt-3">No lessons scheduled for your section today. Your coordinator manages the class timetable.</p>@endif
+@if($checkIns->isNotEmpty())<h6 class="mt-3">Today's check-ins</h6><ul>@foreach($checkIns as $entry)<li>{{ optional(optional($entry->lesson)->subject)->name }}: {{ ucfirst($entry->status) }}. {{ $entry->message }}</li>@endforeach</ul>@endif
+</div></div>
+<div class="card"><div class="card-header"><h5>My Recorded Attendance</h5></div><div class="card-body"><p>{{ $present }} present / {{ $total }} recorded entries.</p><form method="get" class="form-row align-items-end"><div class="col-md-4 form-group"><label>From</label><input name="from" type="date" class="form-control" value="{{ request('from') }}"></div><div class="col-md-4 form-group"><label>To</label><input name="to" type="date" class="form-control" value="{{ request('to') }}"></div><div class="col-md-4 form-group"><button class="btn btn-primary">Filter</button></div></form></div>
+<div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead><tbody>@forelse($records as $row)<tr><td>{{ $row->attendance_date->format('Y-m-d') }}</td><td>{{ optional($row->course)->title ?: 'Legacy daily attendance' }}</td><td>{{ ucfirst($row->status) }}</td></tr>@empty<tr><td colspan="3">No recorded attendance.</td></tr>@endforelse</tbody></table></div><div class="card-footer">{{ $records->links() }}</div></div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        function filterTable() {
-            const table = document.getElementById('student-attendance-table');
-            if (!table) return;
-
-            const search = (document.querySelector('.table-search[data-table-target="student-attendance-table"]')?.value || '').toLowerCase();
-            const status = document.querySelector('.table-status-filter[data-table-target="student-attendance-table"]')?.value || '';
-
-            table.querySelectorAll('tbody tr').forEach(function (row) {
-                if (!row.dataset.search && !row.dataset.status) return;
-
-                const matchesSearch = !search || (row.dataset.search || row.textContent.toLowerCase()).includes(search);
-                const matchesStatus = !status || row.dataset.status === status;
-                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
-            });
-        }
-
-        document.querySelectorAll('[data-table-target="student-attendance-table"]').forEach(function (control) {
-            control.addEventListener('input', filterTable);
-            control.addEventListener('change', filterTable);
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    const video = document.getElementById('attendance-camera'), message = document.getElementById('camera-message');
+    let stream;
+    function stop() { if (stream) stream.getTracks().forEach(track => track.stop()); }
+    document.getElementById('enable-camera').addEventListener('click', async function () {
+        try {
+            if (!navigator.mediaDevices?.getUserMedia) throw new Error('Camera access requires HTTPS or localhost and a supported browser.');
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+            video.srcObject = stream; video.hidden = false; await video.play();
+            document.getElementById('capture-attendance').disabled = false;
+            message.textContent = 'Camera ready. Select your lesson and capture your face.';
+        } catch (error) { message.textContent = error.message || 'Unable to access the camera.'; }
     });
+    document.getElementById('capture-attendance').addEventListener('click', function () {
+        const form = document.getElementById('check-in-form');
+        if (!form.reportValidity() || !video.videoWidth) return;
+        const button = this, canvas = document.getElementById('attendance-canvas');
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0);
+        button.disabled = true;
+        canvas.toBlob(async function (blob) {
+            try {
+                if (!blob) throw new Error('Capture failed. Please try again.');
+                const payload = new FormData(form); payload.append('capture', blob, 'check-in.jpg');
+                const response = await fetch(form.action, { method: 'POST', body: payload, headers: { 'Accept': 'application/json' } });
+                const body = await response.json();
+                if (!response.ok) throw new Error(Object.values(body.errors || {}).flat().join(' ') || body.message || 'Check-in failed.');
+                stop(); window.location.reload();
+            } catch (error) { message.textContent = error.message; button.disabled = false; }
+        }, 'image/jpeg', 0.9);
+    });
+    window.addEventListener('pagehide', stop);
+});
 </script>
-
 @endsection

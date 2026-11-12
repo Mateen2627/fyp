@@ -385,7 +385,7 @@
                             @if(is_null($submission->marks))
                                 <span class="pending-badge"><i class="fas fa-hourglass-half"></i> Pending evaluation</span>
                             @else
-                                <span class="marks-badge">{{ $submission->marks }} / 100</span>
+                                <span class="marks-badge">{{ $submission->marks }} / {{ $assignment->total_marks ?: 100 }}</span>
                             @endif
                         </span>
                     </div>

@@ -20,14 +20,16 @@ class TTRecordRequest extends FormRequest
     {
         if($this->method() === 'POST'){
             return [
-                'name' => 'required|string|min:3|unique:time_table_records',
-                'my_class_id' => 'required',
+                'name' => 'required|string|min:3|max:100|unique:time_table_records',
+                'my_class_id' => 'required|integer|exists:my_classes,id',
+                'section_id' => 'required|integer|exists:sections,id',
             ];
         }
 
         return [
-            'name' => 'required|string|min:3|unique:time_table_records,name,'.$this->ttr,
-            'my_class_id' => 'required',
+            'name' => ['required', 'string', 'min:3', 'max:100', \Illuminate\Validation\Rule::unique('time_table_records', 'name')->ignore((int) $this->route('ttr'))],
+            'my_class_id' => 'required|integer|exists:my_classes,id',
+            'section_id' => 'required|integer|exists:sections,id',
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Services\LmsAccess;
 use App\Models\Assignment;
 use App\Models\Quiz;
 use App\Models\StudentAssignmentSubmission;
@@ -22,8 +23,8 @@ class DashboardController extends Controller
     {
         $teacherId = Auth::id();
 
-        $assignmentIds = Assignment::where('teacher_id', $teacherId)->pluck('id');
-        $quizIds = Quiz::where('teacher_id', $teacherId)->pluck('id');
+        $assignmentIds = LmsAccess::scopeTeacherActivities(Assignment::query())->pluck('id');
+        $quizIds = LmsAccess::scopeTeacherActivities(Quiz::query())->pluck('id');
         $classIds = TeacherAssignment::where('teacher_id', $teacherId)->pluck('my_class_id')->filter()->unique();
 
         $stats = [
@@ -33,9 +34,7 @@ class DashboardController extends Controller
             'quizzes_created' => $quizIds->count(),
             'assignment_submissions' => StudentAssignmentSubmission::whereIn('assignment_id', $assignmentIds)->count(),
             'quiz_attempts' => StudentQuizAttempt::whereIn('quiz_id', $quizIds)->count(),
-            'attendance_records' => StudentAttendance::whereIn('user_id', function ($query) use ($classIds) {
-                $query->select('user_id')->from('student_records')->whereIn('my_class_id', $classIds);
-            })->count(),
+            'attendance_records' => LmsAccess::scopeTeachingRecords(StudentAttendance::query())->count(),
         ];
 
         return view('pages.teacher.dashboard', compact('stats'));

@@ -6,7 +6,7 @@ use Eloquent;
 
 class Quiz extends Eloquent
 {
-    protected $fillable = ['title', 'course_id', 'teacher_id', 'my_class_id', 'description', 'attachment_path', 'total_marks', 'scheduled_at'];
+    protected $fillable = ['title', 'course_id', 'teacher_id', 'my_class_id', 'section_id', 'description', 'attachment_path', 'total_marks', 'scheduled_at'];
 
     protected $dates = ['scheduled_at'];
 
@@ -22,7 +22,7 @@ class Quiz extends Eloquent
 
     public function teacher()
     {
-        return $this->belongsTo(\App\User::class, 'teacher_id');
+        return $this->belongsTo(\App\User::class, 'teacher_id')->withTrashed();
     }
 
     public function my_class()

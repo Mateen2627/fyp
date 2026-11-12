@@ -71,5 +71,7 @@ class Kernel extends HttpKernel
         'my_parent' => \App\Http\Middleware\Custom\MyParent::class,
         'teacher' => \App\Http\Middleware\Custom\Teacher::class,
         'student' => \App\Http\Middleware\Custom\Student::class,
+        'departmentRole' => \App\Http\Middleware\Custom\DepartmentRole::class,
+        'legacyLms' => \App\Http\Middleware\Custom\LegacyLmsAccess::class,
     ];
 }

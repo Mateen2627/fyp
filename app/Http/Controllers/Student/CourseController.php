@@ -21,11 +21,13 @@ class CourseController extends Controller
         $record = StudentRecord::where('user_id', Auth::id())->latest()->firstOrFail();
 
         $courses = TeacherAssignment::with(['course', 'teacher'])
+            ->whereHas('course', function ($q) use ($record) { $q->where('my_class_id', $record->my_class_id); })
             ->where('my_class_id', $record->my_class_id)
+            ->where(function ($q) use ($record) { $q->whereNull('section_id')->orWhere('section_id', $record->section_id); })
             ->latest()
             ->get();
 
-        $ttr = TimeTableRecord::where('my_class_id', $record->my_class_id)->latest()->first();
+        $ttr = TimeTableRecord::where('my_class_id', $record->my_class_id)->where(function ($q) use ($record) { $q->whereNull('section_id')->orWhere('section_id', $record->section_id); })->latest()->first();
         $timeTables = collect();
 
         if ($ttr) {

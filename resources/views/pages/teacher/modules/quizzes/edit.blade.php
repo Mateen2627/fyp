@@ -315,7 +315,7 @@
                     <label class="form-label-modern">
                         <i class="fas fa-star"></i> Total Marks
                     </label>
-                    <input type="number" min="0" name="total_marks" value="{{ old('total_marks', $quiz->total_marks) }}" class="form-control-modern" placeholder="e.g., 100">
+                    <input type="number" min="1" max="999" required name="total_marks" value="{{ old('total_marks', $quiz->total_marks) }}" class="form-control-modern" placeholder="e.g., 100">
                     <div class="helper-text">
                         <i class="fas fa-info-circle"></i> Maximum marks for this quiz
                     </div>

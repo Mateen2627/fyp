@@ -7,7 +7,7 @@ php artisan migrate
 php artisan db:seed
 ```
 
-If migrations are already current, only `php artisan db:seed` is needed. No schema changes were added for this dataset.
+If migrations are already current, only `php artisan db:seed` is needed. The LMS workflow migration adds department memberships, leadership roles, section assignments, private attendance check-ins, and archived accounts. See [the LMS workflow guide](../../docs/LMS_WORKFLOW.md).
 
 ## What is created
 
@@ -15,7 +15,7 @@ If migrations are already current, only `php artisan db:seed` is needed. No sche
 - Eight semester classes per department (56 classes), each with active sections A and B (112 sections).
 - Ten students per section (1,120 students), each with a unique admission number and a student record matching their section and semester.
 - Thirty teachers, including all six supplied faculty names, plus a super admin, admin, and accountant.
-- One sample HOD and coordinator per department, and a teacher as class incharge for every section. These staff members also teach subjects.
+- Neelofer as HOD for CS/AI; Rao Kashif as HOD for IT/SE; M Zainulabideen as coordinator for CS/AI; Mustajeeb ur Rehman as coordinator for IT/SE. Other departments retain sample leaders. Every section has a sample class incharge. Leaders also remain subject teachers.
 - Both subjects and courses, with matching teacher assignments, so the legacy marks screens and newer teacher/student course screens have data.
 - Session `2023-2027`, NUML system settings, Pakistani provinces/districts and nationalities, blood groups, generic demo grades, and sample hostels.
 
@@ -47,7 +47,7 @@ Usernames use lowercase first names, ignoring titles and the abbreviated `M` ini
 
 The supplied six students are placed together in **CS semester 6, section A**. This is an editable demonstration placement, not an inference about their current semester. The sample students across all eight semesters use the requested `2023-2027` session to exercise every class screen; this is not a date-derived roster of one real cohort.
 
-CS semester 1-6 subject titles match the supplied list, including its spelling. Labs are separate subjects. Pre Math I/II retain their non-credited labels. **CS semesters 7-8, other departments' curricula, all course codes, additional people, staff appointments, and hostel names are sample data**, not verified university records. Grade boundaries retain the application's generic demo scale. Credit hours are not invented because the schema has no credit-hour column.
+CS semester 1-6 subject titles match the supplied list, including its spelling. Labs are separate subjects. Pre Math I/II retain their non-credited labels. **CS semesters 7-8, other departments' curricula, all course codes, additional people, unsupplied staff appointments, and hostel names are sample data**, not verified university records. Grade boundaries retain the application's generic demo scale. Credit hours are not invented because the schema has no credit-hour column.
 
 The existing schema is used as follows:
 
@@ -58,13 +58,13 @@ The existing schema is used as follows:
 | Section | `sections`, e.g. `A` or `B` |
 | Class incharge | `sections.teacher_id` |
 | Subject teacher | `subjects.teacher_id` and `teacher_assignments` |
-| HOD/coordinator appointment | JSON in `settings.description`, with keys such as `numl_hod_cs` and `numl_coordinator_cs` |
+| Department membership and HOD/coordinator role | `department_staff`, with leadership flags; settings JSON retained for compatibility |
 
-Each appointment contains `department_id`, `user_id`, `session`, and `sample`. For example, read one with `json_decode(\App\Models\Setting::where('type', 'numl_hod_cs')->value('description'), true)`. The first two faculty listed for a department are its sample HOD and coordinator. All retain `user_type = teacher`. **These settings store appointments only; the current application has no dedicated HOD/coordinator dashboard or permission system.** The teaching tables assign courses at semester-class level, shared by A/B, because they have no section-specific assignment field.
+Leadership authorization uses `department_staff`. HODs manage teaching allocations only in their departments; coordinators manage those departments' timetables. Both have read-only department progress pages, and keep teacher access for their own subjects. Teaching assignments and activities support a specific section or all sections. Compatibility settings include `department_id`, `user_id`, `session`, and `sample` (false for the four specified departments).
 
 ## Editing and rerunning
 
-Edit [Support/NumlSeedData.php](Support/NumlSeedData.php) to change departments, faculty, subjects, sections, students per section, or the named students' semester. Keep stable user codes unchanged. Rerunning updates the same seeded records and resets their password to `cj`; it preserves unrelated users, records, and their relationships. It does not delete previous school demo data or remove seeded entries that have been removed from the catalog. Configured contact details and term dates are preserved.
+Edit [Support/NumlSeedData.php](Support/NumlSeedData.php) for the initial roster, subjects, and faculty, and [DepartmentStaffTableSeeder.php](DepartmentStaffTableSeeder.php) for leadership mappings. Keep stable user codes unchanged. Rerunning resets active seeded passwords to `cj`, reapplies the named leadership mappings, and preserves administrator student placements and HOD teaching changes. Archived accounts are not restored. It preserves unrelated users, records, and their relationships. It does not delete previous school demo data or remove entries removed from the catalog. Configured contact details and term dates are preserved. Changing the initial roster settings does not move existing students; use the administrator tools for that.
 
 `DatabaseSeeder` runs in one transaction. All seeders use natural keys instead of assuming database IDs or deleting tables. To inspect actual usernames, query `users` where `code` starts with `NUML-`.
 

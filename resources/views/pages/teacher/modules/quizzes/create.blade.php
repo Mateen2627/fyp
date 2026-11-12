@@ -223,13 +223,13 @@
                 <select class="form-control-modern" id="pair_select" required>
                     <option value="">— Select Class and Course —</option>
                     @foreach($pairs as $pair)
-                        <option value="{{ $pair->course_id }}|{{ $pair->my_class_id }}">
-                            📚 {{ optional($pair->my_class)->name ?: 'Class '.$pair->my_class_id }} — {{ optional($pair->course)->title ?: 'Course '.$pair->course_id }}
+                        <option value="{{ $pair->course_id }}|{{ $pair->my_class_id }}|{{ $pair->section_id }}">
+                            📚 {{ optional($pair->my_class)->name ?: 'Class '.$pair->my_class_id }} — {{ optional($pair->course)->title ?: 'Course '.$pair->course_id }} · {{ optional($pair->section)->name ?: 'All sections' }}
                         </option>
                     @endforeach
                 </select>
                 <input type="hidden" name="course_id" id="course_id">
-                <input type="hidden" name="my_class_id" id="my_class_id">
+                <input type="hidden" name="my_class_id" id="my_class_id"><input type="hidden" name="section_id" id="section_id">
                 <div class="helper-text">
                     <i class="fas fa-info-circle"></i> Select the class and course for this quiz
                 </div>
@@ -263,7 +263,7 @@
                     <label class="form-label-modern">
                         <i class="fas fa-star"></i> Total Marks
                     </label>
-                    <input type="number" min="0" name="total_marks" class="form-control-modern" placeholder="e.g., 100">
+                    <input type="number" min="1" max="999" required value="100" name="total_marks" class="form-control-modern" placeholder="e.g., 100">
                     <div class="helper-text">
                         <i class="fas fa-info-circle"></i> Maximum marks for this quiz
                     </div>
@@ -296,9 +296,10 @@
 
 <script>
     document.getElementById('pair_select').addEventListener('change', function(){
-        const [courseId, classId] = (this.value || '|').split('|');
+        const [courseId, classId, sectionId] = (this.value || '|').split('|');
         document.getElementById('course_id').value = courseId || '';
         document.getElementById('my_class_id').value = classId || '';
+        document.getElementById('section_id').value = sectionId || '';
     });
 </script>
 

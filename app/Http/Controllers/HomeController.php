@@ -51,6 +51,9 @@ class HomeController extends Controller
     public function dashboard()
     {
         if (Qs::userIsTeacher()) {
+            if (Auth::user()->isHod() || Auth::user()->isCoordinator()) {
+                return redirect()->route('academic.progress.index');
+            }
             return redirect()->route('teacher.dashboard');
         }
 

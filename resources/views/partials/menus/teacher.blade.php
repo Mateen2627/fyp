@@ -17,7 +17,7 @@
                     <div class="media-body">
                         <div class="media-title font-weight-semibold text-white">{{ Auth::user()->name }}</div>
                         <div class="font-size-xs opacity-75">
-                            <i class="fas fa-chalkboard-user"></i> &nbsp;Teacher
+                            <i class="fas fa-chalkboard-user"></i> &nbsp;{{ Auth::user()->isHod() ? 'HOD / Teacher' : (Auth::user()->isCoordinator() ? 'Coordinator / Teacher' : 'Teacher') }}
                         </div>
                     </div>
                     <div class="ml-3 align-self-center">
