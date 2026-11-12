@@ -189,6 +189,22 @@
     .subject-badge i {
         font-size: 10px;
     }
+
+    .teacher-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ecfdf5;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #047857;
+    }
+
+    .teacher-badge i {
+        font-size: 10px;
+    }
     
     /* Empty State */
     .empty-state {
@@ -277,7 +293,7 @@
                         <th><i class="fas fa-calendar-day me-1"></i> Day / Date</th>
                         <th><i class="fas fa-clock me-1"></i> Time Slot</th>
                         <th><i class="fas fa-book me-1"></i> Subject</th>
-                        <th><i class="fas fa-map-marker-alt me-1"></i> Teacher</th>
+                        <th><i class="fas fa-chalkboard-teacher me-1"></i> Teacher</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -305,10 +321,20 @@
                                     <span class="time-badge">—</span>
                                 @endif
                             </td>
+                            <td>
+                                @if($tt->assigned_teachers->isNotEmpty())
+                                    <span class="teacher-badge">
+                                        <i class="fas fa-user-tie"></i>
+                                        {{ $tt->assigned_teachers->pluck('name')->implode(', ') }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">No teacher assigned</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3">
+                            <td colspan="4">
                                 <div class="empty-state">
                                     <i class="fas fa-calendar-times"></i>
                                     <p>No timetable data available.</p>
