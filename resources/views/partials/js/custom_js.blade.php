@@ -74,53 +74,223 @@
     }
 
 
-    {{--Notifications--}}
+    {{-- Notifications: in-app alerts always work; browser alerts are opt-in. --}}
+    @php
+    $serverNotifications = [
+        'pop_error' => session('pop_error'),
+        'pop_warning' => session('pop_warning'),
+        'pop_success' => session('pop_success'),
+        'flash_info' => session('flash_info'),
+        'flash_success' => session('flash_success'),
+        'flash_warning' => session('flash_warning'),
+        'flash_error' => session('flash_error') ?: session('flash_danger'),
+    ];
+    @endphp
+    var serverNotifications = {!! json_encode($serverNotifications, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
 
-    @if (session('pop_error'))
-    pop({msg : '{{ session('pop_error') }}', type : 'error'});
-    @endif
+    (function () {
+        var notificationStack;
+        var permissionButton = document.getElementById('notification-permission-toggle');
+        var browserNotificationsKey = 'spams.browserNotifications.enabled';
+        var browserNotificationsEnabled = false;
+        var iconByType = { success: '\u2713', info: 'i', warning: '!', danger: '\u00d7' };
 
-    @if (session('pop_warning'))
-    pop({msg : '{{ session('pop_warning') }}', type : 'warning'});
-    @endif
+        try {
+            browserNotificationsEnabled = window.localStorage.getItem(browserNotificationsKey) === 'true';
+        } catch (error) {
+            browserNotificationsEnabled = false;
+        }
 
- @if (session('pop_success'))
-    pop({msg : '{{ session('pop_success') }}', type : 'success', title: 'GREAT!!'});
-    @endif
+        function getStack() {
+            if (!notificationStack) {
+                notificationStack = document.createElement('div');
+                notificationStack.className = 'app-notification-stack';
+                notificationStack.setAttribute('aria-live', 'polite');
+                notificationStack.setAttribute('aria-relevant', 'additions');
+                notificationStack.setAttribute('aria-label', 'Notifications');
+                document.body.appendChild(notificationStack);
+            }
+            return notificationStack;
+        }
 
-    @if (session('flash_info'))
-      flash({msg : '{{ session('flash_info') }}', type : 'info'});
-    @endif
+        function updatePermissionButton() {
+            if (!permissionButton) return;
 
-    @if (session('flash_success'))
-      flash({msg : '{{ session('flash_success') }}', type : 'success'});
-    @endif
+            var label = permissionButton.querySelector('.notification-settings-label');
+            var supported = 'Notification' in window;
+            var enabled = supported && Notification.permission === 'granted' && browserNotificationsEnabled;
 
-    @if (session('flash_warning'))
-      flash({msg : '{{ session('flash_warning') }}', type : 'warning'});
-    @endif
+            permissionButton.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+            permissionButton.title = enabled ? 'Browser notifications are enabled' : 'Enable browser notifications';
+            if (label) label.textContent = enabled ? 'Alerts on' : 'Enable alerts';
+        }
 
-     @if (session('flash_error') || session('flash_danger'))
-      flash({msg : '{{ session('flash_error') ?: session('flash_danger') }}', type : 'danger'});
-    @endif
+        function showBrowserNotification(type, message) {
+            if (!browserNotificationsEnabled || !('Notification' in window) || Notification.permission !== 'granted') return;
 
-    {{--End Notifications--}}
+            try {
+                var browserAlert = new Notification(type === 'success' ? 'Task completed' : 'Task needs attention', { body: message });
+                browserAlert.onclick = function () {
+                    window.focus();
+                    browserAlert.close();
+                };
+            } catch (error) {
+                // The in-app notification remains available if the browser blocks desktop alerts.
+            }
+        }
 
-    function pop(data){
-        swal({
-            title: data.title ? data.title : 'Oops...',
-            text: data.msg,
-            icon: data.type
+        window.flash = function (data) {
+            data = data || {};
+            var message = data.msg == null ? '' : String(data.msg);
+            if (!message) return;
+
+            var type = data.type === 'error' ? 'danger' : data.type;
+            if (!iconByType[type]) type = 'info';
+
+            var toast = document.createElement('div');
+            toast.className = 'app-toast app-toast--' + type;
+            toast.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+
+            var icon = document.createElement('span');
+            icon.className = 'app-toast-icon';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.textContent = iconByType[type];
+
+            var text = document.createElement('div');
+            text.className = 'app-toast-message';
+            text.textContent = message;
+
+            var close = document.createElement('button');
+            close.className = 'app-toast-close';
+            close.type = 'button';
+            close.setAttribute('aria-label', 'Dismiss notification');
+            close.textContent = '\u00d7';
+            close.addEventListener('click', function () { toast.remove(); });
+
+            toast.appendChild(icon);
+            toast.appendChild(text);
+            toast.appendChild(close);
+            getStack().appendChild(toast);
+
+            window.setTimeout(function () {
+                if (toast.parentNode) toast.remove();
+            }, type === 'danger' ? 9000 : 6000);
+
+            if (type === 'success' || type === 'danger' || type === 'warning') showBrowserNotification(type, message);
+            window.dispatchEvent(new CustomEvent('app:notification', { detail: { type: type, message: message } }));
+        };
+
+        window.pop = function (data) {
+            data = data || {};
+            window.flash({ msg: data.msg, type: data.type === 'success' ? 'success' : (data.type === 'warning' ? 'warning' : 'danger') });
+        };
+
+        if (permissionButton) {
+            permissionButton.addEventListener('click', function () {
+                if (!('Notification' in window)) {
+                    window.flash({ msg: 'Browser notifications are not supported here. In-app alerts will still appear.', type: 'info' });
+                    return;
+                }
+
+                if (Notification.permission === 'granted') {
+                    browserNotificationsEnabled = !browserNotificationsEnabled;
+                    try { window.localStorage.setItem(browserNotificationsKey, browserNotificationsEnabled ? 'true' : 'false'); } catch (error) {}
+                    updatePermissionButton();
+                    window.flash({ msg: browserNotificationsEnabled ? 'Browser alerts enabled for important task updates.' : 'Browser alerts turned off. In-app alerts will continue.', type: 'info' });
+                    return;
+                }
+
+                if (Notification.permission === 'denied') {
+                    window.flash({ msg: 'Browser alerts are blocked in your browser settings. In-app alerts will continue to appear.', type: 'warning' });
+                    return;
+                }
+
+                var permissionRequest;
+                try {
+                    permissionRequest = Notification.requestPermission();
+                } catch (error) {
+                    window.flash({ msg: 'Browser alerts could not be enabled. In-app alerts will continue to appear.', type: 'warning' });
+                    return;
+                }
+
+                Promise.resolve(permissionRequest).then(function (permission) {
+                    browserNotificationsEnabled = permission === 'granted';
+                    try { window.localStorage.setItem(browserNotificationsKey, browserNotificationsEnabled ? 'true' : 'false'); } catch (error) {}
+                    updatePermissionButton();
+                    window.flash({
+                        msg: browserNotificationsEnabled ? 'Browser alerts enabled for important task updates.' : 'Browser alerts were not enabled. In-app alerts will continue to appear.',
+                        type: browserNotificationsEnabled ? 'success' : 'info'
+                    });
+                }).catch(function () {
+                    window.flash({ msg: 'Browser alerts could not be enabled. In-app alerts will continue to appear.', type: 'warning' });
+                });
+            });
+        }
+
+        updatePermissionButton();
+
+        [
+            ['pop_error', 'danger'], ['pop_warning', 'warning'], ['pop_success', 'success'],
+            ['flash_error', 'danger'], ['flash_warning', 'warning'], ['flash_info', 'info'], ['flash_success', 'success']
+        ].forEach(function (entry) {
+            if (serverNotifications[entry[0]]) window.flash({ msg: serverNotifications[entry[0]], type: entry[1] });
         });
-    }
+    })();
 
-    function flash(data){
-        new PNotify({
-            text: data.msg,
-            type: data.type,
-            hide : data.type !== "danger"
+    {{-- Shared mobile drawer. The theme's desktop control continues to collapse to an icon rail. --}}
+    (function () {
+        var sidebar = document.querySelector('.page-content > .sidebar.sidebar-main');
+        if (!sidebar) return;
+
+        var backdrop = document.createElement('div');
+        backdrop.className = 'app-sidebar-backdrop';
+        backdrop.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(backdrop);
+
+        function closeSidebar() {
+            document.body.classList.remove('sidebar-mobile-main');
+            document.body.style.overflow = '';
+            document.querySelectorAll('.sidebar-mobile-main-toggle').forEach(function (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        function openSidebar() {
+            document.body.classList.add('sidebar-mobile-main');
+            document.body.style.overflow = 'hidden';
+            document.querySelectorAll('.sidebar-mobile-main-toggle').forEach(function (toggle) {
+                toggle.setAttribute('aria-expanded', 'true');
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            var toggle = event.target.closest('.sidebar-mobile-main-toggle');
+            if (toggle && window.matchMedia('(max-width: 767.98px)').matches) {
+                event.preventDefault();
+                if (toggle.closest('.sidebar') || document.body.classList.contains('sidebar-mobile-main')) closeSidebar();
+                else openSidebar();
+                return;
+            }
+
+            if (event.target === backdrop) {
+                closeSidebar();
+                return;
+            }
+
+            var menuLink = event.target.closest('.sidebar-main .nav-sidebar a.nav-link');
+            if (menuLink && menuLink.getAttribute('href') && menuLink.getAttribute('href') !== '#' && window.matchMedia('(max-width: 767.98px)').matches) {
+                closeSidebar();
+            }
         });
-    }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && document.body.classList.contains('sidebar-mobile-main')) closeSidebar();
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth >= 768) closeSidebar();
+        });
+    })();
 
     function confirmDelete(id) {
         swal({

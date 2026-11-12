@@ -17,10 +17,10 @@
 
     <!-- Mobile Toggle Buttons -->
     <div class="d-md-none d-flex gap-2">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-mobile">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-mobile" aria-controls="navbar-mobile" aria-expanded="false" aria-label="Toggle account menu">
             <i class="fas fa-ellipsis-v"></i>
         </button>
-        <button class="navbar-toggler sidebar-mobile-main-toggle" type="button">
+        <button class="navbar-toggler sidebar-mobile-main-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
             <i class="fas fa-bars"></i>
         </button>
     </div>
@@ -30,7 +30,7 @@
         <!-- Left Side - Sidebar Toggle -->
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a href="#" class="nav-link sidebar-control sidebar-main-toggle d-none d-md-block">
+                <a href="#" class="nav-link sidebar-control sidebar-main-toggle d-none d-md-block" aria-label="Collapse or expand navigation" title="Collapse or expand navigation">
                     <i class="fas fa-bars"></i>
                 </a>
             </li>
@@ -41,6 +41,12 @@
 
         <!-- Right Side - User Menu -->
         <ul class="navbar-nav">
+            <li class="nav-item">
+                <button type="button" class="nav-link notification-settings" id="notification-permission-toggle" aria-pressed="false" title="Enable browser notifications">
+                    <i class="fas fa-bell" aria-hidden="true"></i>
+                    <span class="notification-settings-label">Enable alerts</span>
+                </button>
+            </li>
             <li class="nav-item dropdown dropdown-user">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
                     <img src="{{ Qs::getUserPhoto($authUser) }}" class="user-avatar" alt="photo" onerror="this.src='{{ Qs::getDefaultUserImage() }}'">

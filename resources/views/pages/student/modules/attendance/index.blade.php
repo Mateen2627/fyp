@@ -201,6 +201,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 const summary = resultSummary(body);
                 show((body.message || 'Attendance marked successfully.') + (summary ? ' ' + summary : ''), 'success');
+                if (typeof window.flash === 'function') {
+                    window.flash({ msg: body.message || 'Attendance marked successfully.', type: 'success' });
+                }
                 closeLoadingAlert();
                 stop(true);
                 const resultAlert = showFaceResultAlert('Attendance marked', (body.message || 'Face verified and attendance recorded.') + (summary ? '\n' + summary : ''), 'success');
