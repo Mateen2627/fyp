@@ -223,7 +223,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     const reason = body?.code ? ' (' + body.code + ')' : '';
                     const details = body ? resultSummary(body) : '';
-                    throw new Error((body?.message || 'Face verification could not be completed. Attendance was not marked.') + reason + (details ? '\n' + details : ''));
+                    const reportedAccuracy = Number(body?.location_accuracy_meters);
+                    const maximumAccuracy = Number(body?.max_location_accuracy_meters);
+                    const locationHelp = body?.code === 'location_accuracy_insufficient' &&
+                        Number.isFinite(reportedAccuracy) && Number.isFinite(maximumAccuracy)
+                        ? '\nYour device reports ±' + reportedAccuracy.toFixed(1) + ' m accuracy; this page requires ' + maximumAccuracy.toFixed(0) + ' m or better. Try a phone with precise location enabled.'
+                        : '';
+                    throw new Error((body?.message || 'Face verification could not be completed. Attendance was not marked.') + reason + (details ? '\n' + details : '') + locationHelp);
                 }
                 const summary = resultSummary(body);
                 show((body.message || 'Attendance marked successfully.') + (summary ? ' ' + summary : ''), 'success');

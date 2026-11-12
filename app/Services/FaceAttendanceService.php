@@ -92,8 +92,19 @@ class FaceAttendanceService
             (float) $longitude < -180 || (float) $longitude > 180 || (float) $accuracy <= 0) {
             throw new FaceVerificationException('A valid device location is required to mark attendance.', 422, 'invalid_location');
         }
-        if (!is_numeric($maxAccuracy) || (float) $maxAccuracy <= 0 || (float) $accuracy > (float) $maxAccuracy) {
-            throw new FaceVerificationException('Your location is not accurate enough. Enable precise location and try again.', 422, 'location_accuracy_insufficient');
+        if (!is_numeric($maxAccuracy) || (float) $maxAccuracy <= 0) {
+            throw new FaceVerificationException('Campus location accuracy is not configured correctly. Contact an administrator.', 503, 'campus_location_unconfigured');
+        }
+        if ((float) $accuracy > (float) $maxAccuracy) {
+            throw new FaceVerificationException(
+                'Your location is not accurate enough. Enable precise location and try again.',
+                422,
+                'location_accuracy_insufficient',
+                [
+                    'location_accuracy_meters' => round((float) $accuracy, 1),
+                    'max_location_accuracy_meters' => (float) $maxAccuracy,
+                ]
+            );
         }
 
         $earthRadius = 6371000;
