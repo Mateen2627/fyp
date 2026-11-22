@@ -1,0 +1,10 @@
+# Python 3.12; versions captured from the working face service.
+# The constraints also pin all transitive dependencies.
+-c requirements.lock.txt
+deepface==0.0.105
+fastapi==0.162.5
+uvicorn==0.54.0
+python-multipart==0.0.33
+tensorflow==2.21.0
+tf-keras==2.21.0
+opencv-contrib-python-headless==5.0.0.93

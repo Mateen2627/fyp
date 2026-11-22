@@ -1,0 +1,46 @@
+{
+  "deepface_version": "0.0.105",
+  "backend": "tensorflow",
+  "model": "Facenet512",
+  "detector": "opencv",
+  "distance_metric": "cosine",
+  "threshold": 0.25,
+  "anti_spoofing": true,
+  "files": [
+    {
+      "filename": "facenet512_weights.h5",
+      "role": "FaceNet512 recognition",
+      "bytes": 94955648,
+      "sha256": "3f76b5117a9ca574d536af8199e6720089eb4ad3dc7e93534496d88265de864f",
+      "source_url": "https://github.com/serengil/deepface_models/releases/download/v1.0/facenet512_weights.h5"
+    },
+    {
+      "filename": "2.7_80x80_MiniFASNetV2.h5",
+      "role": "Anti-spoofing V2 (TensorFlow)",
+      "bytes": 2234368,
+      "sha256": "da0de51d44dc3d9af808c6c2f6fe97dd174774fa66881c9fd291bde1a1174e04",
+      "source_url": "https://github.com/serengil/deepface_models/releases/download/v1.0/2.7_80x80_MiniFASNetV2.h5"
+    },
+    {
+      "filename": "4_0_0_80x80_MiniFASNetV1SE.h5",
+      "role": "Anti-spoofing V1SE (TensorFlow)",
+      "bytes": 2288392,
+      "sha256": "d2f4280c30d88dbd02d0d6691dcfbdd389316de398f94bb6cba30144e23889b0",
+      "source_url": "https://github.com/serengil/deepface_models/releases/download/v1.0/4_0_0_80x80_MiniFASNetV1SE.h5"
+    },
+    {
+      "filename": "haarcascade_eye.xml",
+      "role": "OpenCV eye alignment",
+      "bytes": 341406,
+      "sha256": "71cc64fc305a355dc60067880f6fbbd43dd155bd63ee3844661a1bda34b2fd8c",
+      "source_url": "https://raw.githubusercontent.com/opencv/opencv/4.9.0/data/haarcascades/haarcascade_eye.xml"
+    },
+    {
+      "filename": "haarcascade_frontalface_default.xml",
+      "role": "OpenCV face detection",
+      "bytes": 930127,
+      "sha256": "0f7d4527844eb514d4a4948e822da90fbb16a34a0bbbbc6adc6498747a5aafb0",
+      "source_url": "https://raw.githubusercontent.com/opencv/opencv/4.9.0/data/haarcascades/haarcascade_frontalface_default.xml"
+    }
+  ]
+}

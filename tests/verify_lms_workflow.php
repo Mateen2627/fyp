@@ -30,12 +30,19 @@ use Illuminate\Support\Facades\Http;
 $assertions = 0;
 $temporaryRoot = sys_get_temp_dir().'/numl-lms-'.bin2hex(random_bytes(6));
 config(['filesystems.disks.local.root' => $temporaryRoot.'/private', 'filesystems.disks.public.root' => $temporaryRoot.'/public']);
+config(['services.attendance_geofence' => [
+    'latitude' => 30.173413, 'longitude' => 71.488261,
+    'radius_meters' => 300, 'max_accuracy_meters' => 300,
+]]);
 Storage::forgetDisk(['local', 'public']);
 Carbon::setTestNow(Carbon::parse('2026-11-12 09:15:00', 'Asia/Karachi'));
 
 function lmsRequest($user, $method, $uri, array $data = [], $expected = 200, array $files = [])
 {
     global $assertions;
+    if ($method === 'POST' && $uri === '/student/attendance/check-in') {
+        $data = array_merge(['latitude' => 30.173413, 'longitude' => 71.488261, 'location_accuracy' => 10], $data);
+    }
     Auth::forgetGuards();
     if ($user) { Auth::guard()->setUser($user->fresh()); }
     $request = Request::create($uri, $method, $data, [], $files, ['HTTP_ACCEPT' => $method === 'GET' ? 'text/html' : 'application/json']);

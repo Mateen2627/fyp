@@ -1,10 +1,18 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from deepface import DeepFace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Lock
 import logging
 import math
+import os
+
+from face_models import MODEL_HOME, verify_model_files
+
+# DeepFace appends .deepface/weights to DEEPFACE_HOME. Use the files shipped
+# with this checkout, independent of the current directory or Windows account.
+os.environ["DEEPFACE_HOME"] = str(MODEL_HOME)
+os.environ["DEEPFACE_BACKEND_ENGINE"] = "tensorflow"
+from deepface import DeepFace
 
 app = FastAPI(title="NUML Face Verification")
 logger = logging.getLogger(__name__)
@@ -18,9 +26,12 @@ models_ready = False
 def warm_face_models():
     """Load FaceNet and the anti-spoof model before the first student checks in."""
     global models_ready
+    models_ready = False
+    verify_model_files()
     logger.info("Loading FaceNet512 and anti-spoofing models; first startup can take a few minutes.")
     DeepFace.build_model(model_name="Facenet512", task="facial_recognition")
     DeepFace.build_model(model_name="Fasnet", task="spoofing")
+    DeepFace.build_model(model_name="opencv", task="face_detector")
     models_ready = True
     logger.info("Face verification models are ready.")
 
@@ -69,7 +80,10 @@ def verify_face(
                     img1_path=str(ref_path),
                     img2_path=str(live_path),
                     model_name="Facenet512",
+                    detector_backend="opencv",
                     distance_metric="cosine",
+                    align=True,
+                    normalization="base",
                     anti_spoofing=True,
                     enforce_detection=True,
                     threshold=FACE_THRESHOLD,

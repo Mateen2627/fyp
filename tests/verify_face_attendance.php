@@ -28,6 +28,10 @@ config([
     'filesystems.disks.local.root' => $temporaryRoot.'/private',
     'filesystems.disks.public.root' => $temporaryRoot.'/public',
     'services.face_verification.url' => 'http://face-service.test/verify-face',
+    'services.attendance_geofence' => [
+        'latitude' => 30.173413, 'longitude' => 71.488261,
+        'radius_meters' => 300, 'max_accuracy_meters' => 300,
+    ],
 ]);
 Storage::forgetDisk(['local', 'public']);
 Carbon::setTestNow(Carbon::parse('2026-11-12 09:15:00', 'Asia/Karachi'));
@@ -35,6 +39,9 @@ Carbon::setTestNow(Carbon::parse('2026-11-12 09:15:00', 'Asia/Karachi'));
 function faceRequest($user, $method, $uri, array $data = [], $expected = 200, array $files = [], $code = null)
 {
     global $faceRequests;
+    if ($method === 'POST' && in_array($uri, ['/attendance/mark-face', '/student/attendance/check-in'], true)) {
+        $data = array_merge(['latitude' => 30.173413, 'longitude' => 71.488261, 'location_accuracy' => 10], $data);
+    }
     // Isolate HTTP cases from each other's rate counter; keep auth/role middleware active.
     Cache::flush();
     Auth::forgetGuards();
@@ -126,6 +133,10 @@ try {
     checkSeed(strpos($view->getContent(), 'attendance/mark-face') !== false && strpos($view->getContent(), 'X-CSRF-TOKEN') !== false, 'Webcam UI is not wired to the canonical endpoint.');
     faceRequest($student, 'POST', '/attendance/mark-face', $payload, 422, [], 'invalid_capture');
     faceRequest($student, 'POST', '/attendance/mark-face', $payload, 422, ['live_image' => UploadedFile::fake()->create('fake.jpg', 1, 'text/plain')], 'invalid_capture');
+    faceRequest($student, 'POST', '/attendance/mark-face', array_merge($payload, ['latitude' => null]), 422, $capture(), 'invalid_location');
+    faceRequest($student, 'POST', '/attendance/mark-face', array_merge($payload, ['latitude' => 0, 'longitude' => 0]), 403, $capture(), 'outside_campus_geofence');
+    faceRequest($student, 'POST', '/attendance/mark-face', array_merge($payload, ['location_accuracy' => 301]), 422, $capture(), 'location_accuracy_insufficient');
+    checkSeed(Http::recorded()->isEmpty(), 'Invalid or out-of-campus location called the face service.');
 
     $failureCases = [
         [['verified' => false, 'distance' => 0.8, 'threshold' => 0.25], 200, 422, 'face_mismatch'],
